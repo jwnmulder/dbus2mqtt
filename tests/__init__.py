@@ -55,9 +55,15 @@ def mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerCo
     processor = FlowProcessor(app_context)
     return processor, flow_config
 
+class MockedMessageBus(dbus_aio.message_bus.MessageBus):
+    def _setup_socket(self):
+        self._stream = ""
+        self._sock = ""
+        self._fd = ""
+
 def mocked_dbus_client(app_context: AppContext):
 
-    bus = dbus_aio.message_bus.MessageBus()
+    bus = MockedMessageBus(bus_address="unix:path=/run/user/1000/bus")
     flow_scheduler = FlowScheduler(app_context)
 
     dbus_client = DbusClient(app_context, bus, flow_scheduler)

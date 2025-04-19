@@ -1,8 +1,5 @@
-
-import dbus_next.aio as dbus_aio
 import pytest
 
-from dbus2mqtt import AppContext
 from dbus2mqtt.config import (
     FlowActionContextSetConfig,
     FlowTriggerBusNameAddedConfig,
@@ -10,10 +7,8 @@ from dbus2mqtt.config import (
     FlowTriggerDbusSignalConfig,
     SignalConfig,
 )
-from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import DbusSignalWithState
-from dbus2mqtt.flow.flow_processor import FlowScheduler
-from tests import mocked_app_context, mocked_flow_processor
+from tests import mocked_app_context, mocked_dbus_client, mocked_flow_processor
 
 
 @pytest.mark.asyncio
@@ -32,7 +27,7 @@ async def test_bus_name_added_trigger():
         )
     ])
 
-    dbus_client = _mocked_dbus_client(app_context)
+    dbus_client = mocked_dbus_client(app_context)
 
     subscription_config = app_context.config.dbus.subscriptions[0]
 
@@ -64,7 +59,7 @@ async def test_bus_name_removed_trigger():
         )
     ])
 
-    dbus_client = _mocked_dbus_client(app_context)
+    dbus_client = mocked_dbus_client(app_context)
 
     subscription_config = app_context.config.dbus.subscriptions[0]
 
@@ -104,7 +99,7 @@ async def test_dbus_signal_trigger():
 
     subscription_config = app_context.config.dbus.subscriptions[0]
 
-    dbus_client = _mocked_dbus_client(app_context)
+    dbus_client = mocked_dbus_client(app_context)
 
     signal = DbusSignalWithState(
         bus_name="test-bus-name",
@@ -132,17 +127,3 @@ async def test_dbus_signal_trigger():
         "interface": "test-interface-name",
         "args": ["first-arg", "second-arg"]
     }
-
-class MockedMessageBus(dbus_aio.message_bus.MessageBus):
-    def _setup_socket(self):
-        self._stream = ""
-        self._sock = ""
-        self._fd = ""
-
-def _mocked_dbus_client(app_context: AppContext):
-
-    bus = MockedMessageBus(bus_address="unix:path=/run/user/1000/bus")
-    flow_scheduler = FlowScheduler(app_context)
-
-    dbus_client = DbusClient(app_context, bus, flow_scheduler)
-    return dbus_client
