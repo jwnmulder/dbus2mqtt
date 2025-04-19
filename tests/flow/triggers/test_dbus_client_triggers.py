@@ -11,7 +11,7 @@ from dbus2mqtt.config import (
     SignalConfig,
 )
 from dbus2mqtt.dbus.dbus_client import DbusClient
-from dbus2mqtt.event_broker import BusNameSubscriptions, DbusSignalWithState
+from dbus2mqtt.event_broker import DbusSignalWithState
 from dbus2mqtt.flow.flow_processor import FlowScheduler
 from tests import mocked_app_context, mocked_flow_processor
 
@@ -107,7 +107,7 @@ async def test_dbus_signal_trigger():
     dbus_client = _mocked_dbus_client(app_context)
 
     signal = DbusSignalWithState(
-        bus_name_subscriptions=BusNameSubscriptions("test-bus-name"),
+        bus_name="test-bus-name",
         path="/",
         interface_name=subscription_config.interfaces[0].interface,
         subscription_config=subscription_config,
