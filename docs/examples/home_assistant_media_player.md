@@ -32,9 +32,9 @@ dbus2mqtt --config docs/examples/home_assistant_media_player.yaml
 
 The following setup is known to work with Home Assistant.
 
-| Application  | Play<br />Pause<br /> | Stop | Next<br />Previous | Seek | Volume | Quit | Media Info | Media Image |
+| Application  | Play<br />Pause<br /> | Stop | Next<br />Previous | Seek<br />SetPosition | Volume | Quit | Media Info | Media Image |
 |--------------|-----------------------|------|--------------------|------|--------|------|------------|-------------|
-| `Firefox`    | ✅ | ✅ | | | | ❌ | ✅ | Youtube only |
+| `Firefox`    | ✅ | ✅ | ✅ | ✅ | | ❌ | ✅ | Youtube only |
 | `VLC` | | | | | | | | | |
 
 ## Player commands
@@ -43,17 +43,18 @@ The following table lists player commands, their descriptions, and an example JS
 
 Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/command`. Method calls will be done for all matching players
 
-| Interface                       | Method<br />Property | Description                              | Example JSON Payload                           |
-|---------------------------------|------------|------------------------------------------|------------------------------------------------|
-| `org.mpris.MediaPlayer2.Player` | `Play`     | Starts playback                          | `{ "method": "Play" }`                         |
-| `org.mpris.MediaPlayer2.Player` | `Pause`    | Pauses playback                          | `{ "method": "Pause" }`                        |
-| `org.mpris.MediaPlayer2.Player` | `PlayPause`| Toggles between play and pause           | `{ "method": "PlayPause" }`                    |
-| `org.mpris.MediaPlayer2.Player` | `Next`     | Next                                     | `{ "method": "Next" }`                         |
-| `org.mpris.MediaPlayer2.Player` | `Previous` | Previous                                 | `{ "method": "Previous" }`                         |
-| `org.mpris.MediaPlayer2.Player` | `Stop`     | Stops playback                           | `{ "method": "Stop" }`                         |
-| `org.mpris.MediaPlayer2.Player` | `Seek`     | Seek forward or backward                | `{ "method": "Seek", "args": [60000000] }`                         |
-| `org.mpris.MediaPlayer2.Player` | `Volume`   | Set volume                               | `{ "property": "Volume", "value": 50 }`                         |
-| `org.mpris.MediaPlayer2`        | `Quit`     | Quits the media player                   | `{ "method": "Quit" }`                         |
+| Interface                       | Method<br />Property | Description                       | Example MQTT JSON Payload                           |
+|---------------------------------|---------------|------------------------------------------|------------------------------------------------|
+| `org.mpris.MediaPlayer2.Player` | `Play`        | Starts playback                          | `{ "method": "Play" }`                         |
+| `org.mpris.MediaPlayer2.Player` | `Pause`       | Pauses playback                          | `{ "method": "Pause" }`                        |
+| `org.mpris.MediaPlayer2.Player` | `PlayPause`   | Toggles between play and pause           | `{ "method": "PlayPause" }`                    |
+| `org.mpris.MediaPlayer2.Player` | `Next`        | Next                                     | `{ "method": "Next" }`                         |
+| `org.mpris.MediaPlayer2.Player` | `Previous`    | Previous                                 | `{ "method": "Previous" }`                     |
+| `org.mpris.MediaPlayer2.Player` | `Stop`        | Stops playback                           | `{ "method": "Stop" }`                         |
+| `org.mpris.MediaPlayer2.Player` | `Seek`        | Seek forward or backward in micro seconds  | `{ "method": "Seek", "args": [60000000] }`   |
+| `org.mpris.MediaPlayer2.Player` | `Volume`      | Set volume                               | `{ "property": "Volume", "value": 50 }`        |
+| `org.mpris.MediaPlayer2.Player` | `SetPosition` | Set / seek to position in micro seconds. First arguments needs to be trackid which can be determined via Metadata.mpris:trackid | `{ "method": "SetPosition", "args": ["/org/mpris/MediaPlayer2/firefox", 170692139] }`                         |
+| `org.mpris.MediaPlayer2`        | `Quit`        | Quits the media player                   | `{ "method": "Quit" }`                         |
 
 For an overview of MPRIS commands have a look at <https://mpris2.readthedocs.io/en/latest/interfaces.html#mpris2.MediaPlayer2>
 
@@ -67,7 +68,7 @@ The configuration shown below creates a few components in Home Assistant
 ```yaml
 mqtt:
   sensor:
-    - name: MPRIS Media Player state
+    - name: MPRIS Media Player
       state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
       json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
       value_template: >-
@@ -143,7 +144,8 @@ media_player:
           service: mqtt.publish
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
-            payload: '{"method": "Seek", "args": [{{ position | int }}] }'
+            payload: >-
+              { "method": "SetPosition", "args": ["{{  state_attr('sensor.mpris_media_player', 'Metadata')['mpris:trackid'] }}", {{ position | int }}] }
         set_volume:
           service: mqtt.publish
           data:

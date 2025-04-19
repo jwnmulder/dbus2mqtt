@@ -13,6 +13,7 @@ dbus:
         - interface: org.freedesktop.DBus.Properties
           signals:
             - signal: PropertiesChanged
+              # TODO: Determine if we should filter here or in flows? The only consumers right now are the flows
               filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
           methods:
             - method: GetAll
@@ -31,6 +32,7 @@ dbus:
             - method: Next
             - method: Previous
             - method: Seek
+            - method: SetPosition
             - method: PlayPause
             - method: OpenUri
 
@@ -40,9 +42,9 @@ dbus:
             - type: bus_name_added
             - type: schedule
               interval: {seconds: 5}
-              # - type: dbus_signal
-              #   interface: org.freedesktop.DBus.Properties
-              #   signal: PropertiesChanged
+            - type: dbus_signal
+              interface: org.freedesktop.DBus.Properties
+              signal: PropertiesChanged
               #   filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
           actions:
             - type: context_set
