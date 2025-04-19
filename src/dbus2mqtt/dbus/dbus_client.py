@@ -124,7 +124,7 @@ class DbusClient:
 
                 on_signal_method_name = "on_" + camel_to_snake(signal_config.signal)
                 dbus_signal_state = {
-                    "bus_name_subscriptions": bus_name_subscriptions,
+                    "bus_name": bus_name,
                     "path": path,
                     "interface_name": interface.name,
                     "subscription_config": subscription_config,
@@ -354,6 +354,8 @@ class DbusClient:
 
     async def _handle_on_dbus_signal(self, signal: DbusSignalWithState):
 
+        logger.debug(f"dbus_signal: signal={signal.signal_config.signal}, args={signal.args}, bus_name={signal.bus_name}, path={signal.path}, interface={signal.interface_name}")
+
         for flow in signal.subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "dbus_signal" and signal.signal_config.signal == trigger.signal:
@@ -366,7 +368,7 @@ class DbusClient:
 
                         if matches_filter:
                             context = {
-                                "bus_name": signal.bus_name_subscriptions.bus_name,
+                                "bus_name": signal.bus_name,
                                 "path": signal.path,
                                 "interface": signal.interface_name,
                                 "args": signal.args

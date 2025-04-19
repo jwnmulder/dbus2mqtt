@@ -15,7 +15,7 @@ def unwrap_dbus_object(o):
     json_obj = json.loads(res)
     return json_obj
 
-def unwrap_dbus_objects(*args):
+def unwrap_dbus_objects(args):
     res = [unwrap_dbus_object(o) for o in args]
     return res
 

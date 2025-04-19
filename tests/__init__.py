@@ -1,4 +1,6 @@
 
+import dbus_next.aio as dbus_aio
+
 from pydantic import SecretStr
 
 from dbus2mqtt import AppContext, config
@@ -8,8 +10,9 @@ from dbus2mqtt.config import (
     FlowTriggerConfig,
     InterfaceConfig,
 )
+from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
-from dbus2mqtt.flow.flow_processor import FlowProcessor
+from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
 from dbus2mqtt.template.templating import TemplateEngine
 
 
@@ -51,3 +54,11 @@ def mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerCo
 
     processor = FlowProcessor(app_context)
     return processor, flow_config
+
+def mocked_dbus_client(app_context: AppContext):
+
+    bus = dbus_aio.message_bus.MessageBus()
+    flow_scheduler = FlowScheduler(app_context)
+
+    dbus_client = DbusClient(app_context, bus, flow_scheduler)
+    return dbus_client

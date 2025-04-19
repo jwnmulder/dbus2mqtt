@@ -13,7 +13,6 @@ from dbus2mqtt.config import (
     SignalConfig,
     SubscriptionConfig,
 )
-from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class MqttMessage:
 
 @dataclass
 class DbusSignalWithState:
-    bus_name_subscriptions: BusNameSubscriptions
+    bus_name: str
     path: str
     interface_name: str
     subscription_config: SubscriptionConfig
