@@ -57,13 +57,17 @@ dbus:
               context:
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                volume: |
+                  {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Volume', 0) }}
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
               payload_template: |
-                bus_name: {{ mpris_bus_name }}
-                Volume: {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Volume', 0) }}
-                {{ player_properties | to_yaml }}
+                {{
+                    { 'bus_name': mpris_bus_name }
+                    | combine(player_properties)
+                    | combine({ 'Volume': volume })
+                }}
         - name: "MPRIS player removed"
           triggers:
             - type: bus_name_removed

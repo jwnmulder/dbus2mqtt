@@ -43,15 +43,14 @@ class MqttClient:
             port=self.config.port
         )
 
-    # def on_dbus_signal(self, bus_name: str, path: str, interface: str, signal: str, topic, msg: dict[str, Any]):
-    #     payload = json.dumps(msg)
-    #     logger.debug(f"on_dbus_signal: payload={payload}")
-    #     self.client.publish(topic=topic, payload=payload)
-
     async def mqtt_publish_queue_processor_task(self):
+
+        first_message = True
+
         """Continuously processes messages from the async queue."""
         while True:
             msg = await self.event_broker.mqtt_publish_queue.async_q.get()  # Wait for a message
+
             try:
                 payload = msg.payload
                 type = msg.payload_serialization_type
@@ -65,6 +64,11 @@ class MqttClient:
 
                 logger.debug(f"mqtt_publish_queue_processor_task: payload={payload}")
                 self.client.publish(topic=msg.topic, payload=payload)
+
+                if first_message:
+                    logger.info(f"First message published: topic={msg.topic}, payload={payload}")
+                    first_message = False
+
             except Exception as e:
                 logger.warning(f"mqtt_publish_queue_processor_task: Exception {e}", exc_info=True)
             finally:
