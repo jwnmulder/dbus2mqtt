@@ -31,5 +31,5 @@ dbus:
             - type: mqtt_publish
               topic: dbus2mqtt/SessionManager
               payload_type: json
-              payload_template: |
-                clients: {{ dbus_call('org.gnome.SessionManager', '/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetClients') }}
+              payload_template:
+                clients: "{{ dbus_call('org.gnome.SessionManager', '/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetClients') }}"

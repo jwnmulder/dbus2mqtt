@@ -1,49 +1,11 @@
 
 from datetime import datetime
-from typing import Any
+from typing import Any, TypeVar
 
-import yaml
+from jinja2 import BaseLoader, StrictUndefined, TemplateError
+from jinja2.nativetypes import NativeEnvironment
 
-from jinja2 import (
-    BaseLoader,
-    Environment,
-    StrictUndefined,
-)
-from yaml import SafeDumper, SafeLoader
-
-
-def _represent_template_str(dumper: SafeDumper, data: str):
-    data = data.replace("{{", "template:{{", 1)
-    data = data.replace("}}", "}}:template", 1)
-    # return dumper.represent_str(f"template:{data}:template")
-    return dumper.represent_str(data)
-
-class _CustomSafeLoader(SafeLoader):
-    def __init__(self, stream):
-        super().__init__(stream)
-
-        # Disable parsing ISO date strings
-        self.add_constructor('tag:yaml.org,2002:timestamp', lambda _l, n: n.value)
-
-class _CustomSafeDumper(SafeDumper):
-    def __init__(self, stream, **kwargs):
-        super().__init__(stream, **kwargs)
-        self.add_representer(_TemplatedStr, _represent_template_str)
-
-class _TemplatedStr(str):
-    """A marker class to force template string formatting in YAML."""
-    pass
-
-def _mark_templates(obj):
-    if isinstance(obj, dict):
-        return {k: _mark_templates(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [_mark_templates(v) for v in obj]
-    elif isinstance(obj, str):
-        s = obj.strip()
-        if s.startswith("{{") and s.endswith("}}"):
-            return _TemplatedStr(obj)
-    return obj
+TemplateResultType = TypeVar('TemplateResultType')
 
 class TemplateEngine:
     def __init__(self):
@@ -51,14 +13,14 @@ class TemplateEngine:
         engine_globals = {}
         engine_globals['now'] = datetime.now
 
-        self.jinja2_env = Environment(
+        self.jinja2_env = NativeEnvironment(
             loader=BaseLoader(),
             extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
             undefined=StrictUndefined,
             keep_trailing_newline=False
         )
 
-        self.jinja2_async_env = Environment(
+        self.jinja2_async_env = NativeEnvironment(
             loader=BaseLoader(),
             extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
             undefined=StrictUndefined,
@@ -66,7 +28,6 @@ class TemplateEngine:
         )
 
         self.app_context: dict[str, Any] = {}
-        # self.dbus_context: dict[str, Any] = {}
 
         self.jinja2_env.globals.update(engine_globals)
         self.jinja2_async_env.globals.update(engine_globals)
@@ -78,52 +39,65 @@ class TemplateEngine:
     def update_app_context(self, context: dict[str, Any]):
         self.app_context.update(context)
 
-    def _dict_to_templatable_str(self, value: dict[str, Any]) -> str:
-        template_str = _mark_templates(value)
-        template_str = yaml.dump(template_str, Dumper=_CustomSafeDumper)
-        # value= yaml.safe_dump(value, default_style=None)
-        # print(f"_dict_to_templatable_str: {value}")
-        template_str = template_str.replace("template:{{", "{{").replace("}}:template", "}}")
-        # print(value)
-        return template_str
+    def _convert_value(self, res: Any, res_type: type[TemplateResultType]) -> TemplateResultType:
 
-    def _render_result_to_dict(self, value: str) -> dict[str, Any]:
-        return yaml.load(value, _CustomSafeLoader)
+        if isinstance(res, res_type):
+            return res
 
-    def render_template(self, template: str | dict | None, res_type: type, context: dict[str, Any] = {}) -> Any:
+        try:
+            return res_type(res) # type: ignore
 
-        if not template:
-            return None
+        except Exception as e:
+            raise ValueError(f"Error converting rendered template result from '{res}' to '{res_type.__name__}'") from e
 
-        if res_type not in [dict, str]:
-            raise ValueError(f"Unsupported result type: {res_type}")
+    def _render_template_nested(self, templatable: str | dict[str, Any], context: dict[str, Any] = {}) -> Any:
 
-        dict_template = isinstance(template, dict)
-        if dict_template:
-            template = self._dict_to_templatable_str(template)
+        if isinstance(templatable, str):
+            try:
+                return self.jinja2_env.from_string(templatable).render(**context)
+            except TemplateError as e:
+                raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
 
-        res = self.jinja2_env.from_string(template).render(**context)
+        elif isinstance(templatable, dict):
+            res = {}
+            for k, v in templatable.items():
+                if isinstance(v, dict) or isinstance(v, str):
+                    res[k] = self._render_template_nested(v, context)
+                else:
+                    res[k] = v
+            return res
 
-        if res_type is dict:
-            res = self._render_result_to_dict(res)
+    def render_template(self, templatable: str | dict[str, Any], res_type: type[TemplateResultType], context: dict[str, Any] = {}) -> TemplateResultType:
 
+        if isinstance(templatable, dict) and res_type is not dict:
+            raise ValueError(f"res_type should dict for dictionary templates, templatable={templatable}")
+
+        res = self._render_template_nested(templatable, context)
+        res = self._convert_value(res, res_type)
         return res
 
-    async def async_render_template(self, template: str | dict | None, res_type: type, context: dict[str, Any] = {}) -> Any:
+    async def _async_render_template_nested(self, templatable: str | dict[str, Any], context: dict[str, Any] = {}) -> Any:
 
-        if not template:
-            return None
+        if isinstance(templatable, str):
+            try:
+                return self.jinja2_env.from_string(templatable).render(**context)
+            except TemplateError as e:
+                raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
 
-        if res_type not in [dict, str]:
-            raise ValueError(f"Unsupported result type: {res_type}")
+        elif isinstance(templatable, dict):
+            res = {}
+            for k, v in templatable.items():
+                if isinstance(v, dict) or isinstance(v, str):
+                    res[k] = await self._async_render_template_nested(v, context)
+                else:
+                    res[k] = v
+            return res
 
-        dict_template = isinstance(template, dict)
-        if dict_template:
-            template = self._dict_to_templatable_str(template)
+    async def async_render_template(self, templatable: str | dict[str, Any], res_type: type[TemplateResultType], context: dict[str, Any] = {}) -> TemplateResultType:
 
-        res = await self.jinja2_async_env.from_string(template).render_async(**context)
+        if isinstance(templatable, dict) and res_type is not dict:
+            raise ValueError(f"res_type should be dict for dictionary templates, templatable={templatable}")
 
-        if res_type is dict:
-            res = self._render_result_to_dict(res)
-
+        res = await self._async_render_template_nested(templatable, context)
+        res = self._convert_value(res, res_type)
         return res

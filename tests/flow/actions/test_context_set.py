@@ -25,6 +25,7 @@ async def test_context():
         ),
         FlowActionMqttPublishConfig(
             topic="dbus2mqtt/test",
+            payload_type="text",
             payload_template="{{ var1 }}"
         )
     ])

@@ -1,7 +1,7 @@
 
 import logging
 
-from jinja2.exceptions import TemplateRuntimeError
+from jinja2.exceptions import TemplateError
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowActionMqttPublishConfig
@@ -24,14 +24,20 @@ class MqttPublishAction(FlowAction):
         try:
             mqtt_topic = await self.templating.async_render_template(self.config.topic, str, render_context)
 
-            payload_res_type = str if self.config.payload_type == "text" else dict
-            payload = await self.templating.async_render_template(self.config.payload_template, payload_res_type, render_context)
+            if self.config.payload_type == "text":
+                res_type = str
+            else:
+                res_type = dict
 
-        except TemplateRuntimeError as e:
-            logger.warning(f"Error rendering jinja template, flow: '{context.name}', error: {str(e)}. render_context={render_context}", exc_info=True)
+            payload = await self.templating.async_render_template(self.config.payload_template, res_type, render_context)
+
+        except TemplateError:
+            logger.warning(f"Error rendering jinja template, flow: '{context.name or ''}', payload_template={self.config.payload_template}, render_context={render_context}", exc_info=True)
             return
-        except Exception as e:
-            logger.warning(f"Error rendering jinja template, flow: '{context.name}', error: {str(e)}. render_context={render_context}", exc_info=False)
+        except Exception:
+            # Dont log full exception info to avoid log spamming on dbus errors
+            # due to clients disconnecting
+            logger.warning(f"Error rendering jinja template, flow: '{context.name or ''}', payload_template={self.config.payload_template}, render_context={render_context}")
             return
 
         logger.debug(f"public_mqtt: flow={context.name}, payload={payload}")

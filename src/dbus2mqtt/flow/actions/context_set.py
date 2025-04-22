@@ -1,5 +1,7 @@
 import logging
 
+from typing import Any
+
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowActionContextSetConfig
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
@@ -16,11 +18,15 @@ class ContextSetAction(FlowAction):
 
         aggregated_context = context.get_aggregated_context()
         if self.config.global_context:
-            context_new = await self.templating.async_render_template(self.config.global_context, dict, aggregated_context)
+            context_new = await self._render_context(self.config.global_context, aggregated_context)
             logger.debug(f"Update global_context with: {context_new}")
             context.global_flows_context.update(context_new)
 
         if self.config.context:
-            context_new = await self.templating.async_render_template(self.config.context, dict, aggregated_context)
+
+            context_new = await self._render_context(self.config.context, aggregated_context)
             logger.debug(f"Update context with: {context_new}")
             context.context.update(context_new)
+
+    async def _render_context(self, context_templates: dict[str, Any], aggregated_context: dict[str, Any]) -> dict[str, Any]:
+        return await self.templating.async_render_template(context_templates, dict, aggregated_context)

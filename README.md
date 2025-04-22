@@ -48,7 +48,7 @@ dbus:
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
               payload_template: |
-                {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) | to_yaml }}
+                {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
 ```
 
 MQTT connection details can be configured in that same `config.yaml` file or via environment variables. For now create a `.env` file with the following contents.

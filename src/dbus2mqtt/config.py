@@ -15,8 +15,9 @@ class SignalConfig:
     filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, *args) -> bool:
-        res = template_engine.render_template(self.filter, str, { "args": args })
-        return res == "True"
+        if self.filter:
+            return template_engine.render_template(self.filter, bool, { "args": args })
+        return True
 
 @dataclass
 class MethodConfig:
@@ -35,7 +36,9 @@ class InterfaceConfig:
     properties: list[PropertyConfig] = field(default_factory=list)
 
     def render_mqtt_call_method_topic(self, template_engine: TemplateEngine, context: dict[str, Any]) -> Any:
-        return template_engine.render_template(self.mqtt_call_method_topic, str, context)
+        if self.mqtt_call_method_topic:
+            return template_engine.render_template(self.mqtt_call_method_topic, str, context)
+        return None
 
 @dataclass
 class FlowTriggerMqttConfig:
@@ -84,8 +87,6 @@ class FlowActionContextSetConfig:
 class FlowActionMqttPublishConfig:
     topic: str
     payload_template: str | dict[str, Any]
-    """should be a dict if payload_type is json/yaml
-    or a string if payload_type is text"""
     type: Literal["mqtt_publish"] = "mqtt_publish"
     payload_type: Literal["json", "yaml", "text"] = "json"
 
