@@ -23,8 +23,9 @@ dbus:
             - method: Reboot  # reboot dialog
 
       flows:
-        - name: "publish state on schedule"
+        - name: "publish state at startup and schedule"
           triggers:
+            - type: bus_name_added
             - type: schedule
               interval: {seconds: 5}
           actions:
