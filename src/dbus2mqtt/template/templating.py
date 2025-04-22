@@ -80,7 +80,7 @@ class TemplateEngine:
 
         if isinstance(templatable, str):
             try:
-                return self.jinja2_env.from_string(templatable).render(**context)
+                return await self.jinja2_async_env.from_string(templatable).render_async(**context)
             except TemplateError as e:
                 raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
 

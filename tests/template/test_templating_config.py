@@ -1,4 +1,4 @@
-
+import pytest
 import yaml
 
 from dbus2mqtt.template.templating import TemplateEngine
@@ -18,7 +18,8 @@ def test_non_template_dict_result():
     assert res["a_string"] == "Off"
     assert res["a_number"] == 5
 
-def test_signal_filter_bool_result():
+@pytest.mark.asyncio
+async def test_signal_filter_bool_result():
 
     config = yaml.safe_load("""
         signals:
@@ -31,11 +32,12 @@ def test_signal_filter_bool_result():
         "args": ["org.mpris.MediaPlayer2.Player", {}, []]
     }
 
-    res = templating.render_template(config["signals"][0]["filter"], bool, context)
+    res = await templating.async_render_template(config["signals"][0]["filter"], bool, context)
 
     assert res
 
-def test_str_template_with_dict_result():
+@pytest.mark.asyncio
+async def test_str_template_with_dict_result():
     """Test a more complex example where functions are returning dicts
     and everything must be bcomined in a nice single structure that can be converted to json"""
 
@@ -52,9 +54,12 @@ def test_str_template_with_dict_result():
     """)
 
     templating = TemplateEngine()
-    context = {
-        "mpris_bus_name": "org.mpris.MediaPlayer2.Player.firefox",
-        "dbus_call": lambda bus_name, path, interface, method, method_args: {
+
+    async def mock_dbus_property_get(bus_name, path, interface, property, default_unsupported):
+        return 50
+
+    async def mock_dbus_call(bus_name, path, interface, method, method_args):
+        return {
             "CanPlay": False,
             "CanSeek": False,
             "LoopStatus": "None",
@@ -67,11 +72,15 @@ def test_str_template_with_dict_result():
             "Position": 0,
             "Rate": 1.0,
             "Shuffle": False
-        },
-        "dbus_property_get": lambda bus_name, path, interface, property, default_unsupported: 50,
+        }
+
+    context = {
+        "mpris_bus_name": "org.mpris.MediaPlayer2.Player.firefox",
+        "dbus_call": mock_dbus_call,
+        "dbus_property_get": mock_dbus_property_get
     }
 
-    res = templating.render_template(config["actions"][0]["payload_template"], dict, context)
+    res = await templating.async_render_template(config["actions"][0]["payload_template"], dict, context)
 
     assert res["bus_name"] == "org.mpris.MediaPlayer2.Player.firefox"
     assert res["Metadata"]["mpris:trackid"] == "/org/mpris/MediaPlayer2/firefox"
