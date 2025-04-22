@@ -3,19 +3,28 @@
   "extends": [
     "local>jwnmulder/renovate-config"
   ],
-
-  "labels": ["dependencies"],
-
+  "labels": [
+    "dependencies"
+  ],
   "packageRules": [
     {
-      "matchFileNames": [".pre-commit-config.yaml"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchFileNames": [
+        ".pre-commit-config.yaml"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true,
-      "addLabels": ["automerge"]
+      "addLabels": [
+        "automerge"
+      ]
     },
     {
       "description": "Disable Renovate for .python-version",
-      "matchFiles": [".python-version"],
+      "matchFileNames": [
+        ".python-version"
+      ],
       "enabled": false
     }
   ]
