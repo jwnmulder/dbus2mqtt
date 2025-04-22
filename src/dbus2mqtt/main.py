@@ -121,15 +121,6 @@ def main():
         apscheduler_logger = logging.getLogger("apscheduler")
         apscheduler_logger.setLevel(logging.WARNING)
 
-
-    # handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s'))
-
-    # logger = colorlog.getLogger('')
-    # for handler in logger.handlers:
-    #     print(handler.st)
-    #     if isinstance(handler, colorlog.StreamHandler):
-    #         handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(levelname)s:%(name)s:%(message)s'))
-
     logger.debug(f"config: {config}")
 
     asyncio.run(run(config))

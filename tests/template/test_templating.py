@@ -4,6 +4,7 @@ from dbus2mqtt.template.templating import TemplateEngine
 
 def test_preregisted_custom_function():
 
+    # now is a custom dbus2mqtt function
     template = "now={{ now().isoformat() }}"
 
     templating = TemplateEngine()
@@ -74,7 +75,7 @@ def test_nested_dict_templates():
     }
     template = {
         "now": "{{ now().isoformat() }}",
-        "dbus_names": "{{ mpris_bus_names }}",  # as list
+        "dbus_names": "{{ mpris_bus_names }}",
         "nested_raw": nested_dict_template,
         "nested_template": "{{ nested_dict_template }}"
     }
@@ -93,29 +94,6 @@ def test_nested_dict_templates():
     assert isinstance(res["nested_template"]["b"], dict)
     assert res["nested_template"]["b"]["c"] == "TestValueC"
 
-# def test_nested_dict_template_with_yaml_parsing():
-
-#     nested_dict_template = {
-#         "a": 1,
-#         "b": {
-#             "c": "TestValueC"
-#         }
-#     }
-#     context = {
-#         "mpris_bus_names": ["org.mpris.MediaPlayer2.vlc", "org.mpris.MediaPlayer2.firefox"],
-#         "nested_dict_template": nested_dict_template
-#     }
-#     template = {
-#         "now": "{{ now().isoformat() }}",
-#         "nested_raw": f"{nested_dict_template}",
-#         "nested_template": "{{ nested_dict_template }}"
-#     }
-
-#     templating = TemplateEngine()
-#     res = templating.render_template(template, dict, context)
-
-#     assert isinstance(res, dict)
-
 def test_dict_template_with_quotes_and_newline():
     """
         Test that:
@@ -132,8 +110,6 @@ def test_dict_template_with_quotes_and_newline():
     templating.add_functions(custom_functions)
 
     template = {
-        # "mpris_bus_name": '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}',
-        # "path": '/org/mpris/MediaPlayer2',
         "player_properties": "{{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}\n"
     }
 
@@ -142,8 +118,6 @@ def test_dict_template_with_quotes_and_newline():
     assert template["player_properties"].endswith("\n")
 
     res = templating.render_template(template, dict)
-
-    print(res)
 
     assert isinstance(res, dict)
     assert isinstance(res["player_properties"], dict)
