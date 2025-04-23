@@ -5,6 +5,31 @@
 dbus:
   subscriptions:
 
+    - bus_name: org.freedesktop.systemd1
+      path: /org/freedesktop/systemd1
+      # https://manpages.ubuntu.com/manpages/lunar/man5/org.freedesktop.systemd1.5.html
+
+      interfaces:
+        - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
+          methods:
+            - method: GetAll
+
+      flows:
+        - name: "publish state at startup and schedule"
+          triggers:
+            - type: bus_name_added
+            - type: schedule
+              interval: {seconds: 5}
+          actions:
+            - type: mqtt_publish
+              topic: dbus2mqtt/systemd
+              payload_type: json
+              payload_template:
+                l: |
+                  {{ dbus_call('org.freedesktop.systemd1', '/org/freedesktop/systemd1', 'org.freedesktop.systemd1.Manager', 'ListUnits') | list }}
+
     # https://lira.no-ip.org:8443/doc/gnome-session/dbus/gnome-session.html
     - bus_name: org.gnome.SessionManager
       path: /org/gnome/SessionManager
@@ -34,3 +59,16 @@ dbus:
               payload_type: json
               payload_template:
                 clients: "{{ dbus_call('org.gnome.SessionManager', '/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetClients') }}"
+
+flows:
+  - name: "publish internal state"
+    triggers:
+      - type: bus_name_added
+      - type: schedule
+        interval: {seconds: 5}
+    actions:
+      - type: mqtt_publish
+        topic: dbus2mqtt/state
+        payload_type: json
+        payload_template:
+          dbus_list: "{{ dbus_list('*') }}"
