@@ -22,8 +22,13 @@ class FlowScheduler:
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
 
-    async def _schedule_flow_strigger(self, flow, trigger_config: FlowTriggerConfig):
-        trigger = FlowTriggerMessage(flow, trigger_config, datetime.now())
+    async def _schedule_flow_strigger(self, flow, trigger_config: FlowTriggerConfig, dbus_object_context: dict[str, Any] | None):
+        trigger = FlowTriggerMessage(
+            flow,
+            trigger_config,
+            datetime.now(),
+            dbus_object_context=dbus_object_context
+        )
         await self.event_broker.flow_trigger_queue.async_q.put(trigger)
 
     async def scheduler_task(self):
@@ -31,12 +36,15 @@ class FlowScheduler:
         self.scheduler.start()
 
         # configure global flow trigger
-        self.start_flow_set(self.config.flows)
+        self.start_flow_set(
+            self.config.flows,
+            dbus_object_context=None
+        )
 
         while True:
             await asyncio.sleep(1000)
 
-    def start_flow_set(self, flows: list[FlowConfig]):
+    def start_flow_set(self, flows: list[FlowConfig], dbus_object_context: dict[str, Any] | None):
         for flow in flows:
             for trigger in flow.triggers:
                 if trigger.type == "schedule":
@@ -54,7 +62,7 @@ class FlowScheduler:
                                 max_instances=1,
                                 misfire_grace_time=5,
                                 coalesce=True,
-                                args=[flow, trigger],
+                                args=[flow, trigger, dbus_object_context],
                                 **trigger.interval
                             )
                         elif trigger.cron:
@@ -66,7 +74,7 @@ class FlowScheduler:
                                 max_instances=1,
                                 misfire_grace_time=5,
                                 coalesce=True,
-                                args=[flow, trigger],
+                                args=[flow, trigger, dbus_object_context],
                                 **trigger.cron
                             )
 
@@ -79,11 +87,15 @@ class FlowScheduler:
 
 class FlowActionContext:
 
-    def __init__(self, app_context: AppContext, flow_config: FlowConfig, global_flows_context: dict[str, Any], flow_context: dict[str, Any]):
+    def __init__(self, app_context: AppContext, flow_config: FlowConfig, global_context: dict[str, Any], static_flow_context: dict[str, Any]):
         self.app_context = app_context
-        self.global_flows_context = global_flows_context
-        self.flow_context = flow_context
         self.flow_config = flow_config
+
+        self.global_context = global_context
+        """Updatable global context which is shared across all flows."""
+
+        self.static_flow_context = static_flow_context
+        """Immutable context that is passed to each flow execution."""
 
         self.flow_actions = self._setup_flow_actions()
 
@@ -101,19 +113,25 @@ class FlowActionContext:
 
         return res
 
-    async def execute_actions(self, trigger_context: dict[str, Any] | None):
+    async def execute_actions(self, dbus_object_context: dict[str, Any] | None, trigger_context: dict[str, Any] | None):
 
         # per flow execution context
-        context = FlowExecutionContext(
+        flow_execution_context = FlowExecutionContext(
             self.flow_config.name,
-            global_flows_context=self.global_flows_context,
-            flow_context=self.flow_context)
+            global_context=self.global_context,
+            dbus_object_context=dbus_object_context)
+
+        if dbus_object_context:
+            flow_execution_context.context.update(dbus_object_context)
 
         if trigger_context:
-            context.context.update(trigger_context)
+            flow_execution_context.context.update(trigger_context)
+
+        if self.static_flow_context:
+            flow_execution_context.context.update(self.static_flow_context)
 
         for action in self.flow_actions:
-            await action.execute(context)
+            await action.execute(flow_execution_context)
 
 class FlowProcessor:
 
@@ -130,14 +148,14 @@ class FlowProcessor:
 
         # register dbus subscription flows
         for subscription in app_context.config.dbus.subscriptions:
-            flow_context = {
+            static_flow_context = {
                 "subscription_bus_name": subscription.bus_name,
                 "subscription_path": subscription.path,
                 "subscription_interfaces": [i.interface for i in subscription.interfaces],
             }
-            self.register_flows(subscription.flows, flow_context)
+            self.register_flows(subscription.flows, static_flow_context)
 
-    def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
+    def register_flows(self, flows: list[FlowConfig], static_flow_context: dict[str, Any] = {}):
         """Register flows with the flow processor."""
 
         for flow_config in flows:
@@ -145,7 +163,7 @@ class FlowProcessor:
                 self.app_context,
                 flow_config,
                 self._global_context,
-                flow_context
+                static_flow_context
             )
             self._flows[flow_config.id] = flow_action_context
 
@@ -182,7 +200,13 @@ class FlowProcessor:
         # flow_name = flow_trigger_message.flow_config.name
 
         flow = self._flows[flow_id]
-        await flow.execute_actions(trigger_context=flow_trigger_message.context)
+
+        # need dbus_object_context
+        # need trigger_context
+        await flow.execute_actions(
+            dbus_object_context=flow_trigger_message.dbus_object_context,
+            trigger_context=flow_trigger_message.context
+        )
 
 # # Create a flow from the YAML configuration
 # for flow_config in config['flows']:

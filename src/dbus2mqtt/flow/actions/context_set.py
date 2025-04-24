@@ -19,10 +19,14 @@ class ContextSetAction(FlowAction):
         if self.config.global_context:
             context_new = await self.templating.async_render_template(self.config.global_context, dict, aggregated_context)
             logger.debug(f"Update global_context with: {context_new}")
-            context.global_flows_context.update(context_new)
+            context.global_context.update(context_new)
+
+        if self.config.dbus_object_context:
+            context_new = await self.templating.async_render_template(self.config.dbus_object_context, dict, aggregated_context)
+            logger.debug(f"Update dbus_object_context with: {context_new}")
+            context.global_context.update(context_new)
 
         if self.config.context:
-
             context_new = await self.templating.async_render_template(self.config.context, dict, aggregated_context)
             logger.debug(f"Update context with: {context_new}")
             context.context.update(context_new)

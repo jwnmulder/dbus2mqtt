@@ -72,6 +72,14 @@ dbus:
                     | combine(player_properties)
                     | combine({ 'Volume': volume })
                 }}
+        - name: "MPRIS player added"
+          triggers:
+            - type: bus_name_added
+          actions:
+            - type: context_set
+              dbus_object_context:
+                properties: |
+                  {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}
         - name: "MPRIS player removed"
           triggers:
             - type: bus_name_removed
