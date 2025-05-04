@@ -85,7 +85,7 @@ class FlowScheduler:
                     logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
                     self.scheduler.remove_job(trigger.id)
 
-class FlowActionContext:
+class _FlowActionsExecutor:
 
     def __init__(self, app_context: AppContext, flow_config: FlowConfig, global_context: dict[str, Any], static_flow_context: dict[str, Any]):
         self.app_context = app_context
@@ -117,16 +117,17 @@ class FlowActionContext:
 
         # per flow execution context
         flow_execution_context = FlowExecutionContext(
-            self.flow_config.name,
+            name=self.flow_config.name,
             global_context=self.global_context,
-            dbus_object_context=dbus_object_context)
+            dbus_object_context=dbus_object_context
+        )
 
-        if dbus_object_context:
-            flow_execution_context.context.update(dbus_object_context)
-
+        # non updatable trigger_context, add it to context to avoid dict processing for each action
         if trigger_context:
             flow_execution_context.context.update(trigger_context)
 
+        # non updatable static_flow_context, add it to context to avoid dict processing for each action
+        # static_flow_context is None for global flows
         if self.static_flow_context:
             flow_execution_context.context.update(self.static_flow_context)
 
@@ -141,7 +142,7 @@ class FlowProcessor:
 
         self._global_context: dict[str, Any] = {}
 
-        self._flows: dict[str, FlowActionContext] = {}
+        self._flows: dict[str, _FlowActionsExecutor] = {}
 
         # register global flows
         self.register_flows(app_context.config.flows)
@@ -159,7 +160,7 @@ class FlowProcessor:
         """Register flows with the flow processor."""
 
         for flow_config in flows:
-            flow_action_context = FlowActionContext(
+            flow_action_context = _FlowActionsExecutor(
                 self.app_context,
                 flow_config,
                 self._global_context,
@@ -205,24 +206,5 @@ class FlowProcessor:
         # need trigger_context
         await flow.execute_actions(
             dbus_object_context=flow_trigger_message.dbus_object_context,
-            trigger_context=flow_trigger_message.context
+            trigger_context=flow_trigger_message.trigger_context
         )
-
-# # Create a flow from the YAML configuration
-# for flow_config in config['flows']:
-#     flow_name = flow_config['name']
-#     triggers = flow_config.get('triggers', [])
-#     actions = flow_config.get('actions', [])
-
-#     with Flow(flow_name) as flow:
-#         data = "sensor_data"
-#         for action in actions:
-#             if action['type'] == 'python_script':
-#                 process_data(data)
-#             elif action['type'] == 'mqtt_publish':
-#                 mqtt_publish(action['topic'], action['message_template'], data)
-
-#         # Add scheduling trigger if defined
-#         for trigger in triggers:
-#             if trigger['type'] == 'schedule' and 'cron' in trigger:
-#                 flow.schedule = CronSchedule(cron=trigger['cron'])

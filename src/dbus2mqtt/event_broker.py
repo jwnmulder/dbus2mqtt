@@ -38,7 +38,7 @@ class FlowTriggerMessage:
     flow_trigger_config: FlowTriggerConfig
     timestamp: datetime
     dbus_object_context: dict[str, Any] | None = None
-    context: dict[str, Any] | None = None
+    trigger_context: dict[str, Any] | None = None
 
 class EventBroker:
     def __init__(self):

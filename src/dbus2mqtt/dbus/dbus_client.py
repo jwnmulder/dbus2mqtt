@@ -250,7 +250,7 @@ class DbusClient:
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "bus_name_added":
-                    context = {
+                    trigger_context = {
                         "bus_name": bus_name,
                     }
                     trigger_message = FlowTriggerMessage(
@@ -258,7 +258,7 @@ class DbusClient:
                         trigger,
                         datetime.now(),
                         dbus_object_context=dbus_object_context,
-                        context=context
+                        trigger_context=trigger_context
                     )
                     await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
@@ -306,7 +306,7 @@ class DbusClient:
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "bus_name_removed":
-                    context = {
+                    trigger_context = {
                         "bus_name": bus_name,
                     }
                     trigger_message = FlowTriggerMessage(
@@ -314,7 +314,7 @@ class DbusClient:
                         trigger,
                         datetime.now(),
                         dbus_object_context=dbus_object_context,
-                        context=context
+                        trigger_context=trigger_context
                     )
                     await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
@@ -396,7 +396,7 @@ class DbusClient:
                             matches_filter = signal.signal_config.matches_filter(self.app_context.templating, *signal.args)
 
                         if matches_filter:
-                            context = {
+                            trigger_context = {
                                 "bus_name": signal.bus_name,
                                 "path": signal.path,
                                 "interface": signal.interface_name,
@@ -407,7 +407,7 @@ class DbusClient:
                                 trigger,
                                 datetime.now(),
                                 dbus_object_context=dbus_object_context,
-                                context=context
+                                trigger_context=trigger_context
                             )
 
                             await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
