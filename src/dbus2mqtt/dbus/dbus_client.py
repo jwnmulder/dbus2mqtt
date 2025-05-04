@@ -239,19 +239,20 @@ class DbusClient:
                 self.flow_scheduler.start_flow_set(subscription_config.flows, dbus_object_context)
 
                 # Trigger flows that have a bus_name_added trigger configured
-                await self._trigger_bus_name_added(subscription_config, subscribed_interface.bus_name, dbus_object_context)
+                await self._trigger_bus_name_added(subscription_config, subscribed_interface.bus_name, subscribed_interface.path, dbus_object_context)
 
                 processed_new_subscriptions.add(subscription_config.id)
 
         return new_subscriped_interfaces
 
-    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, dbus_object_context: dict[str, Any]):
+    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str, dbus_object_context: dict[str, Any]):
 
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "bus_name_added":
                     trigger_context = {
                         "bus_name": bus_name,
+                        "path": path
                     }
                     trigger_message = FlowTriggerMessage(
                         flow,
@@ -276,7 +277,7 @@ class DbusClient:
                 for subscription_config in subscription_configs:
 
                     # Trigger flows that have a bus_name_added trigger configured
-                    await self._trigger_bus_name_removed(subscription_config, bus_name, dbus_object_context)
+                    await self._trigger_bus_name_removed(subscription_config, bus_name, path, dbus_object_context)
 
                     # Stop schedule triggers
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
@@ -300,7 +301,7 @@ class DbusClient:
 
             del self.subscriptions[bus_name]
 
-    async def _trigger_bus_name_removed(self, subscription_config: SubscriptionConfig, bus_name: str, dbus_object_context: dict[str, Any]):
+    async def _trigger_bus_name_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str, dbus_object_context: dict[str, Any]):
 
         # Trigger flows that have a bus_name_removed trigger configured
         for flow in subscription_config.flows:
@@ -308,6 +309,7 @@ class DbusClient:
                 if trigger.type == "bus_name_removed":
                     trigger_context = {
                         "bus_name": bus_name,
+                        "path": path
                     }
                     trigger_message = FlowTriggerMessage(
                         flow,

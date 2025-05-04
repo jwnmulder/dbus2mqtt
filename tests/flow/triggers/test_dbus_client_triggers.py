@@ -22,7 +22,8 @@ async def test_bus_name_added_trigger():
         FlowActionContextSetConfig(
             global_context={
                 "res": {
-                    "bus_name": "{{ bus_name }}"
+                    "bus_name": "{{ bus_name }}",
+                    "path": "{{ path }}",
                 }
             }
         )
@@ -33,7 +34,7 @@ async def test_bus_name_added_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_bus_name_added(subscription_config, "test-bus-name", {})
+    await dbus_client._trigger_bus_name_added(subscription_config, "test-bus-name", "/some/test/path", {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions
@@ -42,6 +43,7 @@ async def test_bus_name_added_trigger():
     # expected context from _trigger_bus_name_added
     assert processor._global_context["res"] == {
         "bus_name": "test-bus-name",
+        "path": "/some/test/path",
     }
 
 @pytest.mark.asyncio
@@ -54,7 +56,8 @@ async def test_bus_name_removed_trigger():
         FlowActionContextSetConfig(
             global_context={
                 "res": {
-                    "bus_name": "{{ bus_name }}"
+                    "bus_name": "{{ bus_name }}",
+                    "path": "{{ path }}"
                 }
             }
         )
@@ -65,7 +68,7 @@ async def test_bus_name_removed_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_bus_name_removed(subscription_config, "test-bus-name", {})
+    await dbus_client._trigger_bus_name_removed(subscription_config, "test-bus-name", "/some/test/path", {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions
@@ -74,6 +77,7 @@ async def test_bus_name_removed_trigger():
     # expected context from _trigger_bus_name_added
     assert processor._global_context["res"] == {
         "bus_name": "test-bus-name",
+        "path": "/some/test/path",
     }
 
 @pytest.mark.asyncio
