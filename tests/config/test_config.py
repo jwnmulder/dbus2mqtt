@@ -28,3 +28,21 @@ def test_off_string_value():
         'PlaybackStatus': 'Off',  # This is the real test, it was False before the 'yaml_custom' loader
         'TestFalseString': False  # This is one that should also be fixed. For now it's what it is
     }
+
+def test_cron_trigger_string_value():
+    """Test that the cron trigger is parsed correctly from a string value
+    More specifically, the value '*/5' will fail jsonargparse for some weird reason
+    """
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(f"{FILE_DIR}/fixtures/schedule_cron_trigger.yaml")
+    config: Config = cast(Config, parser.instantiate_classes(cfg))
+
+    assert config is not None
+
+    trigger = config.flows[0].triggers[0]
+    assert trigger.type == "schedule"
+    assert trigger.cron == {"minute": "*/5"}
