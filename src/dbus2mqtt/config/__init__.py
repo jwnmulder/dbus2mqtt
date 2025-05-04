@@ -50,8 +50,8 @@ class FlowTriggerMqttConfig:
 class FlowTriggerScheduleConfig:
     type: Literal["schedule"] = "schedule"
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    cron: dict[str, Any] | None = None
-    interval: dict[str, Any] | None = None
+    cron: dict[str, object] | None = None
+    interval: dict[str, object] | None = None
 
 @dataclass
 class FlowTriggerDbusSignalConfig:
@@ -80,11 +80,11 @@ FlowTriggerConfig = Annotated[
 @dataclass
 class FlowActionContextSetConfig:
     type: Literal["context_set"] = "context_set"
-    context: dict[str, Any] | None = None
+    context: dict[str, object] | None = None
     """Per flow execution context"""
-    dbus_object_context: dict[str, Any] | None = None
+    dbus_object_context: dict[str, object] | None = None
     """Per dbus object context, shared between multiple flow executions"""
-    global_context: dict[str, Any] | None = None
+    global_context: dict[str, object] | None = None
     """Global context, shared between multiple flow executions, over all subscriptions"""
 
 @dataclass
