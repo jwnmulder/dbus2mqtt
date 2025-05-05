@@ -82,3 +82,17 @@ dbus:
               payload_type: json
               payload_template:
                 PlaybackStatus: "Off"
+        - name: "PlayPause"
+          triggers:
+            - type: mqtt_msg
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+              filter: "{{ value_json.action == 'play-pause' }}"
+          actions:
+            - type: context_set
+              context:
+                mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
+                path: /org/mpris/MediaPlayer2
+            - type: context_set
+              context:
+                current_playback_status: |
+                  {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus', 0) }}
