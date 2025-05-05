@@ -42,7 +42,7 @@ More players that support MPRIS can be found here: <https://wiki.archlinux.org/t
 
 The following table lists player commands, their descriptions, and an example JSON payload for invoking them via MQTT.
 
-Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/command`. Method calls will be done for all matching players
+Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/command`. Method calls will be done for all matching players. The same applies to property updates.
 
 | Interface                       | Method<br />Property | Description                       | Example MQTT JSON Payload                           |
 |---------------------------------|---------------|------------------------------------------|------------------------------------------------|
