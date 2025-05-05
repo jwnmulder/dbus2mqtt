@@ -41,10 +41,15 @@ class InterfaceConfig:
         return None
 
 @dataclass
-class FlowTriggerMqttConfig:
-    type: Literal["mqtt"]
+class FlowTriggerMqttMsgConfig:
+    type: Literal["mqtt_msg"]
     topic: str
     filter: str | None = None
+
+    def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
+        if self.filter:
+            return template_engine.render_template(self.filter, bool, trigger_context)
+        return True
 
 @dataclass
 class FlowTriggerScheduleConfig:
@@ -60,20 +65,20 @@ class FlowTriggerDbusSignalConfig:
     type: Literal["dbus_signal"] = "dbus_signal"
     bus_name: str | None = None
     path: str | None = None
-    filter: str | None = None
+    # filter: str | None = None
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
     type: Literal["bus_name_added"] = "bus_name_added"
-    filter: str | None = None
+    # filter: str | None = None
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
     type: Literal["bus_name_removed"] = "bus_name_removed"
-    filter: str | None = None
+    # filter: str | None = None
 
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig,
+    FlowTriggerMqttMsgConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig,
     Field(discriminator="type")
 ]
 

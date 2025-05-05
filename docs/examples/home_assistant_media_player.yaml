@@ -71,6 +71,7 @@ dbus:
                     { 'bus_name': mpris_bus_name }
                     | combine(player_properties)
                     | combine({ 'Volume': volume })
+                    | combine({ 'properties': properties | default({}) })
                 }}
         - name: "MPRIS player added"
           triggers:
@@ -79,7 +80,7 @@ dbus:
             - type: context_set
               dbus_object_context:
                 properties: |
-                  {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}
+                  {{ dbus_call(bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}
         - name: "MPRIS player removed"
           triggers:
             - type: bus_name_removed
@@ -90,3 +91,42 @@ dbus:
               payload_type: json
               payload_template:
                 PlaybackStatus: "Off"
+        - name: "Mute"
+          triggers:
+            - type: mqtt_msg
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+              filter: "{{ value_json.action == 'mute' }}"
+          actions:
+            - type: context_set
+              context:
+                current_volume: |
+                  0
+                #   {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Volume', 0) }}
+                current_muted: |
+                  {{ muted | default(False) }}
+            - type: context_set
+              dbus_object_context:
+                muted: |
+                  {{ not current_muted }}
+                unmuted_volume: >
+                  {% if not current_muted %}
+                    {{ current_volume }}
+                  {% else %}
+                    None
+                  {% endif %}
+
+            # - type: dbus_method_call
+            #   # Method is called on all matching bus_names & exposed methods configured above
+            #   # This behavior mimics dbus_client._on_mqtt_msg
+            #   method: xxx
+            #   args: []
+            # - type: dbus_property_set
+            #   # Property is set on all matching bus_names & exposed properties configured above
+            #   # This behavior mimics dbus_client._on_mqtt_msg
+            #   property: Volume
+            #   value: >
+            #     {% if muted %}
+            #       {{ unmuted_volume }}
+            #     {% else %}
+            #       0
+            #     {% endif %}

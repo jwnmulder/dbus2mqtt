@@ -54,6 +54,7 @@ class FlowScheduler:
                     if not existing_job and trigger.type == "schedule":
                         logger.info(f"Starting scheduler[{trigger.id}] for flow {flow.id}")
                         if trigger.interval:
+                            trigger_args: dict[str, Any] = trigger.interval
                             # Each schedule gets its own job
                             self.scheduler.add_job(
                                 self._schedule_flow_strigger,
@@ -63,9 +64,10 @@ class FlowScheduler:
                                 misfire_grace_time=5,
                                 coalesce=True,
                                 args=[flow, trigger, dbus_object_context],
-                                **trigger.interval
+                                **trigger_args
                             )
                         elif trigger.cron:
+                            trigger_args: dict[str, Any] = trigger.cron
                             # Each schedule gets its own job
                             self.scheduler.add_job(
                                 self._schedule_flow_strigger,
@@ -75,7 +77,7 @@ class FlowScheduler:
                                 misfire_grace_time=5,
                                 coalesce=True,
                                 args=[flow, trigger, dbus_object_context],
-                                **trigger.cron
+                                **trigger_args
                             )
 
     def stop_flow_set(self, flows):
