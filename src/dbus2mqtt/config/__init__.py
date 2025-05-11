@@ -117,6 +117,7 @@ class SubscriptionConfig:
 @dataclass
 class DbusConfig:
     subscriptions: list[SubscriptionConfig]
+    bus_type: Literal["SESSION", "SYSTEM"] = "SESSION"
 
     def is_bus_name_configured(self, bus_name: str) -> bool:
 
