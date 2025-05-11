@@ -1,0 +1,29 @@
+dbus:
+  bus_type: SYSTEM
+  subscriptions:
+
+    - bus_name: org.bluez
+      path: /org/bluez/hci0
+
+      interfaces:
+        - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
+          methods:
+            - method: GetAll
+
+      flows:
+        - name: "publish state"
+          triggers:
+            - type: bus_name_added
+            - type: schedule
+              interval: {seconds: 5}
+          actions:
+            - type: mqtt_publish
+              topic: dbus2mqtt/bluez
+              payload_type: json
+              payload_template:
+                Adapter1: |
+                  {{ dbus_call('org.bluez', '/org/bluez/hci0', 'org.freedesktop.DBus.Properties', 'GetAll', ['org.bluez.Adapter1']) }}
+                LEAdvertisingManager1: |
+                  {{ dbus_call('org.bluez', '/org/bluez/hci0', 'org.freedesktop.DBus.Properties', 'GetAll', ['org.bluez.LEAdvertisingManager1']) }}
