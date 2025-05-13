@@ -128,7 +128,7 @@ class DbusConfig:
     def get_subscription_configs(self, bus_name: str, path: str) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path:
+            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and fnmatch.fnmatchcase(path, subscription.path):
                 res.append(subscription)
         return res
 

@@ -6,7 +6,7 @@ dbus:
   subscriptions:
 
     - bus_name: org.mpris.MediaPlayer2.*
-      path: /org/mpris/MediaPlayer2
+      path: /*
       # https://mpris2.readthedocs.io/en/latest/interfaces.html#mpris2.MediaPlayer2
 
       interfaces:
