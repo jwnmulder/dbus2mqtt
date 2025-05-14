@@ -1,3 +1,4 @@
+import fnmatch
 import json
 import logging
 
@@ -5,6 +6,7 @@ from datetime import datetime
 from typing import Any
 
 import dbus_fast.aio as dbus_aio
+import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
 
 from dbus2mqtt import AppContext
@@ -62,13 +64,20 @@ class DbusClient:
 
             logger.info(f"subscriptions on startup: {list(set([si.bus_name for si in new_subscriped_interfaces]))}")
 
-    def get_proxy_object(self, bus_name: str, path: str) -> dbus_aio.proxy_object.ProxyObject | None:
+    async def get_proxy_object(self, bus_name: str, path: str) -> dbus_aio.proxy_object.ProxyObject | None:
 
         bus_name_subscriptions = self.subscriptions.get(bus_name)
         if bus_name_subscriptions:
             proxy_object = bus_name_subscriptions.path_objects.get(path)
             if proxy_object:
                 return proxy_object
+
+        # No existing subscription that contains the requested proxy_object
+        logger.warning(f"Returning temporary proxy_object with an additional introspection call, bus_name={bus_name}, path={path}")
+        introspection = await self.bus.introspect(bus_name=bus_name, path=path)
+        proxy_object = self.bus.get_proxy_object(bus_name, path, introspection)
+        if proxy_object:
+            return proxy_object
 
         return None
 
@@ -212,8 +221,14 @@ class DbusClient:
                 logger.warning(f"handle_bus_name_added: {umh_bus_name} already added")
 
         new_subscriped_interfaces = await self._visit_bus_name_path(bus_name, "/")
+        new_subscribed_bus_names = list(set([si.bus_name for si in new_subscriped_interfaces]))
+        new_subscribed_bus_names_paths = {
+            bus_name: list(set([si.path for si in new_subscriped_interfaces if si.bus_name == bus_name]))
+            for bus_name in new_subscribed_bus_names
+        }
 
-        logger.info(f"new_subscriptions: {list(set([si.bus_name for si in new_subscriped_interfaces]))}")
+        logger.info(f"new_subscriptions: {new_subscribed_bus_names}")
+        logger.info(f"new_bus_names_paths: {new_subscribed_bus_names_paths}")
 
         # setup and process triggers for each flow in each subscription
         processed_new_subscriptions: set[str] = set()
@@ -237,6 +252,13 @@ class DbusClient:
                 # Trigger flows that have a bus_name_added trigger configured
                 await self._trigger_bus_name_added(subscription_config, subscribed_interface.bus_name, subscribed_interface.path)
 
+                # Trigger flows that have a path_name_added trigger configured
+                # TODO: implement both path_added and path_remove triggers
+                bus_name_paths = new_subscribed_bus_names_paths[subscribed_interface.bus_name]
+                for bus_name_path in bus_name_paths:
+                    if fnmatch.fnmatchcase(bus_name_path, subscription_config.path):
+                        await self._trigger_bus_name_path_added(subscription_config, subscribed_interface.bus_name, bus_name_path)
+
                 processed_new_subscriptions.add(subscription_config.id)
 
         return new_subscriped_interfaces
@@ -246,6 +268,23 @@ class DbusClient:
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "bus_name_added":
+                    trigger_context = {
+                        "bus_name": bus_name,
+                        "path": path
+                    }
+                    trigger_message = FlowTriggerMessage(
+                        flow,
+                        trigger,
+                        datetime.now(),
+                        trigger_context=trigger_context
+                    )
+                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
+
+    async def _trigger_bus_name_path_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+
+        for flow in subscription_config.flows:
+            for trigger in flow.triggers:
+                if trigger.type == "bus_name_path_added":
                     trigger_context = {
                         "bus_name": bus_name,
                         "path": path
@@ -325,7 +364,11 @@ class DbusClient:
     async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]):
 
         call_method_name = "call_" + camel_to_snake(method)
-        res = await interface.__getattribute__(call_method_name)(*method_args)
+        try:
+            res = await interface.__getattribute__(call_method_name)(*method_args)
+        except dbus_errors.DBusError as e:
+            logger.warning(f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={method}")
+            raise e
 
         if res:
             res = unwrap_dbus_object(res)

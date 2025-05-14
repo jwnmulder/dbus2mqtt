@@ -8,6 +8,14 @@
             "module": "dbus2mqtt",
             "console": "integratedTerminal",
             "args": "--config docs/examples/home_assistant_media_player.yaml"
+        },
+        {
+            "name": "dbus2mqtt - bluez",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "dbus2mqtt",
+            "console": "integratedTerminal",
+            "args": "--config docs/examples/bluez.yaml"
         }
     ]
 }
