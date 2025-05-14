@@ -104,12 +104,16 @@ class FlowConfig:
     name: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
+MatchingMode = Literal["bus_name_path", "bus_name_only"]
+
 @dataclass
 class SubscriptionConfig:
     bus_name: str
     """bus_name pattern supporting * wildcards"""
     path: str
     """path pattern supporting * wildcards"""
+    matching_mode: MatchingMode = "bus_name_path"
+
     interfaces: list[InterfaceConfig] = field(default_factory=list)
     flows: list[FlowConfig] = field(default_factory=list)
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
@@ -128,7 +132,12 @@ class DbusConfig:
     def get_subscription_configs(self, bus_name: str, path: str) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path:
+            match = False
+            if subscription.matching_mode == "bus_name_path":
+                match = fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path
+            elif subscription.matching_mode == "bus_name_only":
+                match = fnmatch.fnmatchcase(bus_name, subscription.bus_name)
+            if match:
                 res.append(subscription)
         return res
 
