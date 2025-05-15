@@ -257,7 +257,7 @@ class DbusClient:
                 bus_name_paths = new_subscribed_bus_names_paths[subscribed_interface.bus_name]
                 for bus_name_path in bus_name_paths:
                     if fnmatch.fnmatchcase(bus_name_path, subscription_config.path):
-                        await self._trigger_bus_name_path_added(subscription_config, subscribed_interface.bus_name, bus_name_path)
+                        await self._trigger_interface_added(subscription_config, subscribed_interface.bus_name, bus_name_path)
 
                 processed_new_subscriptions.add(subscription_config.id)
 
@@ -280,13 +280,14 @@ class DbusClient:
                     )
                     await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
-    async def _trigger_bus_name_path_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+    async def _trigger_interface_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
 
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
-                if trigger.type == "bus_name_path_added":
+                if trigger.type == "interface_added":
                     trigger_context = {
                         "bus_name": bus_name,
+                        "interface": "TODO",
                         "path": path
                     }
                     trigger_message = FlowTriggerMessage(
