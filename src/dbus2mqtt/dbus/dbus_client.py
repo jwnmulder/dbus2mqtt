@@ -184,18 +184,19 @@ class DbusClient:
             logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
             return new_subscriptions
 
-        if len(introspection.nodes) == 0:
-            logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
-
         for interface in introspection.interfaces:
             new_subscriptions.extend(
                 await self._process_interface(bus_name, path, introspection, interface)
             )
 
-        for node in introspection.nodes:
+        child_node_names = [n.name for n in introspection.nodes]
+        if len(child_node_names) == 0:
+            logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
+
+        for node in child_node_names:
             path_seperator = "" if path.endswith('/') else "/"
             new_subscriptions.extend(
-                await self._visit_bus_name_path(bus_name, f"{path}{path_seperator}{node.name}")
+                await self._visit_bus_name_path(bus_name, f"{path}{path_seperator}{node}")
             )
 
         return new_subscriptions
@@ -211,7 +212,12 @@ class DbusClient:
             if umh_bus_name == bus_name:
                 logger.warning(f"handle_bus_name_added: {umh_bus_name} already added")
 
-        new_subscriped_interfaces = await self._visit_bus_name_path(bus_name, "/")
+        # org.mpris.MediaPlayer2.tv.kodi.Kodi
+        path = "/"
+        if bus_name.startswith("org.mpris.MediaPlayer2."):
+            path = "/org/mpris/MediaPlayer2"
+
+        new_subscriped_interfaces = await self._visit_bus_name_path(bus_name, path)
 
         logger.info(f"new_subscriptions: {list(set([si.bus_name for si in new_subscriped_interfaces]))}")
 

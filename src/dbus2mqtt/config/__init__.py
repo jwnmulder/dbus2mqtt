@@ -133,10 +133,10 @@ class DbusConfig:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
             match = False
-            if subscription.matching_mode == "bus_name_path":
-                match = fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path
-            elif subscription.matching_mode == "bus_name_only":
-                match = fnmatch.fnmatchcase(bus_name, subscription.bus_name)
+            # if subscription.matching_mode == "bus_name_path":
+            match = fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path
+            # elif subscription.matching_mode == "bus_name_only":
+            #     match = fnmatch.fnmatchcase(bus_name, subscription.bus_name)
             if match:
                 res.append(subscription)
         return res
