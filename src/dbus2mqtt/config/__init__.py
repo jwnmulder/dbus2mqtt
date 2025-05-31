@@ -72,8 +72,13 @@ class FlowTriggerBusNameRemovedConfig:
     type: Literal["bus_name_removed"] = "bus_name_removed"
     # filter: str | None = None
 
+@dataclass
+class FlowTriggerInterfaceAddedConfig:
+    type: Literal["interface_added"] = "interface_added"
+    # filter: str | None = None
+
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig,
+    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerInterfaceAddedConfig,
     Field(discriminator="type")
 ]
 
@@ -117,6 +122,7 @@ class SubscriptionConfig:
 @dataclass
 class DbusConfig:
     subscriptions: list[SubscriptionConfig]
+    bus_type: Literal["SESSION", "SYSTEM"] = "SESSION"
 
     def is_bus_name_configured(self, bus_name: str) -> bool:
 
@@ -128,7 +134,7 @@ class DbusConfig:
     def get_subscription_configs(self, bus_name: str, path: str) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path:
+            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and fnmatch.fnmatchcase(path, subscription.path):
                 res.append(subscription)
         return res
 
