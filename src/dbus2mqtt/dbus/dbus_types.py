@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import dbus_fast.aio as dbus_aio
 
-from dbus2mqtt.config import InterfaceConfig, SubscriptionConfig
+from dbus2mqtt.config import SubscriptionConfig
 
 
 class BusNameSubscriptions:
@@ -16,7 +16,7 @@ class BusNameSubscriptions:
 @dataclass
 class SubscribedInterface:
 
-    interface_config: InterfaceConfig
+    # interface_config: InterfaceConfig
     subscription_config: SubscriptionConfig
     bus_name: str
     path: str

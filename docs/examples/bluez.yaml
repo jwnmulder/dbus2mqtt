@@ -7,9 +7,9 @@ dbus:
 
       interfaces:
         - interface: org.freedesktop.DBus.ObjectManager
-          signals:
-            - signal: InterfacesAdded
-            - signal: InterfacesRemoved
+        # signals:
+        #   - signal: InterfacesAdded
+        #   - signal: InterfacesRemoved
 
       flows:
         - name: "InterfacesAdded"
@@ -68,18 +68,21 @@ dbus:
 
       interfaces:
         - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
           methods:
             - method: GetAll
 
       flows:
         - name: "publish initial state"
           triggers:
+            # - type: bus_name_added
             - type: interface_added
-            # - type: dbus_signal
-            #   interface: org.freedesktop.DBus.Properties
-            #   signal: PropertiesChanged
-            # - type: schedule  # schedule won't work, just one is running for this flow
-            #   interval: {seconds: 5}
+            - type: dbus_signal
+              interface: org.freedesktop.DBus.Properties
+              signal: PropertiesChanged
+              # - type: schedule  # schedule won't work, just one is running for this flow
+              #   interval: {seconds: 5}
           actions:
             - type: context_set
               context:

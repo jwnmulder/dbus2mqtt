@@ -40,3 +40,22 @@ uv run dbus2mqtt --config docs/bluez.yaml
   ```
 
   One concern is that the flow is triggered before the new interface is subscribed
+
+* Make path optional and allow it to be set on interfaces. This way the flows can be combined as well. Unsure if this is makes sense though as we are now combining dbus objects of different kinds.
+
+  This also means path wildcards need some more thought.
+
+  bus_name = application
+  path = object_path, an object within said application
+
+  bus_name + path = dbus_fast proxy_object
+
+### Multiple dbus objects
+
+`BusNameSubscriptions` holds all dbus_fast proxy_objects for a given bus_name. This allows us to keep track of all objects that have to be cleared after the bus_name disappears from dbus. this works fine for mpris there each player instance has its own bus_name. It is less ideal for org.bluez which exists the entire time and it's the bluetooth devices that come and go, there we would want to cleanup based on objects disappearing from dbus.
+
+For the first scenario, NameOwnerChanged works fine, for the second scenario NameOwnerChanged does not help much
+
+TODOs
+
+* Rename `BusNameSubscriptions` to `BusNameObjects` for clarity?

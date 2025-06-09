@@ -6,11 +6,14 @@ from datetime import datetime
 from typing import Any
 
 import dbus_fast.aio as dbus_aio
+import dbus_fast.constants as dbus_constants
 import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
+import dbus_fast.message as dbus_message
+import dbus_fast.unpack as dbus_unpack
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import InterfaceConfig, SubscriptionConfig
+from dbus2mqtt.config import SubscriptionConfig
 from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, SubscribedInterface
 from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
@@ -26,6 +29,11 @@ from dbus2mqtt.flow.flow_processor import FlowScheduler, FlowTriggerMessage
 
 logger = logging.getLogger(__name__)
 
+# TODO: Add interface added and removed signals
+# TODO: Implement InterfaceRemoved to unregister the object
+# TODO: Redo flow registration in _handle_bus_name_added, might want to move that to a separate file
+# TODO:
+# TODO:
 
 class DbusClient:
 
@@ -47,6 +55,45 @@ class DbusClient:
                 logger.info(f"Connected to {self.bus._bus_address}")
             else:
                 logger.warning(f"Failed to connect to {self.bus._bus_address}")
+
+            # Match all InterfacesAdded signals, from any sender and any object path
+            def signal_handler(message: dbus_message.Message):
+                if (
+                    message.message_type == dbus_constants.MessageType.SIGNAL
+                    and message.interface == 'org.freedesktop.DBus.ObjectManager'
+                    and message.member in ['InterfacesAdded', 'InterfacesRemoved']
+                ):
+
+                    bus_name = message.sender
+
+                    # dbus_fast keeps track of well known bus_names for the high-level API.
+                    # We can use this to find the bus_name for the sender.
+                    for k, v in self.bus._name_owners.items():
+                        if v == message.sender:
+                            bus_name = k
+
+                    print(f"XXX: bus_name={bus_name}, interface={message.interface}, sender={message.sender}, path={message.path}, member={message.member}, signal received: {message.body}")
+
+            self.bus.add_message_handler(signal_handler)
+
+            # Add a match rule for InterfacesAdded from all services
+            # Need to test this without signals from bluez.yaml
+            reply = await self.bus.call(dbus_message.Message(
+                destination='org.freedesktop.DBus',
+                path='/org/freedesktop/DBus',
+                interface='org.freedesktop.DBus',
+                member='AddMatch',
+                signature='s',
+                # body=[(
+                #     "type='signal', interface='org.freedesktop.DBus.ObjectManager',member='InterfacesAdded'"
+                # )]
+                body=[(
+                    "type='signal',interface='org.freedesktop.DBus.ObjectManager'"
+                )]
+            ))
+
+            print(f"XXX: {reply}")
+            assert reply and reply.message_type == dbus_constants.MessageType.METHOD_RETURN
 
             introspection = await self.bus.introspect('org.freedesktop.DBus', '/org/freedesktop/DBus')
             obj = self.bus.get_proxy_object('org.freedesktop.DBus', '/org/freedesktop/DBus', introspection)
@@ -96,10 +143,25 @@ class DbusClient:
         return proxy_object, bus_name_subscriptions
 
     def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], *args):
+        """publish a dbus signal to the event broker, one for each subscription_config"""
+
         unwrapped_args = unwrap_dbus_objects(args)
-        self.event_broker.on_dbus_signal(
-            DbusSignalWithState(**dbus_signal_state, args=unwrapped_args)
-        )
+
+        signal_subscriptions = dbus_signal_state["signal_subscriptions"]
+        for signal_subscription in signal_subscriptions:
+            subscription_config = signal_subscription["subscription_config"]
+            signal_config = signal_subscription["signal_config"]
+
+            self.event_broker.on_dbus_signal(
+                DbusSignalWithState(
+                    bus_name=dbus_signal_state["bus_name"],
+                    path=dbus_signal_state["path"],
+                    interface_name=dbus_signal_state["interface_name"],
+                    subscription_config=subscription_config,
+                    signal_config=signal_config,
+                    args=unwrapped_args
+                )
+            )
 
     def _dbus_fast_signal_handler(self, signal: dbus_introspection.Signal, state: dict[str, Any]) -> Any:
         expected_args = len(signal.args)
@@ -114,58 +176,83 @@ class DbusClient:
             return lambda a, b, c, d: self._dbus_fast_signal_publisher(state, a, b, c, d)
         raise ValueError("Unsupported nr of arguments")
 
-    async def _subscribe_interface(self, bus_name: str, path: str, introspection: dbus_introspection.Node, interface: dbus_introspection.Interface, subscription_config: SubscriptionConfig, si: InterfaceConfig) -> SubscribedInterface:
+    async def _subscribe_interface_signals(self, bus_name: str, path: str, introspection: dbus_introspection.Node, interface: dbus_introspection.Interface, configured_signals: dict[str, list[dict]]) -> int:
 
-        proxy_object, bus_name_subscriptions = self._ensure_proxy_object_subscription(bus_name, path, introspection)
+        proxy_object, _ = self._ensure_proxy_object_subscription(bus_name, path, introspection)
         obj_interface = proxy_object.get_interface(interface.name)
 
         interface_signals = dict((s.name, s) for s in interface.signals)
 
         logger.debug(f"subscribe: bus_name={bus_name}, path={path}, interface={interface.name}, proxy_interface: signals={list(interface_signals.keys())}")
+        signal_subscription_count = 0
 
-        for signal_config in si.signals:
-            interface_signal = interface_signals.get(signal_config.signal)
+        for signal, signal_subscriptions in configured_signals.items():
+            interface_signal = interface_signals.get(signal)
             if interface_signal:
 
-                on_signal_method_name = "on_" + camel_to_snake(signal_config.signal)
+                on_signal_method_name = "on_" + camel_to_snake(signal)
                 dbus_signal_state = {
                     "bus_name": bus_name,
                     "path": path,
                     "interface_name": interface.name,
-                    "subscription_config": subscription_config,
-                    "signal_config": signal_config,
+                    "signal_subscriptions": signal_subscriptions
                 }
 
                 handler = self._dbus_fast_signal_handler(interface_signal, dbus_signal_state)
-                obj_interface.__getattribute__(on_signal_method_name)(handler)
-                logger.info(f"subscribed with signal_handler: signal={signal_config.signal}, bus_name={bus_name}, path={path}, interface={interface.name}")
+                obj_interface.__getattribute__(on_signal_method_name)(handler)  # TODO: This is overwritten when multiple subscription configs exists
+                logger.info(f"subscribed with signal_handler: signal={signal}, bus_name={bus_name}, path={path}, interface={interface.name}")
+
+                signal_subscription_count += 1
 
             else:
-                logger.warning(f"Invalid signal: signal={signal_config.signal}, bus_name={bus_name}, path={path}, interface={interface.name}")
+                logger.warning(f"Invalid signal: signal={signal}, bus_name={bus_name}, path={path}, interface={interface.name}")
 
-        return SubscribedInterface(
-            bus_name=bus_name,
-            path=path,
-            interface_name=interface.name,
-            subscription_config=subscription_config,
-            interface_config=si
-        )
+        return signal_subscription_count
 
     async def _process_interface(self, bus_name: str, path: str, introspection: dbus_introspection.Node, interface: dbus_introspection.Interface) -> list[SubscribedInterface]:
 
         logger.debug(f"process_interface: {bus_name}, {path}, {interface.name}")
-        subscription_configs = self.config.get_subscription_configs(bus_name, path)
+
         new_subscriptions: list[SubscribedInterface] = []
+        configured_signals: dict[str, list[dict[str, Any]]] = {}
+
+        subscription_configs = self.config.get_subscription_configs(bus_name, path)
         for subscription in subscription_configs:
             logger.debug(f"processing subscription config: {subscription.bus_name}, {subscription.path}")
             for subscription_interface in subscription.interfaces:
                 if subscription_interface.interface == interface.name:
                     logger.debug(f"matching config found for bus_name={bus_name}, path={path}, interface={interface.name}")
-                    subscribed_iterface = await self._subscribe_interface(bus_name, path, introspection, interface, subscription, subscription_interface)
 
-                    new_subscriptions.append(subscribed_iterface)
+                    # TODO: Before we where calling self._ensure_proxy_object_subscription(bus_name, path, introspection)
+                    # need to check if this still works as expected for method calling
 
-        return new_subscriptions
+                    # Determine signals we need to subscribe to
+                    for signal_config in subscription_interface.signals:
+                        signal_subscriptions = configured_signals.get(signal_config.signal, [])
+                        signal_subscriptions.append({
+                            "signal_config": signal_config,
+                            "subscription_config": subscription
+                        })
+                        configured_signals[signal_config.signal] = signal_subscriptions
+
+                    if subscription_interface.signals:
+                        new_subscriptions.append(SubscribedInterface(
+                            bus_name=bus_name,
+                            path=path,
+                            interface_name=interface.name,
+                            subscription_config=subscription
+                            # interface_config=si
+                        ))
+
+        if len(configured_signals) > 0:
+
+            signal_subscription_count = await self._subscribe_interface_signals(
+                bus_name, path, introspection, interface, configured_signals
+            )
+            if signal_subscription_count > 0:
+                return new_subscriptions
+
+        return []
 
     async def _introspect(self, bus_name: str, path: str) -> dbus_introspection.Node:
 
@@ -183,7 +270,38 @@ class DbusClient:
 
         return introspection
 
-    async def _visit_bus_name_path(self, bus_name: str, path: str) -> list[SubscribedInterface]:
+    async def _list_bus_name_paths(self, bus_name: str, path: str) -> list[str]:
+        """list all nested paths. Only paths that have interfaces are returned"""
+
+        paths: list[str] = []
+
+        try:
+            introspection = await self._introspect(bus_name, path)
+        except TypeError as e:
+            logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
+            return paths
+
+        if len(introspection.nodes) == 0:
+            logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
+
+        if len(introspection.interfaces) > 0:
+            paths.append(path)
+
+        for node in introspection.nodes:
+            path_seperator = "" if path.endswith('/') else "/"
+            paths.extend(
+                await self._list_bus_name_paths(bus_name, f"{path}{path_seperator}{node.name}")
+            )
+
+        return paths
+
+    async def _subscribe_dbus_object(self, bus_name: str, path: str) -> list[SubscribedInterface]:
+        """Subscribes to a dbus object at the given bus_name and path.
+        For each matching subscription config, subscribe to all configured interfaces,
+        start listening to signals and start/register flows if configured.
+        """
+        if not self.config.is_bus_name_configured(bus_name):
+            return []
 
         new_subscriptions: list[SubscribedInterface] = []
 
@@ -193,18 +311,12 @@ class DbusClient:
             logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
             return new_subscriptions
 
-        if len(introspection.nodes) == 0:
-            logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
+        # if len(introspection.nodes) == 0:
+        #     logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
 
         for interface in introspection.interfaces:
             new_subscriptions.extend(
                 await self._process_interface(bus_name, path, introspection, interface)
-            )
-
-        for node in introspection.nodes:
-            path_seperator = "" if path.endswith('/') else "/"
-            new_subscriptions.extend(
-                await self._visit_bus_name_path(bus_name, f"{path}{path_seperator}{node.name}")
             )
 
         return new_subscriptions
@@ -215,12 +327,37 @@ class DbusClient:
             return []
 
         # sanity checks
-        for umh in self.bus._user_message_handlers:
-            umh_bus_name = umh.__self__.bus_name
-            if umh_bus_name == bus_name:
-                logger.warning(f"handle_bus_name_added: {umh_bus_name} already added")
+        # for umh in self.bus._user_message_handlers:
+        #     umh_bus_name = umh.__self__.bus_name
+        #     if umh_bus_name == bus_name:
+        #         logger.warning(f"handle_bus_name_added: {umh_bus_name} already added")
 
-        new_subscriped_interfaces = await self._visit_bus_name_path(bus_name, "/")
+        object_paths = []
+        subscription_configs = self.config.get_subscription_configs(bus_name=bus_name)
+        for subscription_config in subscription_configs:
+
+            # if configured path is not a wildcard, use it
+            if "*" not in subscription_config.path:
+                object_paths.append(subscription_config.path)
+            else:
+                # if configured path is a wildcard, use introspection to find all paths
+                # and filter by subscription_config.path
+                introspected_paths = await self._list_bus_name_paths(bus_name, "/")
+                # logger.warning(f"bus_name: {bus_name}, introspected_paths: {introspected_paths}")
+                for path in introspected_paths:
+                    if fnmatch.fnmatchcase(path, subscription_config.path):
+                        object_paths.append(path)
+
+        # dedupe
+        object_paths = list(set(object_paths))
+
+        new_subscriped_interfaces = []
+
+        # for each object path, call _subscribe_dbus_object
+        for object_path in object_paths:
+            logger.info(f"handle_bus_name_added: bus_name={bus_name}, path={object_path}")
+            new_subscriped_interfaces.extend(await self._subscribe_dbus_object(bus_name, object_path))
+
         new_subscribed_bus_names = list(set([si.bus_name for si in new_subscriped_interfaces]))
         new_subscribed_bus_names_paths = {
             bus_name: list(set([si.path for si in new_subscriped_interfaces if si.bus_name == bus_name]))
@@ -241,6 +378,7 @@ class DbusClient:
         # Maybe use queues to communicate from here with the FlowProcessor?
         # e.g.: StartFlows, StopFlows,
 
+        # TODO: check for already existing started flows
         for subscribed_interface in new_subscriped_interfaces:
 
             subscription_config = subscribed_interface.subscription_config
@@ -260,6 +398,30 @@ class DbusClient:
                         await self._trigger_interface_added(subscription_config, subscribed_interface.bus_name, bus_name_path)
 
                 processed_new_subscriptions.add(subscription_config.id)
+
+                # subscribe to existing managed objects via GetManagedObjects
+                # TODO, we dont known which dbus services implement ObjectManager, need to make it configurable
+                # or maybe rely on introspection during _handle_bus_name_added
+                # For now it's hardcoded to '/'
+
+                # TODO: Keep track of introspection data for each bus_name / path pair
+                # TODO: For each bus_name, introspect '/' to subscribe to InterfacesAdded and InterfacesRemoved signals
+                # TODO: For each bus_name, introspect '/' to initially call GetManagedObjects
+                rep = await self.bus.call(
+                    dbus_message.Message(destination=bus_name,
+                            path='/',
+                            interface='org.freedesktop.DBus.ObjectManager',
+                            member='GetManagedObjects',
+                            signature='',
+                            body=[""]
+                    )
+                )
+
+                if rep and rep.message_type == dbus_constants.MessageType.METHOD_RETURN and rep.body:
+                    managed_objects = dbus_unpack.unpack_variants(rep.body)
+                    print(f"XXX2-res: {managed_objects[0].keys()}")
+                    #  XXX2-res: dict_keys(['/org/bluez', '/org/bluez/hci0', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA'])
+                # dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.ObjectManager.GetManagedObjects
 
         return new_subscriped_interfaces
 

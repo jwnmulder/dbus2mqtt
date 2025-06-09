@@ -3,23 +3,11 @@ import re
 
 import dbus_fast.signature as dbus_signature
 
-# def _variant_serializer(obj):
-#     if isinstance(obj, dbus_signature.Variant):
-#         return obj.value
-#     return obj
-
-
-# def unwrap_dbus_object(o):
-#     # an easy way to get rid of dbus_fast.signature.Variant types
-#     res = json.dumps(o, default=_variant_serializer)
-#     json_obj = json.loads(res)
-#     return json_obj
 
 def unwrap_dbus_objects(args):
     res = [unwrap_dbus_object(o) for o in args]
     return res
 
-# circular reference fix
 def unwrap_dbus_object(obj):
     if isinstance(obj, dict):
         return {k: unwrap_dbus_object(v) for k, v in obj.items()}

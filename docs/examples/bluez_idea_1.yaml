@@ -1,0 +1,74 @@
+dbus:
+  bus_type: SYSTEM
+  subscriptions:
+
+    - bus_name: org.bluez
+
+      interfaces:
+        - interface: org.freedesktop.DBus.ObjectManager
+          path: /
+          signals:
+            - signal: InterfacesAdded
+            - signal: InterfacesRemoved
+
+        - interface: org.freedesktop.DBus.Properties
+          path: /org/bluez/hci0
+          signals:
+            - signal: PropertiesChanged
+          methods:
+            - method: GetAll
+
+        - interface: org.freedesktop.DBus.Properties
+          path: /org/bluez/hci0/dev_*
+          methods:
+            - method: GetAll
+
+      flows:
+        - name: "InterfacesAdded"
+          triggers:
+            - type: dbus_signal  # interface-path=args[0]
+              interface: org.freedesktop.DBus.ObjectManager
+              signal: InterfacesAdded
+            - type: interface_added  # triggered on startup, interface-path=context.path is set
+              filter: "{{ path.startswith('/org/bluez/hci0/dev_')}}"
+          actions:
+            - type: context_set
+              context:
+                path: "{{ path or args[0] }}"
+                # device_properties: |
+                #   {{ args[1]['org.bluez.Device1'] }}
+                device_properties: |
+                  {{ dbus_call('org.bluez', path or args[0], 'org.freedesktop.DBus.Properties', 'GetAll', ['org.bluez.Device1']) }}
+            - type: mqtt_publish
+              topic: dbus2mqtt/bluez/{{ path | replace('/org/bluez/', '') }}
+              payload_type: json
+              payload_template: "{{ device_properties }}"
+
+
+        - name: "InterfacesRemoved"
+          triggers:
+            - type: dbus_signal
+              interface: org.freedesktop.DBus.ObjectManager
+              signal: InterfacesRemoved
+          actions:
+            - type: mqtt_publish
+              topic: dbus2mqtt/bluez/{{ args[0] | replace('/org/bluez/', '') }}
+              payload_type: json
+              payload_template: "{{ None }}"
+
+        - name: "publish adapter state"
+          triggers:
+            - type: bus_name_added
+            - type: dbus_signal
+              interface: org.freedesktop.DBus.Properties
+              signal: PropertiesChanged
+          actions:
+            - type: context_set
+              context:
+                adapter_properties: |
+                  {{ dbus_call('org.bluez', '/org/bluez/hci0', 'org.freedesktop.DBus.Properties', 'GetAll', ['org.bluez.Adapter1']) }}
+            - type: mqtt_publish
+              topic: dbus2mqtt/bluez/hci0
+              payload_type: json
+              payload_template:
+                hci0: "{{ adapter_properties }}"
