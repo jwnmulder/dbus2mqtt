@@ -76,8 +76,8 @@ dbus:
       flows:
         - name: "publish initial state"
           triggers:
-            # - type: bus_name_added
-            - type: interface_added
+            - type: bus_name_added
+            - type: interfaces_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged

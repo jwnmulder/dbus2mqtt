@@ -105,11 +105,11 @@ class DbusClient:
             # subscribe to existing registered bus_names we are interested in
             connected_bus_names = await dbus_interface.__getattribute__("call_list_names")()
 
-            new_subscriped_interfaces: list[SubscribedInterface] = []
+            new_subscribed_interfaces: list[SubscribedInterface] = []
             for bus_name in connected_bus_names:
-                new_subscriped_interfaces.extend(await self._handle_bus_name_added(bus_name))
+                new_subscribed_interfaces.extend(await self._handle_bus_name_added(bus_name))
 
-            logger.info(f"subscriptions on startup: {list(set([si.bus_name for si in new_subscriped_interfaces]))}")
+            logger.info(f"subscriptions on startup: {list(set([si.bus_name for si in new_subscribed_interfaces]))}")
 
     async def get_proxy_object(self, bus_name: str, path: str) -> dbus_aio.proxy_object.ProxyObject | None:
 
@@ -351,23 +351,49 @@ class DbusClient:
         # dedupe
         object_paths = list(set(object_paths))
 
-        new_subscriped_interfaces = []
+        new_subscribed_interfaces = []
 
         # for each object path, call _subscribe_dbus_object
         for object_path in object_paths:
             logger.info(f"handle_bus_name_added: bus_name={bus_name}, path={object_path}")
-            new_subscriped_interfaces.extend(await self._subscribe_dbus_object(bus_name, object_path))
+            new_subscribed_interfaces.extend(await self._subscribe_dbus_object(bus_name, object_path))
 
-        new_subscribed_bus_names = list(set([si.bus_name for si in new_subscriped_interfaces]))
-        new_subscribed_bus_names_paths = {
-            bus_name: list(set([si.path for si in new_subscriped_interfaces if si.bus_name == bus_name]))
-            for bus_name in new_subscribed_bus_names
-        }
+        # start all flows for the new subscriptions
+        await self._start_subscription_flows(bus_name, new_subscribed_interfaces)
 
-        logger.info(f"new_subscriptions: {new_subscribed_bus_names}")
-        logger.info(f"new_bus_names_paths: {new_subscribed_bus_names_paths}")
+        return new_subscribed_interfaces
+
+    async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface]):
+        """Start all flows for the new subscriptions.
+        For each matching bus_name-path subscription_config, the following is done:
+        1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
+        2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
+        3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
+        """
+
+        bus_name_object_paths = {}
+        bus_name_object_path_interfaces = {}
+        for si in subscribed_interfaces:
+            bus_name_object_paths.setdefault(si.bus_name, [])
+            bus_name_object_path_interfaces.setdefault(si.bus_name, {}).setdefault(si.path, [])
+
+            if si.path not in bus_name_object_paths[si.bus_name]:
+                bus_name_object_paths[si.bus_name].append(si.path)
+
+            bus_name_object_path_interfaces[si.bus_name][si.path].append(si.interface_name)
+
+
+        # new_subscribed_bus_names = list(set([si.bus_name for si in subscribed_interfaces]))
+        # new_subscribed_bus_names_paths = {
+        #     bus_name: list(set([si.path for si in subscribed_interfaces if si.bus_name == bus_name]))
+        #     for bus_name in new_subscribed_bus_names
+        # }
+
+        logger.info(f"new_subscriptions: {list(bus_name_object_paths.keys())}")
+        logger.info(f"new_bus_name_object_paths: {bus_name_object_paths}")
 
         # setup and process triggers for each flow in each subscription
+        # just once per subscription_config
         processed_new_subscriptions: set[str] = set()
 
         # With all subscriptions in place, we can now ensure schedulers are created
@@ -378,52 +404,58 @@ class DbusClient:
         # Maybe use queues to communicate from here with the FlowProcessor?
         # e.g.: StartFlows, StopFlows,
 
-        # TODO: check for already existing started flows
-        for subscribed_interface in new_subscriped_interfaces:
+        for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
 
-            subscription_config = subscribed_interface.subscription_config
-            if subscription_config.id not in processed_new_subscriptions:
+            paths = list(path_interfaces_map.keys())
 
-                # Ensure all schedulers are started
-                self.flow_scheduler.start_flow_set(subscription_config.flows)
+            # subscription_config = subscribed_interface.subscription_config
+            for object_path in paths:
 
-                # Trigger flows that have a bus_name_added trigger configured
-                await self._trigger_bus_name_added(subscription_config, subscribed_interface.bus_name, subscribed_interface.path)
+                object_interfaces = path_interfaces_map[object_path]
+                print(f"XXX: bus_name={bus_name}, path={object_path}, interfaces={object_interfaces}")
 
-                # Trigger flows that have a path_name_added trigger configured
-                # TODO: implement both path_added and path_remove triggers
-                bus_name_paths = new_subscribed_bus_names_paths[subscribed_interface.bus_name]
-                for bus_name_path in bus_name_paths:
-                    if fnmatch.fnmatchcase(bus_name_path, subscription_config.path):
-                        await self._trigger_interface_added(subscription_config, subscribed_interface.bus_name, bus_name_path)
+                subscription_configs = self.config.get_subscription_configs(bus_name, object_path)
+                for subscription_config in subscription_configs:
 
-                processed_new_subscriptions.add(subscription_config.id)
+                    if subscription_config.id not in processed_new_subscriptions:
 
-                # subscribe to existing managed objects via GetManagedObjects
-                # TODO, we dont known which dbus services implement ObjectManager, need to make it configurable
-                # or maybe rely on introspection during _handle_bus_name_added
-                # For now it's hardcoded to '/'
+                        # Ensure all schedulers are started
+                        # If a scheduler is already active for this subscription flow, it will be reused
+                        self.flow_scheduler.start_flow_set(subscription_config.flows)
 
-                # TODO: Keep track of introspection data for each bus_name / path pair
-                # TODO: For each bus_name, introspect '/' to subscribe to InterfacesAdded and InterfacesRemoved signals
-                # TODO: For each bus_name, introspect '/' to initially call GetManagedObjects
-                rep = await self.bus.call(
-                    dbus_message.Message(destination=bus_name,
-                            path='/',
-                            interface='org.freedesktop.DBus.ObjectManager',
-                            member='GetManagedObjects',
-                            signature='',
-                            body=[""]
-                    )
-                )
+                        # Trigger flows that have a bus_name_added trigger configured
+                        # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
+                        await self._trigger_bus_name_added(subscription_config, bus_name, object_path)
 
-                if rep and rep.message_type == dbus_constants.MessageType.METHOD_RETURN and rep.body:
-                    managed_objects = dbus_unpack.unpack_variants(rep.body)
-                    print(f"XXX2-res: {managed_objects[0].keys()}")
-                    #  XXX2-res: dict_keys(['/org/bluez', '/org/bluez/hci0', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA'])
-                # dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.ObjectManager.GetManagedObjects
+                        processed_new_subscriptions.add(subscription_config.id)
 
-        return new_subscriped_interfaces
+                        # subscribe to existing managed objects via GetManagedObjects
+                        # TODO, we dont known which dbus services implement ObjectManager, need to make it configurable
+                        # or maybe rely on introspection during _handle_bus_name_added
+                        # For now it's hardcoded to '/'
+
+                        # TODO: Keep track of introspection data for each bus_name / path pair
+                        # TODO: For each bus_name, introspect '/' to subscribe to InterfacesAdded and InterfacesRemoved signals
+                        # TODO: For each bus_name, introspect '/' to initially call GetManagedObjects
+                        rep = await self.bus.call(
+                            dbus_message.Message(destination=bus_name,
+                                    path='/',
+                                    interface='org.freedesktop.DBus.ObjectManager',
+                                    member='GetManagedObjects',
+                                    signature='',
+                                    body=[""]
+                            )
+                        )
+
+                        if rep and rep.message_type == dbus_constants.MessageType.METHOD_RETURN and rep.body:
+                            managed_objects = dbus_unpack.unpack_variants(rep.body)
+                            print(f"XXX2-res: {managed_objects[0].keys()}")
+                            #  XXX2-res: dict_keys(['/org/bluez', '/org/bluez/hci0', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA', '/org/bluez/hci0/dev_AA_AA_AA_AA_AA_AA'])
+                        # dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.ObjectManager.GetManagedObjects
+
+                    # Trigger flows that have a interfaces_added trigger configured
+                    await self._trigger_interfaces_added(subscription_config, bus_name, object_path, object_interfaces)
+
 
     async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
 
@@ -442,15 +474,15 @@ class DbusClient:
                     )
                     await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
-    async def _trigger_interface_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+    async def _trigger_interfaces_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str]):
 
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
-                if trigger.type == "interface_added":
+                if trigger.type == "interfaces_added":
                     trigger_context = {
                         "bus_name": bus_name,
-                        "interface": "TODO",
-                        "path": path
+                        "path": object_path,
+                        "interfaces": object_interfaces
                     }
                     trigger_message = FlowTriggerMessage(
                         flow,
