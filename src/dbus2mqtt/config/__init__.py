@@ -1,5 +1,6 @@
 import fnmatch
 import uuid
+import warnings
 
 from dataclasses import dataclass, field
 from typing import Annotated, Any, Literal
@@ -65,12 +66,16 @@ class FlowTriggerDbusSignalConfig:
 @dataclass
 class FlowTriggerBusNameAddedConfig:
     type: Literal["bus_name_added"] = "bus_name_added"
-    # filter: str | None = None
+
+    def __post_init__(self):
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
     type: Literal["bus_name_removed"] = "bus_name_removed"
-    # filter: str | None = None
+
+    def __post_init__(self):
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
 
 @dataclass
 class FlowTriggerObjectAddedConfig:
