@@ -2,6 +2,8 @@
 import asyncio
 import json
 import logging
+import random
+import string
 
 from typing import Any
 from urllib.parse import ParseResult
@@ -24,8 +26,9 @@ class MqttClient:
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
 
+        unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client = mqtt.Client(
-            client_id="dbus2mqtt-client",
+            client_id=f"dbus2mqtt-client-{unique_client_id_postfix}",
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2
         )
