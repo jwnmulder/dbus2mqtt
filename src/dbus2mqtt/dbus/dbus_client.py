@@ -404,6 +404,7 @@ class DbusClient:
             # if configured path is not a wildcard, use it
             if "*" not in subscription_config.path:
                 object_paths.append(subscription_config.path)
+                # TODO: path might not exist for bus_name, should test this
             else:
                 # if configured path is a wildcard, use introspection to find all paths
                 # and filter by subscription_config.path
@@ -573,6 +574,7 @@ class DbusClient:
                 for subscription_config in subscription_configs:
 
                     # Stop schedule triggers. Only done once per subscription_config and not per path
+                    # TODO: Dont stop when other bus_names are using the same flowset
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
                     # Trigger flows that have a bus_name_removed trigger configured
