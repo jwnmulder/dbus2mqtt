@@ -6,8 +6,8 @@ Flows can be defined on a global or dbus subscription level and can be triggered
 
 * `schedule` for cron based schedules
 * `dbus_signal` for when dbus signal occur
-* `bus_name_added` when a new bus_name is registered on dbus
-* `bus_name_removed` when a bus_name is removed from dbus
+* `object_added` when a new bus_name is registered on dbus
+* `object_removed` when a bus_name is removed from dbus
 
 Within each flow a set of actions can be configured. These are executed in order
 
@@ -57,10 +57,10 @@ When triggered, the following context parameters are available
 | interface | string | name of interface for which the signal was triggered |
 | args      | list   | signal arguments, list of objects |
 
-### bus_name_added
+### object_added
 
 ```yaml
-type: bus_name_added
+type: object_added
 ```
 
 When triggered, the following context parameters are available
@@ -70,10 +70,10 @@ When triggered, the following context parameters are available
 | bus_name | bus_name of the object that was registered on dbus |
 | path     | bus_name path of the object that was registered on dbus |
 
-### bus_name_removed
+### object_removed
 
 ```yaml
-type: bus_name_removed
+type: object_removed
 ```
 
 When triggered, the following context parameters are available

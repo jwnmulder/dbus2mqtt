@@ -29,11 +29,8 @@ from dbus2mqtt.flow.flow_processor import FlowScheduler, FlowTriggerMessage
 
 logger = logging.getLogger(__name__)
 
-# TODO: Add interface added and removed signals
-# TODO: Implement InterfaceRemoved to unregister the object
 # TODO: Redo flow registration in _handle_bus_name_added, might want to move that to a separate file
-# TODO:
-# TODO:
+# TODO: deregister signal watcher on shutdown
 
 class DbusClient:
 
@@ -80,7 +77,7 @@ class DbusClient:
             dbus_interface = obj.get_interface('org.freedesktop.DBus')
 
             # subscribe to NameOwnerChanged which allows us to detect new bus_names
-            dbus_interface.__getattribute__("on_name_owner_changed")(self._dbus_name_owner_changed_callback)
+            # dbus_interface.__getattribute__("on_name_owner_changed")(self._dbus_name_owner_changed_callback)
 
             # subscribe to existing registered bus_names we are interested in
             connected_bus_names = await dbus_interface.__getattribute__("call_list_names")()
@@ -121,13 +118,17 @@ class DbusClient:
         if not message.message_type == dbus_constants.MessageType.SIGNAL:
             return
 
-        logger.debug(f'object_lifecycle_signal_handler: member={message.member}, body={message.body}')
-
+        logger.debug(f'object_lifecycle_signal_handler: interface={message.interface}, member={message.member}, body={message.body}')
 
         loop = asyncio.get_event_loop()
         if message.interface == 'org.freedesktop.DBus' and message.member == 'NameOwnerChanged':
-            bus_name = self.get_well_known_bus_name(message.sender)
-            loop.create_task(self._handle_bus_name_added(bus_name))
+            name = message.body[0]
+            old_owner = message.body[1] or ''
+            new_owner = message.body[2] or ''
+            if new_owner != '' and old_owner == '':
+                loop.create_task(self._handle_bus_name_added(name))
+            if old_owner != '' and new_owner == '':
+                loop.create_task(self._handle_bus_name_removed(name))
 
         if message.interface == 'org.freedesktop.DBus.ObjectManager':
             bus_name = self.get_well_known_bus_name(message.sender)
@@ -391,14 +392,10 @@ class DbusClient:
 
     async def _handle_bus_name_added(self, bus_name: str) -> list[SubscribedInterface]:
 
+        logger.debug(f"_handle_bus_name_added: bus_name={bus_name}")
+
         if not self.config.is_bus_name_configured(bus_name):
             return []
-
-        # # sanity checks
-        # for umh in self.bus._user_message_handlers:
-        #     umh_bus_name = umh.__self__.bus_name
-        #     if umh_bus_name == bus_name:
-        #         logger.warning(f"handle_bus_name_added: {umh_bus_name} already added")
 
         object_paths = []
         subscription_configs = self.config.get_subscription_configs(bus_name=bus_name)
@@ -565,31 +562,6 @@ class DbusClient:
                     await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
 
 
-    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
-
-        for flow in subscription_config.flows:
-            for trigger in flow.triggers:
-                if trigger.type == "bus_name_added":
-                    trigger_context = {
-                        "bus_name": bus_name,
-                        "path": path
-                    }
-                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), trigger_context)
-                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
-
-    async def _trigger_object_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str]):
-
-        for flow in subscription_config.flows:
-            for trigger in flow.triggers:
-                if trigger.type == "object_added":
-                    trigger_context = {
-                        "bus_name": bus_name,
-                        "path": object_path
-                        # "interfaces": object_interfaces
-                    }
-                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), trigger_context)
-                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
-
     async def _handle_bus_name_removed(self, bus_name: str):
 
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
@@ -603,7 +575,7 @@ class DbusClient:
                     # Stop schedule triggers. Only done once per subscription_config and not per path
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
-                    # Trigger flows that have a bus_name_added trigger configured
+                    # Trigger flows that have a bus_name_removed trigger configured
                     await self._trigger_bus_name_removed(subscription_config, bus_name, path)
 
                     # Trigger flows that have an object_removed trigger configured
@@ -629,40 +601,46 @@ class DbusClient:
 
             del self.subscriptions[bus_name]
 
+    async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
+
+        for flow in subscription_config.flows:
+            for trigger in flow.triggers:
+                if trigger.type == type:
+                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), context)
+                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
+
+    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+
+        # Trigger flows that have a bus_name_added trigger configured
+        await self._trigger_flows(subscription_config, "bus_name_added", {
+            "bus_name": bus_name,
+            "path": path
+        })
+
     async def _trigger_bus_name_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
 
         # Trigger flows that have a bus_name_removed trigger configured
-        for flow in subscription_config.flows:
-            for trigger in flow.triggers:
-                if trigger.type == "bus_name_removed":
-                    trigger_context = {
-                        "bus_name": bus_name,
-                        "path": path
-                    }
-                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), trigger_context)
-                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
+        await self._trigger_flows(subscription_config, "bus_name_removed", {
+            "bus_name": bus_name,
+            "path": path
+        })
+
+    async def _trigger_object_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str]):
+
+        # Trigger flows that have a object_added trigger configured
+        await self._trigger_flows(subscription_config, "object_added", {
+            "bus_name": bus_name,
+            "path": object_path
+            # "interfaces": object_interfaces
+        })
 
     async def _trigger_object_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
 
         # Trigger flows that have a object_removed trigger configured
-        for flow in subscription_config.flows:
-            for trigger in flow.triggers:
-                if trigger.type == "object_removed":
-                    trigger_context = {
-                        "bus_name": bus_name,
-                        "path": path
-                    }
-                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), trigger_context)
-                    await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
-
-    async def _dbus_name_owner_changed_callback(self, name, old_owner, new_owner):
-
-        if new_owner and not old_owner:
-            logger.debug(f'NameOwnerChanged.new: name={name}')
-            await self._handle_bus_name_added(name)
-        if old_owner and not new_owner:
-            logger.debug(f'NameOwnerChanged.old: name={name}')
-            await self._handle_bus_name_removed(name)
+        await self._trigger_flows(subscription_config, "object_removed", {
+            "bus_name": bus_name,
+            "path": path
+        })
 
     async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]):
 
