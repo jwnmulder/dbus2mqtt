@@ -120,6 +120,9 @@ class DbusClient:
 
         logger.debug(f'object_lifecycle_signal_handler: interface={message.interface}, member={message.member}, body={message.body}')
 
+        # TODO: Redo, during shutdown an error might occur
+        # ERROR:asyncio:Task was destroyed but it is pending!
+        # task: <Task pending name='Task-32' coro=<DbusClient._handle_interfaces_added() done, defined aat dbus_client.py:431> wait_for=<Future pending cb=[Task.task_wakeup()]>>
         loop = asyncio.get_event_loop()
         if message.interface == 'org.freedesktop.DBus' and message.member == 'NameOwnerChanged':
             name = message.body[0]
