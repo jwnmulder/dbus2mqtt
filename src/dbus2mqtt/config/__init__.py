@@ -73,12 +73,17 @@ class FlowTriggerBusNameRemovedConfig:
     # filter: str | None = None
 
 @dataclass
-class FlowTriggerInterfacesAddedConfig:
-    type: Literal["interfaces_added"] = "interfaces_added"
+class FlowTriggerObjectAddedConfig:
+    type: Literal["object_added"] = "object_added"
+    # filter: str | None = None
+
+@dataclass
+class FlowTriggerObjectRemovedConfig:
+    type: Literal["object_removed"] = "object_removed"
     # filter: str | None = None
 
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerInterfacesAddedConfig,
+    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
     Field(discriminator="type")
 ]
 

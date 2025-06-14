@@ -44,14 +44,12 @@ dbus:
             - method: GetAll
 
       flows:
-        - name: "publish state"
+        - name: "publish adapter state"
           triggers:
-            - type: bus_name_added
+            - type: object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
-              # - type: schedule
-              #   interval: {seconds: 5}
           actions:
             - type: context_set
               context:
@@ -74,10 +72,9 @@ dbus:
             - method: GetAll
 
       flows:
-        - name: "publish initial state"
+        - name: "publish device state"
           triggers:
-            - type: bus_name_added
-            - type: interfaces_added
+            - type: object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -92,3 +89,11 @@ dbus:
               topic: dbus2mqtt/bluez/{{ path | replace('/org/bluez/', '') }}
               payload_type: json
               payload_template: "{{ device_properties }}"
+        - name: "device removed"
+          triggers:
+            - type: object_removed
+          actions:
+            - type: mqtt_publish
+              topic: dbus2mqtt/bluez/{{ path | replace('/org/bluez/', '') }}
+              payload_type: json
+              payload_template: "{{ None }}"
