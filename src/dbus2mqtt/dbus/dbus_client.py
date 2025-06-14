@@ -573,7 +573,7 @@ class DbusClient:
                 subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
                 for subscription_config in subscription_configs:
 
-                    # Stop schedule triggers. Only done once per subscription_config and not per path
+                    # Stop schedule triggers. Only done once per subscription_config
                     # TODO: Dont stop when other bus_names are using the same flowset
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
