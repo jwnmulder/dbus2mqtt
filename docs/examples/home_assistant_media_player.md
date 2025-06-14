@@ -99,7 +99,12 @@ media_player:
         media_content_type_template: music  # needed to show 'artist'
         media_duration_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) }}"
         album_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:album', '') }}"
-        artist_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', ['']) | first }}"
+        artist_template: >-
+          {% set artist = (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', '') %}
+          {% if artist is string %}
+          {% set artist = [artist] %}
+          {% endif %}
+          {{ artist | first }}
 
         # mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT
         media_image_url_template: >-

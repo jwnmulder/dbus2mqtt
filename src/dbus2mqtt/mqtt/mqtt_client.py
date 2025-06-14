@@ -25,6 +25,7 @@ class MqttClient:
         self.event_broker = app_context.event_broker
 
         self.client = mqtt.Client(
+            client_id="dbus2mqtt-client",
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2
         )
@@ -45,7 +46,8 @@ class MqttClient:
         # mqtt_client.on_message = lambda client, userdata, message: asyncio.create_task(mqtt_on_message(client, userdata, message))
         self.client.connect_async(
             host=self.config.host,
-            port=self.config.port
+            port=self.config.port,
+            clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY
         )
 
     async def mqtt_publish_queue_processor_task(self):
