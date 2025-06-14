@@ -248,7 +248,7 @@ class DbusClient:
                 }
 
                 handler = self._dbus_fast_signal_handler(interface_signal, dbus_signal_state)
-                obj_interface.__getattribute__(on_signal_method_name)(handler)  # TODO: This is overwritten when multiple subscription configs exists
+                obj_interface.__getattribute__(on_signal_method_name)(handler)
                 logger.info(f"subscribed with signal_handler: signal={signal}, bus_name={bus_name}, path={path}, interface={interface.name}")
 
                 signal_subscription_count += 1
@@ -271,9 +271,6 @@ class DbusClient:
             for subscription_interface in subscription.interfaces:
                 if subscription_interface.interface == interface.name:
                     logger.debug(f"matching config found for bus_name={bus_name}, path={path}, interface={interface.name}")
-
-                    # TODO: Before we where calling self._ensure_proxy_object_subscription(bus_name, path, introspection)
-                    # need to check if this still works as expected for method calling
 
                     # Determine signals we need to subscribe to
                     for signal_config in subscription_interface.signals:
@@ -405,6 +402,7 @@ class DbusClient:
             if "*" not in subscription_config.path:
                 object_paths.append(subscription_config.path)
                 # TODO: path might not exist for bus_name, should test this
+                # or rely on _subscribe_dbus_object
             else:
                 # if configured path is a wildcard, use introspection to find all paths
                 # and filter by subscription_config.path
