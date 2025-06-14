@@ -7,6 +7,8 @@ from dbus2mqtt.config import (
     FlowTriggerBusNameAddedConfig,
     FlowTriggerBusNameRemovedConfig,
     FlowTriggerDbusSignalConfig,
+    FlowTriggerObjectAddedConfig,
+    FlowTriggerObjectRemovedConfig,
     FlowTriggerScheduleConfig,
 )
 from dbus2mqtt.flow.flow_processor import FlowTriggerMessage
@@ -59,6 +61,46 @@ async def test_bus_name_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameRemovedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+        FlowActionContextSetConfig(
+            global_context={
+                "res": "removed"
+            }
+        )
+    ])
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert processor._global_context["res"] == "removed"
+
+@pytest.mark.asyncio
+async def test_object_added_trigger():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerObjectAddedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+        FlowActionContextSetConfig(
+            global_context={
+                "res": "added"
+            }
+        )
+    ])
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert processor._global_context["res"] == "added"
+
+@pytest.mark.asyncio
+async def test_object_removed_trigger():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerObjectRemovedConfig()
     processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
         FlowActionContextSetConfig(
             global_context={

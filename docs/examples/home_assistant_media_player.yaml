@@ -42,7 +42,7 @@ dbus:
       flows:
         - name: "publish player state"
           triggers:
-            - type: bus_name_added
+            - type: object_added
             - type: schedule
               interval: {seconds: 5}
             - type: dbus_signal
@@ -74,7 +74,7 @@ dbus:
           # mpris:artUrl can have a file:// or http:// schema
           # Home Assistant is unable to access file:// so we use MQTT for that
           triggers:
-            - type: bus_name_added
+            - type: object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -90,7 +90,7 @@ dbus:
 
         - name: "player removed"
           triggers:
-            - type: bus_name_removed
+            - type: object_removed
             # filter: # TODO: Check if this is the last or inactive one #
           actions:
             - type: mqtt_publish

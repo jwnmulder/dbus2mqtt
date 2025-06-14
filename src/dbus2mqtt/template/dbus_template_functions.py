@@ -32,7 +32,7 @@ class DbusContext:
             # Pylance will mentiod this line is unreachable. It is not as jinja2 can pass in any type
             raise ValueError("method_args must be a list")
 
-        proxy_object = self.dbus_client.get_proxy_object(bus_name, path)
+        proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:
             raise ValueError(f"No matching subscription found for bus_name: {bus_name}, path: {path}")
 
@@ -42,7 +42,7 @@ class DbusContext:
 
     async def async_dbus_property_get_fn(self, bus_name: str, path: str, interface: str, property:str, default_unsupported: Any = None):
 
-        proxy_object = self.dbus_client.get_proxy_object(bus_name, path)
+        proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:
             raise ValueError(f"No matching subscription found for bus_name: {bus_name}, path: {path}")
 

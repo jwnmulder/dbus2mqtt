@@ -25,8 +25,10 @@ async def test_signal_handler_unwrap_args():
         "bus_name": "org.mpris.MediaPlayer2.vlc",
         "path": "/org/mpris/MediaPlayer2",
         "interface_name": "org.freedesktop.DBus.Properties",
-        "subscription_config": None, # subscription_config,
-        "signal_config": None, # signal_config,
+        "signal_subscriptions": [{
+            "subscription_config": None,
+            "signal_config": None
+        }]
     }
 
     handler = dbus_client._dbus_fast_signal_handler(dbus_signal, dbus_signal_state)

@@ -1,5 +1,6 @@
 import fnmatch
 import uuid
+import warnings
 
 from dataclasses import dataclass, field
 from typing import Annotated, Any, Literal
@@ -65,15 +66,29 @@ class FlowTriggerDbusSignalConfig:
 @dataclass
 class FlowTriggerBusNameAddedConfig:
     type: Literal["bus_name_added"] = "bus_name_added"
-    # filter: str | None = None
+
+    def __post_init__(self):
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
     type: Literal["bus_name_removed"] = "bus_name_removed"
+
+    def __post_init__(self):
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
+
+@dataclass
+class FlowTriggerObjectAddedConfig:
+    type: Literal["object_added"] = "object_added"
+    # filter: str | None = None
+
+@dataclass
+class FlowTriggerObjectRemovedConfig:
+    type: Literal["object_removed"] = "object_removed"
     # filter: str | None = None
 
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig,
+    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
     Field(discriminator="type")
 ]
 
@@ -126,11 +141,14 @@ class DbusConfig:
                 return True
         return False
 
-    def get_subscription_configs(self, bus_name: str, path: str) -> list[SubscriptionConfig]:
+    def get_subscription_configs(self, bus_name: str, path: str|None = None) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name) and path == subscription.path:
-                res.append(subscription)
+            if fnmatch.fnmatchcase(bus_name, subscription.bus_name):
+                if not path or path == subscription.path:
+                    res.append(subscription)
+                elif fnmatch.fnmatchcase(path, subscription.path):
+                    res.append(subscription)
         return res
 
 @dataclass
