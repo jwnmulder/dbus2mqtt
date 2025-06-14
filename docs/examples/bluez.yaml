@@ -3,37 +3,6 @@ dbus:
   subscriptions:
 
     - bus_name: org.bluez
-      path: /
-
-      interfaces:
-        - interface: org.freedesktop.DBus.ObjectManager
-        # signals:
-        #   - signal: InterfacesAdded
-        #   - signal: InterfacesRemoved
-
-      flows:
-        - name: "InterfacesAdded"
-          triggers:
-            - type: dbus_signal
-              interface: org.freedesktop.DBus.ObjectManager
-              signal: InterfacesAdded
-          actions:
-            - type: mqtt_publish
-              topic: dbus2mqtt/bluez/{{ args[0] | replace('/org/bluez/', '') }}
-              payload_type: json
-              payload_template: "{{ args[1]['org.bluez.Device1'] }}"
-        - name: "InterfacesRemoved"
-          triggers:
-            - type: dbus_signal
-              interface: org.freedesktop.DBus.ObjectManager
-              signal: InterfacesRemoved
-          actions:
-            - type: mqtt_publish
-              topic: dbus2mqtt/bluez/{{ args[0] | replace('/org/bluez/', '') }}
-              payload_type: json
-              payload_template: "{{ None }}"
-
-    - bus_name: org.bluez
       path: /org/bluez/hci0
 
       interfaces:
@@ -78,8 +47,6 @@ dbus:
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
-              # - type: schedule  # schedule won't work, just one is running for this flow
-              #   interval: {seconds: 5}
           actions:
             - type: context_set
               context:
