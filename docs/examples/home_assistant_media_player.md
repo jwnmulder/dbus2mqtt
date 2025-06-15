@@ -19,7 +19,7 @@ Features:
 Configuration activities
 
 * MQTT Sensor and player configuration in Home Assistant (see below)
-* dbus2mqtt setup using the supplied `home_assistant_media_player.yaml`
+* dbus2mqtt setup using the supplied [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml)
 
 Execute the following command to run dbus2mqtt with the example configuration in this repository.
 

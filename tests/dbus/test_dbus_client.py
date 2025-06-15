@@ -25,8 +25,10 @@ async def test_signal_handler_unwrap_args():
         "bus_name": "org.mpris.MediaPlayer2.vlc",
         "path": "/org/mpris/MediaPlayer2",
         "interface_name": "org.freedesktop.DBus.Properties",
-        "subscription_config": None, # subscription_config,
-        "signal_config": None, # signal_config,
+        "signal_subscriptions": [{
+            "subscription_config": None,
+            "signal_config": None
+        }]
     }
 
     handler = dbus_client._dbus_fast_signal_handler(dbus_signal, dbus_signal_state)
@@ -43,8 +45,8 @@ async def test_signal_handler_unwrap_args():
     # Invoke with wrapped arguments
     handler(*args)
 
-    # Check if message is published on the event_broker
-    mqtt_message = app_context.event_broker.dbus_signal_queue.sync_q.get_nowait()
+    # Check if message is published on the internal queue
+    mqtt_message = dbus_client._dbus_signal_queue.sync_q.get_nowait()
 
     # message args should be unwrapped
     assert mqtt_message is not None

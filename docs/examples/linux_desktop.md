@@ -5,7 +5,7 @@
 Trying out this example
 
 ```bash
-uv run dbus2mqtt --config docs/linux_desktop.yaml
+uv run dbus2mqtt --config docs/examples/linux_desktop.yaml
 ```
 
 This example shows how this dbus2mqtt can act as a bridge between the MPRIS player and Home Assistant.
