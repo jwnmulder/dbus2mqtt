@@ -374,10 +374,11 @@ class DbusClient:
             logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
             return new_subscriptions
 
-        # if len(introspection.nodes) == 0:
-        #     logger.debug(f"leaf node: bus_name={bus_name}, path={path}, is_root={introspection.is_root}, interfaces={[i.name for i in introspection.interfaces]}")
+        if len(introspection.interfaces) == 0:
+            logger.warning(f"Skipping dbus_object subscription, no interfaces found for bus_name={bus_name}, path={path}")
+            return new_subscriptions
 
-        logger.info(f"subscribe_dbus_object: bus_name={bus_name}, path={path}")
+        logger.info(f"subscribe_dbus_object: bus_name={bus_name}, path={path}, interfaces={introspection.interfaces}")
 
         await self._create_proxy_object_subscription(bus_name, path, introspection)
 
@@ -402,8 +403,6 @@ class DbusClient:
             # if configured path is not a wildcard, use it
             if "*" not in subscription_config.path:
                 object_paths.append(subscription_config.path)
-                # TODO: path might not exist for bus_name, should test this
-                # or rely on _subscribe_dbus_object
             else:
                 # if configured path is a wildcard, use introspection to find all paths
                 # and filter by subscription_config.path
