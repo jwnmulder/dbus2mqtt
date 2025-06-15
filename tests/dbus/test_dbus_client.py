@@ -45,8 +45,8 @@ async def test_signal_handler_unwrap_args():
     # Invoke with wrapped arguments
     handler(*args)
 
-    # Check if message is published on the event_broker
-    mqtt_message = app_context.event_broker.dbus_signal_queue.sync_q.get_nowait()
+    # Check if message is published on the internal queue
+    mqtt_message = dbus_client._dbus_signal_queue.sync_q.get_nowait()
 
     # message args should be unwrapped
     assert mqtt_message is not None

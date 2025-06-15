@@ -9,8 +9,7 @@ from dbus2mqtt.config import (
     FlowTriggerObjectRemovedConfig,
     SignalConfig,
 )
-from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions
-from dbus2mqtt.event_broker import DbusSignalWithState
+from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState
 from tests import mocked_app_context, mocked_dbus_client, mocked_flow_processor
 
 

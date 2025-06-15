@@ -1,10 +1,14 @@
 
 
 from dataclasses import dataclass
+from typing import Any
 
 import dbus_fast.aio as dbus_aio
 
-from dbus2mqtt.config import SubscriptionConfig
+from dbus2mqtt.config import (
+    SignalConfig,
+    SubscriptionConfig,
+)
 
 
 class BusNameSubscriptions:
@@ -22,3 +26,12 @@ class SubscribedInterface:
     bus_name: str
     path: str
     interface_name: str
+
+@dataclass
+class DbusSignalWithState:
+    bus_name: str
+    path: str
+    interface_name: str
+    subscription_config: SubscriptionConfig
+    signal_config: SignalConfig
+    args: list[Any]

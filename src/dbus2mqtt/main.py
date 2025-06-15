@@ -39,7 +39,8 @@ async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowSched
     await asyncio.gather(
         dbus_client_run_future,
         asyncio.create_task(dbus_client.dbus_signal_queue_processor_task()),
-        asyncio.create_task(dbus_client.mqtt_receive_queue_processor_task())
+        asyncio.create_task(dbus_client.mqtt_receive_queue_processor_task()),
+        asyncio.create_task(dbus_client.dbus_object_lifecycle_signal_processor_task())
     )
 
 async def mqtt_processor_task(app_context: AppContext):

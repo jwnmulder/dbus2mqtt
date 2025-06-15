@@ -1,4 +1,3 @@
-import asyncio
 import fnmatch
 import json
 import logging
@@ -11,10 +10,15 @@ import dbus_fast.constants as dbus_constants
 import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
 import dbus_fast.message as dbus_message
+import janus
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import SubscriptionConfig
-from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, SubscribedInterface
+from dbus2mqtt.dbus.dbus_types import (
+    BusNameSubscriptions,
+    DbusSignalWithState,
+    SubscribedInterface,
+)
 from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     unwrap_dbus_object,
@@ -24,7 +28,7 @@ from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
     mpris_introspection_playerctl,
 )
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
-from dbus2mqtt.event_broker import DbusSignalWithState, MqttMessage
+from dbus2mqtt.event_broker import MqttMessage
 from dbus2mqtt.flow.flow_processor import FlowScheduler, FlowTriggerMessage
 
 logger = logging.getLogger(__name__)
@@ -43,6 +47,13 @@ class DbusClient:
         self.flow_scheduler = flow_scheduler
         self.subscriptions: dict[str, BusNameSubscriptions] = {}
 
+        self._dbus_signal_queue = janus.Queue[DbusSignalWithState]()
+        self._dbus_object_lifecycle_signal_queue = janus.Queue[dbus_message.Message]()
+
+        self._name_owner_match_rule = "sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',path='/org/freedesktop/DBus',member='NameOwnerChanged'"
+        self._interfaces_added_match_rule = "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesAdded'"
+        self._interfaces_removed_match_rule = "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
+
     async def connect(self):
 
         if not self.bus.connected:
@@ -55,29 +66,14 @@ class DbusClient:
 
             self.bus.add_message_handler(self.object_lifecycle_signal_handler)
 
-            # Add a match rule for InterfacesAdded from all services
-            # Need to test this without signals from bluez.yaml
-            reply = await self.bus.call(dbus_message.Message(
-                destination='org.freedesktop.DBus',
-                path='/org/freedesktop/DBus',
-                interface='org.freedesktop.DBus',
-                member='AddMatch',
-                signature='s',
-                # body=[(
-                #     "type='signal', interface='org.freedesktop.DBus.ObjectManager',member='InterfacesAdded'"
-                # )]
-                body=[(
-                    "type='signal',interface='org.freedesktop.DBus.ObjectManager'"
-                )]
-            ))
-            assert reply and reply.message_type == dbus_constants.MessageType.METHOD_RETURN
+            # Add dbus match rules to get notified of new bus_names or interfaces
+            await self._add_match_rule(self._name_owner_match_rule)
+            await self._add_match_rule(self._interfaces_added_match_rule)
+            await self._add_match_rule(self._interfaces_removed_match_rule)
 
             introspection = await self.bus.introspect('org.freedesktop.DBus', '/org/freedesktop/DBus')
             obj = self.bus.get_proxy_object('org.freedesktop.DBus', '/org/freedesktop/DBus', introspection)
             dbus_interface = obj.get_interface('org.freedesktop.DBus')
-
-            # subscribe to NameOwnerChanged which allows us to detect new bus_names
-            # dbus_interface.__getattribute__("on_name_owner_changed")(self._dbus_name_owner_changed_callback)
 
             # subscribe to existing registered bus_names we are interested in
             connected_bus_names = await dbus_interface.__getattribute__("call_list_names")()
@@ -87,6 +83,28 @@ class DbusClient:
                 new_subscribed_interfaces.extend(await self._handle_bus_name_added(bus_name))
 
             logger.info(f"subscriptions on startup: {list(set([si.bus_name for si in new_subscribed_interfaces]))}")
+
+    async def _add_match_rule(self, match_rule: str):
+        reply = await self.bus.call(dbus_message.Message(
+            destination='org.freedesktop.DBus',
+            path='/org/freedesktop/DBus',
+            interface='org.freedesktop.DBus',
+            member='AddMatch',
+            signature='s',
+            body=[(match_rule)]
+        ))
+        assert reply and reply.message_type == dbus_constants.MessageType.METHOD_RETURN
+
+    async def _remove_match_rule(self, match_rule: str):
+        reply = await self.bus.call(dbus_message.Message(
+            destination='org.freedesktop.DBus',
+            path='/org/freedesktop/DBus',
+            interface='org.freedesktop.DBus',
+            member='RemoveMatch',
+            signature='s',
+            body=[(match_rule)]
+        ))
+        assert reply and reply.message_type == dbus_constants.MessageType.METHOD_RETURN
 
     def get_well_known_bus_name(self, unique_bus_name: str) -> str:
 
@@ -120,25 +138,8 @@ class DbusClient:
 
         logger.debug(f'object_lifecycle_signal_handler: interface={message.interface}, member={message.member}, body={message.body}')
 
-        # TODO: Redo, during shutdown an error might occur
-        # ERROR:asyncio:Task was destroyed but it is pending!
-        # task: <Task pending name='Task-32' coro=<DbusClient._handle_interfaces_added() done, defined aat dbus_client.py:431> wait_for=<Future pending cb=[Task.task_wakeup()]>>
-        loop = asyncio.get_running_loop()
-        if message.interface == 'org.freedesktop.DBus' and message.member == 'NameOwnerChanged':
-            name, old_owner, new_owner = message.body
-            if new_owner != '' and old_owner == '':
-                loop.create_task(self._handle_bus_name_added(name))
-            if old_owner != '' and new_owner == '':
-                loop.create_task(self._handle_bus_name_removed(name))
-
-        if message.interface == 'org.freedesktop.DBus.ObjectManager':
-            bus_name = self.get_well_known_bus_name(message.sender)
-            if message.member == 'InterfacesAdded':
-                path = message.body[0]
-                loop.create_task(self._handle_interfaces_added(bus_name, path))
-            elif message.member == 'InterfacesRemoved':
-                path = message.body[0]
-                loop.create_task(self._handle_interfaces_removed(bus_name, path))
+        if message.interface in ['org.freedesktop.DBus', 'org.freedesktop.DBus.ObjectManager']:
+            self._dbus_object_lifecycle_signal_queue.sync_q.put(message)
 
     def get_bus_name_subscriptions(self, bus_name: str) -> BusNameSubscriptions | None:
 
@@ -200,7 +201,7 @@ class DbusClient:
             subscription_config = signal_subscription["subscription_config"]
             signal_config = signal_subscription["signal_config"]
 
-            self.event_broker.on_dbus_signal(
+            self._dbus_signal_queue.sync_q.put(
                 DbusSignalWithState(
                     bus_name=dbus_signal_state["bus_name"],
                     path=dbus_signal_state["path"],
@@ -340,22 +341,6 @@ class DbusClient:
                 await self._list_bus_name_paths(bus_name, f"{path}{path_seperator}{node.name}")
             )
 
-        # Idea for a fallback when introspection fails but the object implements the ObjectManager interface
-
-        # rep = await self.bus.call(
-        #     dbus_message.Message(destination=bus_name,
-        #             path='/',
-        #             interface='org.freedesktop.DBus.ObjectManager',
-        #             member='GetManagedObjects',
-        #             signature='',
-        #             body=[""]
-        #     )
-        # )
-        # if rep and rep.message_type == dbus_constants.MessageType.METHOD_RETURN and rep.body:
-        #     managed_objects = dbus_unpack.unpack_variants(rep.body)
-        #     print(f"XXX2-res: {managed_objects[0].keys()}")
-        # dbus-send --system --print-reply --dest=org.bluez / org.freedesktop.DBus.ObjectManager.GetManagedObjects
-
         return paths
 
     async def _subscribe_dbus_object(self, bus_name: str, path: str) -> list[SubscribedInterface]:
@@ -378,7 +363,8 @@ class DbusClient:
             logger.warning(f"Skipping dbus_object subscription, no interfaces found for bus_name={bus_name}, path={path}")
             return new_subscriptions
 
-        logger.info(f"subscribe_dbus_object: bus_name={bus_name}, path={path}, interfaces={introspection.interfaces}")
+        interfaces_names = [i.name for i in introspection.interfaces]
+        logger.info(f"subscribe_dbus_object: bus_name={bus_name}, path={path}, interfaces={interfaces_names}")
 
         await self._create_proxy_object_subscription(bus_name, path, introspection)
 
@@ -696,9 +682,16 @@ class DbusClient:
     async def dbus_signal_queue_processor_task(self):
         """Continuously processes messages from the async queue."""
         while True:
-            signal = await self.event_broker.dbus_signal_queue.async_q.get()  # Wait for a message
+            signal = await self._dbus_signal_queue.async_q.get()
             await self._handle_on_dbus_signal(signal)
-            self.event_broker.dbus_signal_queue.async_q.task_done()
+            self._dbus_signal_queue.async_q.task_done()
+
+    async def dbus_object_lifecycle_signal_processor_task(self):
+        """Continuously processes messages from the async queue."""
+        while True:
+            message = await self._dbus_object_lifecycle_signal_queue.async_q.get()
+            await self._handle_dbus_object_lifecycle_signal(message)
+            self._dbus_object_lifecycle_signal_queue.async_q.task_done()
 
     async def _handle_on_dbus_signal(self, signal: DbusSignalWithState):
 
@@ -731,6 +724,25 @@ class DbusClient:
                             await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
                     except Exception as e:
                         logger.warning(f"dbus_signal_queue_processor_task: Exception {e}", exc_info=True)
+
+    async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):
+
+        if message.member == 'NameOwnerChanged':
+            name, old_owner, new_owner = message.body
+            if new_owner != '' and old_owner == '':
+                await self._handle_bus_name_added(name)
+            if old_owner != '' and new_owner == '':
+                await self._handle_bus_name_removed(name)
+
+        if message.interface == 'org.freedesktop.DBus.ObjectManager':
+            bus_name = self.get_well_known_bus_name(message.sender)
+            if message.member == 'InterfacesAdded':
+                path = message.body[0]
+                await self._handle_interfaces_added(bus_name, path)
+            elif message.member == 'InterfacesRemoved':
+                path = message.body[0]
+                await self._handle_interfaces_removed(bus_name, path)
+
 
     async def _on_mqtt_msg(self, msg: MqttMessage):
         # self.queue.put({
