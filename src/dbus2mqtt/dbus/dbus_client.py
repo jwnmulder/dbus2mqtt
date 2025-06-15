@@ -123,11 +123,9 @@ class DbusClient:
         # TODO: Redo, during shutdown an error might occur
         # ERROR:asyncio:Task was destroyed but it is pending!
         # task: <Task pending name='Task-32' coro=<DbusClient._handle_interfaces_added() done, defined aat dbus_client.py:431> wait_for=<Future pending cb=[Task.task_wakeup()]>>
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         if message.interface == 'org.freedesktop.DBus' and message.member == 'NameOwnerChanged':
-            name = message.body[0]
-            old_owner = message.body[1] or ''
-            new_owner = message.body[2] or ''
+            name, old_owner, new_owner = message.body
             if new_owner != '' and old_owner == '':
                 loop.create_task(self._handle_bus_name_added(name))
             if old_owner != '' and new_owner == '':
@@ -431,6 +429,48 @@ class DbusClient:
 
         return new_subscribed_interfaces
 
+    async def _handle_bus_name_removed(self, bus_name: str):
+
+        logger.debug(f"_handle_bus_name_removed: bus_name={bus_name}")
+
+        bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
+
+        if bus_name_subscriptions:
+            for path, proxy_object in bus_name_subscriptions.path_objects.items():
+
+                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
+                for subscription_config in subscription_configs:
+
+                    # Stop schedule triggers. Only done once per subscription_config
+                    # TODO: Dont stop when other bus_names are using the same flowset
+                    self.flow_scheduler.stop_flow_set(subscription_config.flows)
+
+                    # Trigger flows that have a bus_name_removed trigger configured
+                    await self._trigger_bus_name_removed(subscription_config, bus_name, path)
+
+                    # Trigger flows that have an object_removed trigger configured
+                    await self._trigger_object_removed(subscription_config, bus_name, path)
+
+
+                # Wait for completion
+                await self.event_broker.flow_trigger_queue.async_q.join()
+
+                # clean up all dbus matchrules
+                for interface in proxy_object._interfaces.values():
+                    proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
+
+                    # officially you should do 'off_...' but the below is easier
+                    # proxy_interface.off_properties_changed(self.on_properties_changed)
+
+                    # clean lingering interface matchrule from bus
+                    if proxy_interface._signal_match_rule in self.bus._match_rules.keys():
+                        self.bus._remove_match_rule(proxy_interface._signal_match_rule)
+
+                    # clean lingering interface messgage handler from bus
+                    self.bus.remove_message_handler(proxy_interface._message_handler)
+
+            del self.subscriptions[bus_name]
+
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
         """
         Handles the addition of new D-Bus interfaces for a given bus name and object path.
@@ -443,6 +483,8 @@ class DbusClient:
             path (str): The object path on the D-Bus where the interface was added.
         """
 
+        logger.debug(f"_handle_interfaces_added: bus_name={bus_name}, path={path}")
+
         if not self.config.get_subscription_configs(bus_name=bus_name, path=path):
             return
 
@@ -453,6 +495,8 @@ class DbusClient:
             await self._start_subscription_flows(bus_name, new_subscribed_interfaces)
 
     async def _handle_interfaces_removed(self, bus_name: str, path: str) -> None:
+
+        logger.debug(f"_handle_interfaces_removed: bus_name={bus_name}, path={path}")
 
         subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
         for subscription_config in subscription_configs:
@@ -562,47 +606,6 @@ class DbusClient:
 
                     # Trigger flows that have a object_added trigger configured
                     await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
-
-
-    async def _handle_bus_name_removed(self, bus_name: str):
-
-        bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
-
-        if bus_name_subscriptions:
-            for path, proxy_object in bus_name_subscriptions.path_objects.items():
-
-                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
-                for subscription_config in subscription_configs:
-
-                    # Stop schedule triggers. Only done once per subscription_config
-                    # TODO: Dont stop when other bus_names are using the same flowset
-                    self.flow_scheduler.stop_flow_set(subscription_config.flows)
-
-                    # Trigger flows that have a bus_name_removed trigger configured
-                    await self._trigger_bus_name_removed(subscription_config, bus_name, path)
-
-                    # Trigger flows that have an object_removed trigger configured
-                    await self._trigger_object_removed(subscription_config, bus_name, path)
-
-
-                # Wait for completion
-                await self.event_broker.flow_trigger_queue.async_q.join()
-
-                # clean up all dbus matchrules
-                for interface in proxy_object._interfaces.values():
-                    proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
-
-                    # officially you should do 'off_...' but the below is easier
-                    # proxy_interface.off_properties_changed(self.on_properties_changed)
-
-                    # clean lingering interface matchrule from bus
-                    if proxy_interface._signal_match_rule in self.bus._match_rules.keys():
-                        self.bus._remove_match_rule(proxy_interface._signal_match_rule)
-
-                    # clean lingering interface messgage handler from bus
-                    self.bus.remove_message_handler(proxy_interface._message_handler)
-
-            del self.subscriptions[bus_name]
 
     async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
 
