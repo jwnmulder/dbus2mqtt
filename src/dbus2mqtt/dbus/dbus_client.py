@@ -584,7 +584,9 @@ class DbusClient:
                         self.flow_scheduler.start_flow_set(subscription_config.flows)
 
                         # Trigger flows that have a bus_name_added trigger configured
+
                         # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
+                        # leaving it now for backwards compatibility
                         await self._trigger_bus_name_added(subscription_config, bus_name, object_path)
 
                         processed_new_subscriptions.add(subscription_config.id)

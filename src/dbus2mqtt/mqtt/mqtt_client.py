@@ -44,9 +44,18 @@ class MqttClient:
         self.loop = loop
         self.connected_event = asyncio.Event()
 
+    #     self.subscription_topics = self._all_known_subscription_topics(app_context.config)
+
+    # def _all_known_subscription_topics(self, config: Config):
+    #     topics = []
+    #     config.dbus.subscriptions[0].interfaces[0].mqtt_command_topic
+    #     config.dbus.subscriptions[0].flows[0].triggers[0].topic
+    #     config.flows[0].triggers[0].topic
+
+    #     return topics
+
     def connect(self):
 
-        # mqtt_client.on_message = lambda client, userdata, message: asyncio.create_task(mqtt_on_message(client, userdata, message))
         self.client.connect_async(
             host=self.config.host,
             port=self.config.port,
@@ -103,11 +112,14 @@ class MqttClient:
             logger.info(f"on_connect: Connected to {self.config.host}:{self.config.port}")
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
+            # TODO: Determine topics based on config
             client.subscribe("dbus2mqtt/#", options=SubscribeOptions(noLocal=True))
 
             self.loop.call_soon_threadsafe(self.connected_event.set)
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
+
+        # TODO: Skip messages being sent by other dbus2mqtt clients
 
         payload = msg.payload.decode()
         if msg.retain:
