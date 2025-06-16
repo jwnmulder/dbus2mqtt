@@ -44,6 +44,16 @@ class MqttClient:
         self.loop = loop
         self.connected_event = asyncio.Event()
 
+    #     self.subscription_topics = self._all_known_subscription_topics(app_context.config)
+
+    # def _all_known_subscription_topics(self, config: Config):
+    #     topics = []
+    #     config.dbus.subscriptions[0].interfaces[0].mqtt_command_topic
+    #     config.dbus.subscriptions[0].flows[0].triggers[0].topic
+    #     config.flows[0].triggers[0].topic
+
+    #     return topics
+
     def connect(self):
 
         self.client.connect_async(
