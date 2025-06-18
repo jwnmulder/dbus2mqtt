@@ -790,7 +790,12 @@ class DbusClient:
 
                                 try:
                                     logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                    await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                    res = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                    if msg.response_topic is not None:
+                                        response_payload = res
+                                        response_msg = MqttMessage(msg.response_topic, response_payload)
+                                        await self.event_broker.mqtt_publish_queue.async_q.put(response_msg)
+
                                 except Exception as e:
                                     logger.warning(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name} failed, exception={e}")
 

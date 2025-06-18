@@ -111,6 +111,9 @@ class MqttClient:
 
         # TODO: Skip messages being sent by other dbus2mqtt clients
 
+        response_topic = getattr(msg.properties, "ResponseTopic", None)
+        correlation_data = getattr(msg.properties, "CorrelationData", None)
+
         payload = msg.payload.decode()
         if msg.retain:
             logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")
@@ -119,6 +122,6 @@ class MqttClient:
         try:
             json_payload = json.loads(payload)
             logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={json.dumps(json_payload)}")
-            self.event_broker.on_mqtt_receive(MqttMessage(msg.topic, json_payload))
+            self.event_broker.on_mqtt_receive(MqttMessage(msg.topic, json_payload, response_topic, correlation_data))
         except json.JSONDecodeError as e:
             logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")

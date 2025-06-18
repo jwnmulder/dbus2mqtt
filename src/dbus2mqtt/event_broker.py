@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 class MqttMessage:
     topic: str
     payload: Any
+    response_topic: str | None = None
+    correlation_data: str | None = None
     payload_serialization_type: str = "json"
 
 @dataclass
