@@ -17,3 +17,14 @@ Execute the following command to run dbus2mqtt with the example configuration in
 ```bash
 uv run dbus2mqtt --config docs/examples/bluez.yaml
 ```
+
+## Commands
+
+The following table lists commands, their descriptions, and an example JSON payload for invoking them via MQTT.
+
+Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/bluez/hci0/command`. Method calls will be done for all matching dbus objects.
+
+| Interface            | Method<br />Property  | Description                          | Example MQTT JSON Payload                          |
+|----------------------|-----------------------|--------------------------------------|-------------------------------------------------|
+| `org.bluez.Adapter1` | `StartDiscovery`      | Starts bluetooth discovery           | `{ "method": "StartDiscovery" }`                |
+| `org.bluez.Adapter1` | `StopDiscovery`       | Stops bluetooth discovery            | `{ "method": "StopDiscovery" }`                         |

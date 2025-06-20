@@ -5,12 +5,18 @@ dbus:
     - bus_name: org.bluez
       path: /org/bluez/hci0
 
+      # https://manpages.ubuntu.com/manpages/oracular/man5/org.bluez.Adapter.5.html
+
       interfaces:
         - interface: org.freedesktop.DBus.Properties
           signals:
             - signal: PropertiesChanged
+
+        - interface: org.bluez.Adapter1
+          mqtt_command_topic: dbus2mqtt/bluez/hci0/command
           methods:
-            - method: GetAll
+            - method: StartDiscovery
+            - method: StopDiscovery
 
       flows:
         - name: "publish adapter state"
@@ -33,12 +39,19 @@ dbus:
     - bus_name: org.bluez
       path: /org/bluez/hci0/dev_*
 
+      # https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Device.5.html
       interfaces:
         - interface: org.freedesktop.DBus.Properties
           signals:
             - signal: PropertiesChanged
+
+        - interface: org.bluez.Device1
+          mqtt_command_topic: dbus2mqtt/bluez/hci0/command
           methods:
-            - method: GetAll
+            - method: Connect
+            - method: Disconnect
+            - method: Pair
+            - method: CancelPairing
 
       flows:
         - name: "publish device state"
