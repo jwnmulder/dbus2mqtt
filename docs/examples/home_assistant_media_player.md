@@ -19,7 +19,7 @@ Features:
 Configuration activities
 
 * MQTT Sensor and player configuration in Home Assistant (see below)
-* dbus2mqtt setup using the supplied `home_assistant_media_player.yaml`
+* dbus2mqtt setup using the supplied [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml)
 
 Execute the following command to run dbus2mqtt with the example configuration in this repository.
 
@@ -33,8 +33,11 @@ The following setup is known to work with Home Assistant.
 
 | Application  | Play<br />Pause<br /> | Stop | Next<br />Previous | Seek<br />SetPosition | Volume | Quit | Media Info | Media Image | Notes
 |--------------|-----------------------|------|--------------------|------|--------|------|------------|-------------|-------------------|
-| `Firefox`    | ✅ | ✅ | ✅ | ✅ |    | ❌ | ✅ | ✔️ | Youtube image only |
-| `VLC`        | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
+| `Firefox`    | ✅ | ✅ | ✅ | ✅ |    | ❌ | ✅ | ✅ |  |
+| `VLC`        | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    |  |
+| `Chromium`   | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✔️ | Images not working when Chromium is running as snap |
+| `Kodi`       | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Requires Kodi plugin [MediaPlayerRemoteInterface](https://github.com/wastis/MediaPlayerRemoteInterface)<br /> Requires path to be set to '/'<br />Signals not working due to non-defaut path |
+
 
 More players that support MPRIS can be found here: <https://wiki.archlinux.org/title/MPRIS>
 
@@ -74,15 +77,11 @@ mqtt:
       json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
       value_template: >-
         {% set status = value_json.PlaybackStatus %}
-        {% if status == 'Playing' %}
-          playing
-        {% elif status == 'Paused' %}
-          paused
-        {% elif status == 'Stopped' %}
-          idle
-        {% else %}
-          off
-        {% endif %}
+        {{ {'Playing': 'playing', 'Paused': 'paused', 'Stopped': 'idle'}.get(status, 'off') }}
+
+  image:
+    - name: MPRIS Media Player MQTT image
+      image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
 
 media_player:
   - platform: media_player_template
@@ -100,16 +99,31 @@ media_player:
         media_content_type_template: music  # needed to show 'artist'
         media_duration_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) }}"
         album_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:album', '') }}"
-        artist_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', ['']) | first }}"
+        artist_template: >-
+          {% set artist = (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', '') %}
+          {% if artist is string %}
+          {% set artist = [artist] %}
+          {% endif %}
+          {{ artist | first }}
 
-        # mpris:artUrl is referencing a local file when firefox is used, for now this will provide Youtube img support
+        # mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT
         media_image_url_template: >-
-          {{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:url', '')
-            | regex_replace(
-                find='https:\/\/www\\.youtube\\.com\/watch\\?v=([^&]+).*',
-                replace='https://img.youtube.com/vi/\\1/maxresdefault.jpg'
-              )
-          }}
+          {% set mpris_metadata = state_attr('sensor.mpris_media_player', 'Metadata') or {} %}
+          {% set mpris_art_url = mpris_metadata.get('mpris:artUrl', '') %}
+          {% set mpris_url = mpris_metadata.get('xesam:url') %}
+
+          {% if mpris_art_url.startswith('http') %}
+            {{ mpris_art_url }}
+          {% elif mpris_art_url.startswith('file://') %}
+            http://127.0.0.1:8123{{ state_attr('image.mpris_media_player_mqtt_image', 'entity_picture') }}
+          {% else %}
+            {{
+                mpris_url | regex_replace(
+                  find='https:\/\/www\\.youtube\\.com\/watch\\?v=([^&]+).*',
+                  replace='https://img.youtube.com/vi/\\1/maxresdefault.jpg'
+                )
+            }}
+          {% endif %}
 
         turn_off:
           service: mqtt.publish

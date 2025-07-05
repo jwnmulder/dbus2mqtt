@@ -6,8 +6,10 @@ name: docker-stable releases
       - main
     paths:
       - "docker/**"
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Publish Python Package"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
@@ -61,6 +63,8 @@ jobs:
           # type=ref,event=branch
           # type=ref,event=pr
           # type=semver,pattern={{version}},value=${{ matrix.version }}
+          flavor:
+            latest=false
           labels: |
             org.opencontainers.image.source=https://github.com/jwnmulder/dbus2mqtt
 

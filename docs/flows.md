@@ -6,8 +6,8 @@ Flows can be defined on a global or dbus subscription level and can be triggered
 
 * `schedule` for cron based schedules
 * `dbus_signal` for when dbus signal occur
-* `bus_name_added` when a new bus_name is registered on dbus
-* `bus_name_removed` when a bus_name is removed from dbus
+* `object_added` when a new bus_name is registered on dbus
+* `object_removed` when a bus_name is removed from dbus
 
 Within each flow a set of actions can be configured. These are executed in order
 
@@ -41,10 +41,27 @@ When triggered, the following context parameters are available
 
 ### dbus_signal
 
-### bus_name_added
+DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
+
+| key | description  |
+|------|-------------|
+| interface | interface to filter on, e.g. 'org.freedesktop.DBus.Properties' |
+| signal    | signal name to filter on, e.g. PropertiesChanged |
+
+When triggered, the following context parameters are available
+
+| name | type | description |
+|------|------|-------------|
+| bus_name  | string | bus_name of the object that was registered on dbus |
+| path      | string | path of the object that was registered on dbus |
+| interface | string | name of interface for which the signal was triggered |
+| signal    | string | name of the signal, e.g. 'Seeked'
+| args      | list   | signal arguments, list of objects |
+
+### object_added
 
 ```yaml
-type: bus_name_added
+type: object_added
 ```
 
 When triggered, the following context parameters are available
@@ -52,12 +69,12 @@ When triggered, the following context parameters are available
 | name | description |
 |------|-------------|
 | bus_name | bus_name of the object that was registered on dbus |
-| path     | bus_name path of the object that was registered on dbus |
+| path     | path of the object that was registered on dbus |
 
-### bus_name_removed
+### object_removed
 
 ```yaml
-type: bus_name_removed
+type: object_removed
 ```
 
 When triggered, the following context parameters are available
@@ -65,7 +82,7 @@ When triggered, the following context parameters are available
 | name | description |
 |------|-------------|
 | bus_name | bus_name of the object that was registered on dbus |
-| path     | bus_name path of the object that was registered on dbus |
+| path     | path of the object that was registered on dbus |
 
 ## Flow actions
 

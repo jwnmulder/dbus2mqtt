@@ -38,12 +38,12 @@ version-resolver:
   minor:
     labels:
       - minor
-      - feature
-      - enhancement
       - breaking-change  # minor until we are on 1.x
   patch:
     labels:
       - patch
+      - feature  # patch until we are on 1.x
+      - enhancement  # patch until we are on 1.x
   default: patch
 change-template: '* $TITLE (#$NUMBER)'
 template: |

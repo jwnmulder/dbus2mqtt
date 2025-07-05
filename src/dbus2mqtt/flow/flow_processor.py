@@ -7,7 +7,13 @@ from typing import Any
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import FlowConfig, FlowTriggerConfig, FlowTriggerDbusSignalConfig
+from dbus2mqtt.config import (
+    FlowConfig,
+    FlowTriggerConfig,
+    FlowTriggerDbusSignalConfig,
+    FlowTriggerObjectAddedConfig,
+    FlowTriggerObjectRemovedConfig,
+)
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
@@ -103,13 +109,15 @@ class FlowActionContext:
 
         return res
 
-    async def execute_actions(self, trigger_context: dict[str, Any] | None):
+    async def execute_actions(self, trigger_type: str, trigger_context: dict[str, Any] | None):
 
         # per flow execution context
         context = FlowExecutionContext(
             self.flow_config.name,
             global_flows_context=self.global_flows_context,
             flow_context=self.flow_context)
+
+        context.context["trigger_type"] = trigger_type
 
         if trigger_context:
             context.context.update(trigger_context)
@@ -162,26 +170,44 @@ class FlowProcessor:
                 await self._process_flow_trigger(flow_trigger_message)
 
             except Exception as e:
-                logger.warning(f"flow_processor_task: Exception {e}", exc_info=True)
+                # exc_info is only set when running in verbose mode to avoid lots of stack traces being printed
+                # while flows are still running and the DBus object was just removed. Some examples:
+
+                log_level = logging.WARN
+
+                # 1: error during context_set
+                # WARNING:dbus2mqtt.flow.flow_processor:flow_processor_task: Exception The name org.mpris.MediaPlayer2.firefox.instance_1_672 was not provided by any .service files
+                if "was not provided by any .service files" in str(e):
+                    log_level = logging.DEBUG
+
+                logger.log(log_level, f"flow_processor_task: Exception {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
             finally:
                 self.event_broker.flow_trigger_queue.async_q.task_done()
 
-    def _trigger_config_to_str(self, config: FlowTriggerConfig) -> str:
+    def _trigger_config_to_str(self, msg: FlowTriggerMessage) -> str:
+        config = msg.flow_trigger_config
         if isinstance(config, FlowTriggerDbusSignalConfig):
             return f"{config.type}({config.signal})"
+        elif isinstance(config, FlowTriggerObjectAddedConfig) or isinstance(config, FlowTriggerObjectRemovedConfig):
+            path = msg.trigger_context.get('path') if msg.trigger_context else None
+            if path:
+                return f"{config.type}({path})"
         return config.type
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
 
-        trigger_str = self._trigger_config_to_str(flow_trigger_message.flow_trigger_config)
-        log_message = f"on_trigger: {trigger_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        trigger_type = flow_trigger_message.flow_trigger_config.type
+        trigger_str = self._trigger_config_to_str(flow_trigger_message)
+        flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
+
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+
         if flow_trigger_message.flow_trigger_config.type != "schedule":
             logger.info(log_message)
         else:
             logger.debug(log_message)
 
         flow_id = flow_trigger_message.flow_config.id
-        # flow_name = flow_trigger_message.flow_config.name
 
         flow = self._flows[flow_id]
-        await flow.execute_actions(trigger_context=flow_trigger_message.trigger_context)
+        await flow.execute_actions(trigger_type, trigger_context=flow_trigger_message.trigger_context)

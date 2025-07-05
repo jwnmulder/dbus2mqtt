@@ -1,0 +1,19 @@
+%YAML 1.2
+---
+dbus:
+  subscriptions: []
+flows:
+  - name: "double left curly brace"
+    triggers: []
+    actions:
+      - type: mqtt_publish
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+        payload_template: |-
+          {{ "testvalue" }}
+  - name: "left curly brace with percentage"
+    triggers: []
+    actions:
+      - type: mqtt_publish
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+        payload_template: |-
+          {% set val = "testvalue" %}

@@ -1,6 +1,8 @@
 
 import logging
 
+from urllib.parse import urlparse
+
 from jinja2.exceptions import TemplateError
 
 from dbus2mqtt import AppContext
@@ -26,10 +28,20 @@ class MqttPublishAction(FlowAction):
 
             if self.config.payload_type == "text":
                 res_type = str
+            elif self.config.payload_type == "binary":
+                res_type = str
             else:
                 res_type = dict
 
             payload = await self.templating.async_render_template(self.config.payload_template, res_type, render_context)
+
+            # for binary payloads, payload contains the file to read binary data from
+            if isinstance(payload, str) and self.config.payload_type == "binary":
+                uri = payload
+                payload = urlparse(uri)
+                if not payload.scheme == "file":
+                    raise ValueError(f"Expected readable file, got: '{uri}'")
+
 
         except TemplateError as e:
             logger.warning(f"Error rendering jinja template, flow: '{context.name or ''}', msg={e}, payload_template={self.config.payload_template}, render_context={render_context}", exc_info=True)

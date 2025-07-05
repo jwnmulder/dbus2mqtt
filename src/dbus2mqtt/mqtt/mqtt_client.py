@@ -2,9 +2,13 @@
 import asyncio
 import json
 import logging
+import random
+import string
 
 from datetime import datetime
 from typing import Any
+from urllib.parse import ParseResult
+from urllib.request import urlopen
 
 import paho.mqtt.client as mqtt
 import yaml
@@ -20,13 +24,15 @@ logger = logging.getLogger(__name__)
 
 class MqttClient:
 
-    def __init__(self, app_context: AppContext, subscription_topics: set[str]):
+    def __init__(self, app_context: AppContext, loop, subscription_topics: set[str]):
         self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
         self.subscription_topics = subscription_topics
 
+        unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client = mqtt.Client(
+            client_id=f"dbus2mqtt-client-{unique_client_id_postfix}",
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2
         )
@@ -39,12 +45,15 @@ class MqttClient:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
 
+        self.loop = loop
+        self.connected_event = asyncio.Event()
+
     def connect(self):
 
-        # mqtt_client.on_message = lambda client, userdata, message: asyncio.create_task(mqtt_on_message(client, userdata, message))
         self.client.connect_async(
             host=self.config.host,
-            port=self.config.port
+            port=self.config.port,
+            clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY
         )
 
     async def mqtt_publish_queue_processor_task(self):
@@ -56,33 +65,38 @@ class MqttClient:
             msg = await self.event_broker.mqtt_publish_queue.async_q.get()  # Wait for a message
 
             try:
-                payload = msg.payload
+                payload: str | bytes | None = msg.payload
                 type = msg.payload_serialization_type
-                if isinstance(msg.payload, dict):
-                    if type == "json":
-                        payload = json.dumps(msg.payload)
-                    elif type == "yaml":
-                        payload = yaml.dump(msg.payload)
-                elif type == "text":
-                    payload = str(payload)
+                if type == "text":
+                    payload = str(msg.payload)
+                if isinstance(msg.payload, dict) and type == "json":
+                    payload = json.dumps(msg.payload)
+                elif isinstance(msg.payload, dict) and type == "yaml":
+                    payload = yaml.dump(msg.payload)
+                elif isinstance(msg.payload, ParseResult) and type == "binary":
+                    try:
+                        with urlopen(msg.payload.geturl()) as response:
+                            payload = response.read()
+                    except Exception as e:
+                        # In case failing uri reads, we still publish an empty msg to avoid stale data
+                        payload = None
+                        logger.warning(f"mqtt_publish_queue_processor_task: Exception {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
 
-                logger.debug(f"mqtt_publish_queue_processor_task: payload={payload}")
-                self.client.publish(topic=msg.topic, payload=payload)
+                payload_log_msg = payload if isinstance(payload, str) else msg.payload
+                logger.debug(f"mqtt_publish_queue_processor_task: topic={msg.topic}, type={payload.__class__}, payload={payload_log_msg}")
 
                 if first_message:
-                    logger.info(f"First message published: topic={msg.topic}, payload={payload}")
+                    await asyncio.wait_for(self.connected_event.wait(), timeout=5)
+
+                self.client.publish(topic=msg.topic, payload=payload or "").wait_for_publish(timeout=1000)
+                if first_message:
+                    logger.info(f"First message published: topic={msg.topic}, payload={payload_log_msg}")
                     first_message = False
 
             except Exception as e:
-                logger.warning(f"mqtt_publish_queue_processor_task: Exception {e}", exc_info=True)
+                logger.warning(f"mqtt_publish_queue_processor_task: Exception {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
             finally:
                 self.event_broker.mqtt_publish_queue.async_q.task_done()
-
-
-    async def run(self):
-        """Runs the MQTT loop in a non-blocking way with asyncio."""
-        self.client.loop_start()  # Runs Paho's loop in a background thread
-        await asyncio.Event().wait()  # Keeps the coroutine alive
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect(self, client: mqtt.Client, userdata, flags, reason_code, properties):
@@ -93,11 +107,18 @@ class MqttClient:
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
 
+            # TODO: Determine topics based on config
+            client.subscribe("dbus2mqtt/#", options=SubscribeOptions(noLocal=True))
+
             subscriptions = [(t, SubscribeOptions(noLocal=True)) for t in self.subscription_topics]
 
-            client.subscribe(subscriptions)
+            client.subscribe(subscriptions, options=SubscribeOptions(noLocal=True))
+
+            self.loop.call_soon_threadsafe(self.connected_event.set)
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
+
+        # TODO: Skip messages being sent by other dbus2mqtt clients
 
         payload = msg.payload.decode()
         if msg.retain:
@@ -105,7 +126,7 @@ class MqttClient:
             return
 
         try:
-            json_payload = json.loads(payload)
+            json_payload = json.loads(payload) if payload else {}
             logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={json.dumps(json_payload)}")
 
             # publish on a queue that is beiing processed by dbus_client

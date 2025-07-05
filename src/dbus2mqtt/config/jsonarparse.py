@@ -13,7 +13,7 @@ def _custom_yaml_load(stream):
         # Anoyingly, values starting with {{ and ending with }} are working with the default yaml_loader
         # from jsonargparse. Somehow its not when we use the custom yaml loader.
         # This fixes it
-        if v.startswith("{{") and v.endswith("}}"):
+        if v.startswith("{{") or v.startswith("{%"):
             return stream
 
     # Delegate to default yaml loader from jsonargparse

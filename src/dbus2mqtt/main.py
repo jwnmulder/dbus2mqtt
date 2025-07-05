@@ -5,8 +5,10 @@ import sys
 from typing import cast
 
 import colorlog
-import dbus_next.aio as dbus_aio
+import dbus_fast.aio as dbus_aio
 import dotenv
+
+from dbus_fast import BusType
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config, FlowConfig
@@ -23,7 +25,8 @@ logger = logging.getLogger(__name__)
 
 async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowScheduler):
 
-    bus = dbus_aio.message_bus.MessageBus()
+    bus_type = BusType.SYSTEM if app_context.config.dbus.bus_type == "SYSTEM" else BusType.SESSION
+    bus = dbus_aio.message_bus.MessageBus(bus_type=bus_type)
 
     dbus_client = DbusClient(app_context, bus, flow_scheduler)
     app_context.templating.add_functions(jinja_custom_dbus_functions(dbus_client))
@@ -36,7 +39,8 @@ async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowSched
     await asyncio.gather(
         dbus_client_run_future,
         asyncio.create_task(dbus_client.dbus_signal_queue_processor_task()),
-        asyncio.create_task(dbus_client.mqtt_receive_queue_processor_task())
+        asyncio.create_task(dbus_client.mqtt_receive_queue_processor_task()),
+        asyncio.create_task(dbus_client.dbus_object_lifecycle_signal_processor_task())
     )
 
 async def mqtt_processor_task(app_context: AppContext):
@@ -57,13 +61,13 @@ async def mqtt_processor_task(app_context: AppContext):
             if trigger.type == "mqtt_msg" and trigger.topic:
                 subscription_topics.add(trigger.topic)
 
-    mqtt_client = MqttClient(app_context, subscription_topics)
+    loop = asyncio.get_running_loop()
+    mqtt_client_run_future = loop.create_future()
+
+    mqtt_client = MqttClient(app_context, loop, subscription_topics)
 
     mqtt_client.connect()
     mqtt_client.client.loop_start()
-
-    loop = asyncio.get_running_loop()
-    mqtt_client_run_future = loop.create_future()
 
     try:
         await asyncio.gather(
@@ -119,9 +123,19 @@ def main():
 
     config: Config = cast(Config, parser.instantiate_classes(cfg))
 
+    class NamePartsFilter(logging.Filter):
+        def filter(self, record):
+            record.name_last = record.name.rsplit('.', 1)[-1]
+            # record.name_first = record.name.split('.', 1)[0]
+            # record.name_short = record.name
+            # if record.name.startswith("dbus2mqtt"):
+            #     record.name_short = record.name.split('.', 1)[-1]
+            return True
+
     handler = colorlog.StreamHandler(stream=sys.stdout)
+    handler.addFilter(NamePartsFilter())
     handler.setFormatter(colorlog.ColoredFormatter(
-        '%(log_color)s%(levelname)s:%(name)s:%(message)s',
+        '%(log_color)s%(levelname)s:%(name_last)s:%(message)s',
         log_colors={
             "DEBUG": "light_black",
             "WARNING": "yellow",

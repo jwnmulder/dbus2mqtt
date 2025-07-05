@@ -46,3 +46,25 @@ def test_cron_trigger_string_value():
     trigger = config.flows[0].triggers[0]
     assert trigger.type == "schedule"
     assert trigger.cron == {"minute": "*/5"}
+
+def test_jsonargparse_jinja_expressions():
+    """values starting with {{ are not parsed correctly
+    """
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(f"{FILE_DIR}/fixtures/payload_template_jinja_expressions.yaml")
+    config: Config = cast(Config, parser.instantiate_classes(cfg))
+
+    assert config is not None
+
+    # double left curly brace
+    action = config.flows[0].actions[0]
+    assert action.type == "mqtt_publish"
+    assert action.payload_template == """{{ "testvalue" }}"""
+
+    action = config.flows[1].actions[0]
+    assert action.type == "mqtt_publish"
+    assert action.payload_template == """{% set val = "testvalue" %}"""

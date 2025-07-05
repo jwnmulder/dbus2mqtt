@@ -41,6 +41,9 @@ class TemplateEngine:
 
     def _convert_value(self, res: Any, res_type: type[TemplateResultType]) -> TemplateResultType:
 
+        if res is None:
+            return res
+
         if isinstance(res, res_type):
             return res
 

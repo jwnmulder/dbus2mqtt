@@ -1,7 +1,7 @@
 import dbus_fast.introspection as dbus_introspection
 
-# taken from https://code.videolan.org/videolan/vlc/-/blob/master/modules/control/dbus/dbus_introspect.h
-mpris_introspection_vlc = dbus_introspection.Node.parse("""\
+# taken from https://github.com/altdesktop/playerctl/blob/b19a71cb9dba635df68d271bd2b3f6a99336a223/playerctl/playerctl-daemon.c#L578
+mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
   "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
@@ -70,52 +70,81 @@ mpris_introspection_vlc = dbus_introspection.Node.parse("""\
     <method name="Stop"/>
     <method name="Play"/>
     <method name="Seek">
-      <arg type="x" direction="in"/>
+      <arg type="x" name="Offset" direction="in"/>
     </method>
     <method name="SetPosition">
-      <arg type="o" direction="in"/>
-      <arg type="x" direction="in"/>
+      <arg type="o" name="TrackId" direction="in"/>
+      <arg type="x" name="Offset" direction="in"/>
     </method>
     <method name="OpenUri">
-      <arg type="s" direction="in"/>
+      <arg type="s" name="Uri" direction="in"/>
     </method>
     <signal name="Seeked">
-      <arg type="x"/>
+      <arg type="x" name="Position" direction="out"/>
     </signal>
   </interface>
 
   <interface name="org.mpris.MediaPlayer2.TrackList">
-    <property name="Tracks" type="ao" access="read"/>
-    <property name="CanEditTracks" type="b" access="read"/>
+    <property name="Tracks" type="ao" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="invalidates"/>
+    </property>
+    <property name="CanEditTracks" type="b" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+    </property>
     <method name="GetTracksMetadata">
-      <arg type="ao" direction="in"/>
-      <arg type="aa{sv}" direction="out"/>
+      <arg direction="in" name="TrackIds" type="ao"/>
+      <arg direction="out" name="Metadata" type="aa{sv}"/>
     </method>
     <method name="AddTrack">
-      <arg type="s" direction="in"/>
-      <arg type="o" direction="in"/>
-      <arg type="b" direction="in"/>
+      <arg direction="in" name="Uri" type="s"/>
+      <arg direction="in" name="AfterTrack" type="o"/>
+      <arg direction="in" name="SetAsCurrent" type="b"/>
     </method>
     <method name="RemoveTrack">
-      <arg type="o" direction="in"/>
+      <arg direction="in" name="TrackId" type="o"/>
     </method>
     <method name="GoTo">
-      <arg type="o" direction="in"/>
+      <arg direction="in" name="TrackId" type="o"/>
     </method>
     <signal name="TrackListReplaced">
-      <arg type="ao"/>
-      <arg type="o"/>
+      <arg name="Tracks" type="ao"/>
+      <arg name="CurrentTrack" type="o"/>
     </signal>
     <signal name="TrackAdded">
-      <arg type="a{sv}"/>
-      <arg type="o"/>
+      <arg name="Metadata" type="a{sv}"/>
+      <arg name="AfterTrack" type="o"/>
     </signal>
     <signal name="TrackRemoved">
-      <arg type="o"/>
+      <arg name="TrackId" type="o"/>
     </signal>
     <signal name="TrackMetadataChanged">
-      <arg type="o"/>
-      <arg type="a{sv}"/>
+      <arg name="TrackId" type="o"/>
+      <arg name="Metadata" type="a{sv}"/>
+    </signal>
+  </interface>
+
+  <interface name="org.mpris.MediaPlayer2.Playlists">
+    <method name="ActivatePlaylist">
+      <arg direction="in" name="PlaylistId" type="o"/>
+    </method>
+    <method name="GetPlaylists">
+      <arg direction="in" name="Index" type="u"/>
+      <arg direction="in" name="MaxCount" type="u"/>
+      <arg direction="in" name="Order" type="s"/>
+      <arg direction="in" name="ReverseOrder" type="b"/>
+      <arg direction="out" name="Playlists" type="a(oss)"/>
+    </method>
+    <property name="PlaylistCount" type="u" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+    </property>
+    <property name="Orderings" type="as" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+    </property>
+    <property name="ActivePlaylist" type="(b(oss))" access="read">
+      <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
+    </property>
+    <signal name="PlaylistChanged">
+      <arg name="Playlist" type="(oss)"/>
     </signal>
   </interface>
 </node>

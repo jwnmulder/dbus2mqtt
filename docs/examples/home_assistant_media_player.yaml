@@ -40,9 +40,9 @@ dbus:
             - property: Volume
 
       flows:
-        - name: "MPRIS publish player state"
+        - name: "publish player state"
           triggers:
-            - type: bus_name_added
+            - type: object_added
             - type: schedule
               interval: {seconds: 5}
             - type: dbus_signal
@@ -56,13 +56,14 @@ dbus:
             - type: context_set
               context:
                 mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
-                path: /org/mpris/MediaPlayer2
+                mpris_path: /org/mpris/MediaPlayer2
+                # Some players return stale position if GetAll is executed immediately after a seeked signal.
+                # By storing the seeked position it can be used to override Position below
+                seeked_position: '{{ args[0] if trigger_type == "dbus_signal" and signal == "Seeked" else None }}'
             - type: context_set
               context:
                 player_properties: |
-                  {{ dbus_call(mpris_bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
-                volume: |
-                  {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Volume', 0) }}
+                  {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
@@ -70,11 +71,30 @@ dbus:
                 {{
                     { 'bus_name': mpris_bus_name }
                     | combine(player_properties)
-                    | combine({ 'Volume': volume })
+                    | combine ({ 'Position': seeked_position } if seeked_position else {})
                 }}
-        - name: "MPRIS player removed"
+
+        - name: "publish local art image"
+          # mpris:artUrl can have a file:// or http:// schema
+          # Home Assistant is unable to access file:// so we use MQTT for that
           triggers:
-            - type: bus_name_removed
+            - type: object_added
+            - type: dbus_signal
+              interface: org.freedesktop.DBus.Properties
+              signal: PropertiesChanged
+          actions:
+            - type: context_set
+              context:
+                artUrl: "{{ (dbus_property_get(bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') }}"
+            - type: mqtt_publish
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+              payload_type: binary
+              payload_template: |
+                {{ artUrl if artUrl and artUrl.startswith('file://') else None }}
+
+        - name: "player removed"
+          triggers:
+            - type: object_removed
             # filter: # TODO: Check if this is the last or inactive one #
           actions:
             - type: mqtt_publish
