@@ -5,6 +5,7 @@ import logging
 import random
 import string
 
+from datetime import datetime
 from typing import Any
 from urllib.parse import ParseResult
 from urllib.request import urlopen
@@ -16,15 +17,18 @@ from paho.mqtt.enums import CallbackAPIVersion
 from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.event_broker import MqttMessage
+from dbus2mqtt.config import FlowConfig
+from dbus2mqtt.event_broker import FlowTriggerMessage, MqttMessage
 
 logger = logging.getLogger(__name__)
 
 class MqttClient:
 
-    def __init__(self, app_context: AppContext, loop):
+    def __init__(self, app_context: AppContext, loop, subscription_topics: list[str]):
+        self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
+        self.subscription_topics = set(subscription_topics)
 
         unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client = mqtt.Client(
@@ -102,8 +106,13 @@ class MqttClient:
             logger.info(f"on_connect: Connected to {self.config.host}:{self.config.port}")
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
+
             # TODO: Determine topics based on config
             client.subscribe("dbus2mqtt/#", options=SubscribeOptions(noLocal=True))
+
+            subscriptions = [(t, SubscribeOptions(noLocal=True)) for t in self.subscription_topics]
+
+            client.subscribe(subscriptions, options=SubscribeOptions(noLocal=True))
 
             self.loop.call_soon_threadsafe(self.connected_event.set)
 
@@ -119,6 +128,41 @@ class MqttClient:
         try:
             json_payload = json.loads(payload) if payload else {}
             logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={json.dumps(json_payload)}")
+
+            # publish on a queue that is beiing processed by dbus_client
             self.event_broker.on_mqtt_receive(MqttMessage(msg.topic, json_payload))
+
+            # publish to flow trigger queue for any configured mqtt_msg triggers
+            self._trigger_flows(msg.topic, {
+                "topic": msg.topic,
+                "payload": json_payload
+            })
+
         except json.JSONDecodeError as e:
             logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")
+
+    def _trigger_flows(self, topic: str, trigger_context: dict):
+        """Triggers all flows that have a mqtt_trigger defined that matches the given topic
+           and checks configured filters."""
+
+        all_flows: list[FlowConfig] = []
+        all_flows.extend(self.app_context.config.flows)
+        for subscription in self.app_context.config.dbus.subscriptions:
+            all_flows.extend(subscription.flows)
+
+        for flow in all_flows:
+            for trigger in flow.triggers:
+                if trigger.type == "mqtt_msg":
+                    matches_filter = trigger.topic == topic
+                    if trigger.filter is not None:
+                        matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
+
+                    if matches_filter:
+                        trigger_message = FlowTriggerMessage(
+                            flow,
+                            trigger,
+                            datetime.now(),
+                            trigger_context=trigger_context,
+                        )
+
+                        self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)

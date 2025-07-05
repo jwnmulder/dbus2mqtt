@@ -42,10 +42,15 @@ class InterfaceConfig:
         return None
 
 @dataclass
-class FlowTriggerMqttConfig:
-    type: Literal["mqtt"]
+class FlowTriggerMqttMsgConfig:
     topic: str
+    type: Literal["mqtt_msg"] = "mqtt_msg"
     filter: str | None = None
+
+    def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
+        if self.filter:
+            return template_engine.render_template(self.filter, bool, trigger_context)
+        return True
 
 @dataclass
 class FlowTriggerScheduleConfig:
@@ -88,7 +93,7 @@ class FlowTriggerObjectRemovedConfig:
     # filter: str | None = None
 
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
+    FlowTriggerMqttMsgConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
     Field(discriminator="type")
 ]
 
