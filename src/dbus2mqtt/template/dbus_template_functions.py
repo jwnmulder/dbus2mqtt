@@ -29,7 +29,7 @@ class DbusContext:
     async def async_dbus_call_fn(self, bus_name: str, path: str, interface: str, method:str, method_args: list[Any] = []):
 
         if not isinstance(method_args, list):
-            # Pylance will mentiod this line is unreachable. It is not as jinja2 can pass in any type
+            # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
             raise ValueError("method_args must be a list")
 
         proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)

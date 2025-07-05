@@ -84,6 +84,23 @@ When triggered, the following context parameters are available
 | bus_name | bus_name of the object that was registered on dbus |
 | path     | path of the object that was registered on dbus |
 
+### mqtt_msg
+
+Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted
+
+| key | description  |
+|------|-------------|
+| topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
+| filter    | A templated string that must evaluate to a boolean result, when False, the MQTT message is skipped |
+
+When triggered, the following context parameters are available
+
+| name | type | description |
+|------|------|-------------|
+| topic     | string | mqtt topic |
+| payload   | any | json deserialized MQTT message payload  |
+| payload_serialization_type | string | always 'json' |
+
 ## Flow actions
 
 ### context_set
@@ -100,8 +117,6 @@ global_context: {}
 | context             | dict | Per flow execution context. Value can be a dict of strings or dict of templated strings |
 | dbus_object_context | dict | Per dbus object context, shared between multiple flow executions. Value can be a dict of strings or dict of templated strings |
 | global_context      | dict | Global context, shared between multiple flow executions, over all subscriptions. Value can be a dict of strings or dict of templated strings |
-
-
 
 ### mqtt_publish
 

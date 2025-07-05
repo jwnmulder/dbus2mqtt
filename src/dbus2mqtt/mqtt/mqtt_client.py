@@ -133,36 +133,37 @@ class MqttClient:
             self.event_broker.on_mqtt_receive(MqttMessage(msg.topic, json_payload))
 
             # publish to flow trigger queue for any configured mqtt_msg triggers
-            all_flows: list[FlowConfig] = []
-            all_flows.extend(self.app_context.config.flows)
-            for subscription in self.app_context.config.dbus.subscriptions:
-                all_flows.extend(subscription.flows)
-
-            for flow in all_flows:
-                for trigger in flow.triggers:
-                    if trigger.type == "mqtt_msg":
-                        trigger_context = {
-                            "topic": msg.topic,
-                            "value_json": json_payload
-                            # "path": signal.path,
-                            # "interface": signal.interface_name,
-                            # "args": signal.args
-                        }
-                        matches_filter = trigger.topic == msg.topic
-                        if trigger.filter is not None:
-                            matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
-
-                        if matches_filter:
-                            trigger_message = FlowTriggerMessage(
-                                flow,
-                                trigger,
-                                datetime.now(),
-                                trigger_context=trigger_context,
-                            )
-
-                            self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
-
-            # self.event_broker.flow_trigger_queue
+            self._trigger_flows(msg.topic, {
+                "topic": msg.topic,
+                "payload": json_payload,
+                "payload_serialization_type": "json"
+            })
 
         except json.JSONDecodeError as e:
             logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")
+
+    def _trigger_flows(self, topic: str, trigger_context: dict):
+        """Triggers all flows that have a mqtt_trigger defined that matches the given topic
+           and checks configured filters."""
+
+        all_flows: list[FlowConfig] = []
+        all_flows.extend(self.app_context.config.flows)
+        for subscription in self.app_context.config.dbus.subscriptions:
+            all_flows.extend(subscription.flows)
+
+        for flow in all_flows:
+            for trigger in flow.triggers:
+                if trigger.type == "mqtt_msg":
+                    matches_filter = trigger.topic == topic
+                    if trigger.filter is not None:
+                        matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
+
+                    if matches_filter:
+                        trigger_message = FlowTriggerMessage(
+                            flow,
+                            trigger,
+                            datetime.now(),
+                            trigger_context=trigger_context,
+                        )
+
+                        self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
