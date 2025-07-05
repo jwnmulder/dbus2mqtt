@@ -43,8 +43,8 @@ class InterfaceConfig:
 
 @dataclass
 class FlowTriggerMqttMsgConfig:
-    type: Literal["mqtt_msg"]
     topic: str
+    type: Literal["mqtt_msg"] = "mqtt_msg"
     filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:

@@ -99,7 +99,6 @@ When triggered, the following context parameters are available
 |------|------|-------------|
 | topic     | string | mqtt topic |
 | payload   | any | json deserialized MQTT message payload  |
-| payload_serialization_type | string | always 'json' |
 
 ## Flow actions
 

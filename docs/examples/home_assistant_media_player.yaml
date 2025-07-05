@@ -106,6 +106,7 @@ dbus:
           # TODO: Check what will happen when reusing dbus2mqtt/org.mpris.MediaPlayer2/command
           # need to check if it works as expected and logs make sense
 
+          # Scenarios
           # 1. MQTT msg with valid dbus Play command that triggers both dbus and flows
           # 2. MQTT msg with invalid dbus Play command that triggers both dbus and flows (e.g. play-pause)
           #      - This will likely just work but might cause warnings in logs

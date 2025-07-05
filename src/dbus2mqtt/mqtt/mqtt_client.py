@@ -24,11 +24,11 @@ logger = logging.getLogger(__name__)
 
 class MqttClient:
 
-    def __init__(self, app_context: AppContext, loop, subscription_topics: set[str]):
+    def __init__(self, app_context: AppContext, loop, subscription_topics: list[str]):
         self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
-        self.subscription_topics = subscription_topics
+        self.subscription_topics = set(subscription_topics)
 
         unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client = mqtt.Client(
@@ -135,8 +135,7 @@ class MqttClient:
             # publish to flow trigger queue for any configured mqtt_msg triggers
             self._trigger_flows(msg.topic, {
                 "topic": msg.topic,
-                "payload": json_payload,
-                "payload_serialization_type": "json"
+                "payload": json_payload
             })
 
         except json.JSONDecodeError as e:
