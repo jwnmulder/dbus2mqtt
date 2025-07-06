@@ -162,6 +162,7 @@ class MqttConfig:
     username: str
     password: SecretStr
     port: int = 1883
+    subscription_topics: list[str] = field(default_factory=lambda: ['dbus2mqtt/#'])
 
 @dataclass
 class Config:

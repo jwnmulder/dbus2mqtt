@@ -71,5 +71,5 @@ def mocked_dbus_client(app_context: AppContext):
 
 def mocked_mqtt_client(app_context: AppContext):
 
-    dbus_client = MqttClient(app_context, None, ["dbus2mqtt"])
+    dbus_client = MqttClient(app_context, None)
     return dbus_client

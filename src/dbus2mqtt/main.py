@@ -11,7 +11,7 @@ import dotenv
 from dbus_fast import BusType
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import Config, FlowConfig
+from dbus2mqtt.config import Config
 from dbus2mqtt.config.jsonarparse import new_argument_parser
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
@@ -45,26 +45,10 @@ async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowSched
 
 async def mqtt_processor_task(app_context: AppContext):
 
-    subscription_topics = set()
-
-    all_flows: list[FlowConfig] = []
-    all_flows.extend(app_context.config.flows)
-    for subscription in app_context.config.dbus.subscriptions:
-        all_flows.extend(subscription.flows)
-        for interface in subscription.interfaces:
-            if interface.mqtt_command_topic:
-                mqtt_command_topic = interface.render_mqtt_command_topic(app_context.templating, {})
-                subscription_topics.add(mqtt_command_topic)
-
-    for flow in all_flows:
-        for trigger in flow.triggers:
-            if trigger.type == "mqtt_msg" and trigger.topic:
-                subscription_topics.add(trigger.topic)
-
     loop = asyncio.get_running_loop()
     mqtt_client_run_future = loop.create_future()
 
-    mqtt_client = MqttClient(app_context, loop, subscription_topics)
+    mqtt_client = MqttClient(app_context, loop)
 
     mqtt_client.connect()
     mqtt_client.client.loop_start()

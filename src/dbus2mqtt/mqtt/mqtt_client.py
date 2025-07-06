@@ -24,15 +24,14 @@ logger = logging.getLogger(__name__)
 
 class MqttClient:
 
-    def __init__(self, app_context: AppContext, loop, subscription_topics: list[str]):
+    def __init__(self, app_context: AppContext, loop):
         self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
-        self.subscription_topics = set(subscription_topics)
 
         unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client = mqtt.Client(
-            client_id=f"dbus2mqtt-client-{unique_client_id_postfix}",
+            client_id=f"dbus2mqtt-{unique_client_id_postfix}",
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2
         )
@@ -107,10 +106,7 @@ class MqttClient:
             # Subscribing in on_connect() means that if we lose the connection and
             # reconnect then subscriptions will be renewed.
 
-            # TODO: Determine topics based on config
-            client.subscribe("dbus2mqtt/#", options=SubscribeOptions(noLocal=True))
-
-            subscriptions = [(t, SubscribeOptions(noLocal=True)) for t in self.subscription_topics]
+            subscriptions = [(t, SubscribeOptions(noLocal=True)) for t in self.config.subscription_topics]
 
             client.subscribe(subscriptions, options=SubscribeOptions(noLocal=True))
 
@@ -154,7 +150,7 @@ class MqttClient:
             for trigger in flow.triggers:
                 if trigger.type == "mqtt_msg":
                     matches_filter = trigger.topic == topic
-                    if trigger.filter is not None:
+                    if matches_filter and trigger.filter is not None:
                         matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
 
                     if matches_filter:

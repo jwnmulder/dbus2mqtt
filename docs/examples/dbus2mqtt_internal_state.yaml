@@ -1,6 +1,8 @@
 # mqtt:
 #   host:
 #   port:
+#   subscription_topics:
+#     - dbus2mqtt/#
 
 dbus:
   subscriptions:

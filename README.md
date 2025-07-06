@@ -122,6 +122,8 @@ or
 mqtt:
   host: localhost
   port: 1883
+  subscription_topics:
+    - dbus2mqtt/#
 ```
 
 ### Exposing dbus methods
