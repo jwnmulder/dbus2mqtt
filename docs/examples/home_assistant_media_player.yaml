@@ -116,7 +116,7 @@ dbus:
           triggers:
             - type: mqtt_msg
               topic: dbus2mqtt/org.mpris.MediaPlayer2/command
-              filter: "{{ payload.action == 'play-pause' }}"
+              filter: "{{ payload.get('action') == 'play-pause' }}"
           actions:
             - type: context_set
               context:
@@ -124,5 +124,8 @@ dbus:
                 path: /org/mpris/MediaPlayer2
             - type: context_set
               context:
+                # {{ dbus_call('org.mpris.MediaPlayer2.*', '*', 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
                 current_playback_status: |
                   {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus', 0) }}
+                call_res: |
+                  {{ dbus_call(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
