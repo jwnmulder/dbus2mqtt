@@ -1,6 +1,6 @@
 # Flows
 
-**dbus2mqtt** allows you to add additional processing logic (flows) for when events occur. Configuration is best done in yaml and a complete example can be found here: [MPRIS to Home Assistant Media Player integration](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md)
+**dbus2mqtt** allows you to add additional processing logic (flows) for when events occur. Configuration is done in yaml and a complete example can be found in [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml) which is part of the [MPRIS to Home Assistant Media Player integration](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md) example
 
 Flows can be defined on a global or dbus subscription level and can be triggered by any of the following events:
 
@@ -9,12 +9,26 @@ Flows can be defined on a global or dbus subscription level and can be triggered
 * `object_added` when a new bus_name is registered on dbus
 * `object_removed` when a bus_name is removed from dbus
 
-Within each flow a set of actions can be configured. These are executed in order
+Within each flow a set of actions can be configured. These are executed in the order as defined in yaml
 
+* `log` for logging message
 * `context_set` to set variables
 * `mqtt_publish` to publish a mqtt message
 
-Actions support string templating which is based on jinja2
+An example
+
+```yaml
+flows:
+  - name: "Example flow"
+    triggers:
+      - type: schedule
+        interval: {seconds: 5}
+    actions:
+      - type: log
+        msg: hello from example flow
+```
+
+Some action parameters allow the use of jinja2 templating. dbus2mqtt supports both builtin jinja2 filters and comes with additional filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/). When supported, it is documented below.
 
 ## Flow triggers
 
@@ -22,7 +36,6 @@ Actions support string templating which is based on jinja2
 
 ```yaml
 type: schedule
-cron: {second: 5}
 interval: {seconds: 5}
 ```
 
@@ -40,6 +53,12 @@ When triggered, the following context parameters are available
 | N/A  | N/A         |
 
 ### dbus_signal
+
+```yaml
+type: dbus_signal
+interface: org.freedesktop.DBus.Properties
+signal: PropertiesChanged
+```
 
 DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
 
@@ -102,6 +121,19 @@ When triggered, the following context parameters are available
 
 ## Flow actions
 
+### log
+
+```yaml
+type: log
+msg: your log message
+levvel: INFO
+```
+
+| key              | type             | description  |
+|------------------|------------------|--------------|
+| msg              | str              | a templated string |
+| level            | str              | One of ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], defaults to 'INFO' |
+
 ### context_set
 
 ```yaml
@@ -127,11 +159,7 @@ payload_template: {PlaybackStatus: "Off"}
 ```
 
 | key              | type             | description  |
-|------------------|------------------|-------------|
+|------------------|------------------|--------------|
 | topic            | string | mqtt topic the messaage is published to |
 | payload_type     | string | any of [json, yaml, text], defaults to json, format the message is published in to mqtt |
 | payload_template | string, dict | value can be a string, a dict of strings, a templated string or a nested dict of templated strings |
-
-## Jinja2 based templating
-
-Some configuration values allow the use of jinja 2 templating. dbus2mqtt supports both the builtin filters and comes with additional filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/)

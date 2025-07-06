@@ -194,7 +194,7 @@ dbus:
 
 ## Flows
 
-TODO: Document flows, for now see the [MPRIS to Home Assistant Media Player integration](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md) example
+A reference of all supported flow triggers and actions can be found on [Flows](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/flows.md)
 
 ## Jinja templating
 

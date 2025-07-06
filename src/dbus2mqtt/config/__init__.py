@@ -112,8 +112,14 @@ class FlowActionMqttPublishConfig:
     type: Literal["mqtt_publish"] = "mqtt_publish"
     payload_type: Literal["json", "yaml", "text", "binary"] = "json"
 
+@dataclass
+class FlowActionLogConfig:
+    msg: str
+    type: Literal["log"] = "log"
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+
 FlowActionConfig = Annotated[
-    FlowActionMqttPublishConfig | FlowActionContextSetConfig,
+    FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig,
     Field(discriminator="type")
 ]
 

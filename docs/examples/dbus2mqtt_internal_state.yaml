@@ -39,4 +39,8 @@ flows:
         payload_type: json
         payload_template:
           now: "{{ now().isoformat() }}"
-          dbus_list: "{{ dbus_list('*') }}"
+          dbus_list_res: "{{ dbus_list('*') }}"
+      - type: log
+        level: INFO
+        msg: >
+          Just published: dbus_list={{ dbus_list('*') }} to topic 'dbus2mqtt/state'
