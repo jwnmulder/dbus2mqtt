@@ -122,10 +122,10 @@ dbus:
               context:
                 mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
                 path: /org/mpris/MediaPlayer2
-            - type: context_set
-              context:
-                # {{ dbus_call('org.mpris.MediaPlayer2.*', '*', 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
-                current_playback_status: |
-                  {{ dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus', 0) }}
-                call_res: |
-                  {{ dbus_call(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
+            - type: log
+              msg: >-
+                {% set current = dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus', 0) %}
+                {%- set action = 'Play' if current != 'Playing' else 'Pause' -%}
+                TODO: Implement dbus_call, current_playback_status={{ current }}, action={{ action }}
+              # {{ dbus_call('org.mpris.MediaPlayer2.*', '*', 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
+              # {{ dbus_call(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
