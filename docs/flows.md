@@ -103,14 +103,14 @@ When triggered, the following context parameters are available
 | bus_name | bus_name of the object that was registered on dbus |
 | path     | path of the object that was registered on dbus |
 
-### mqtt_msg
+### mqtt_message
 
 Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted
 
 | key | description  |
 |------|-------------|
 | topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
-| filter    | A templated string that must evaluate to a boolean result, when False, the MQTT message is skipped |
+| filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 When triggered, the following context parameters are available
 

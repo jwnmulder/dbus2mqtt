@@ -114,7 +114,7 @@ dbus:
           #      - Check logs and see if we need to make intent explicit in mqtt payloads
           #      - Backwards compatibility
           triggers:
-            - type: mqtt_msg
+            - type: mqtt_message
               topic: dbus2mqtt/org.mpris.MediaPlayer2/command
               filter: "{{ payload.get('action') == 'play-pause' }}"
           actions:

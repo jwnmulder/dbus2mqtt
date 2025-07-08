@@ -8,6 +8,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import (
+    FlowActionContextSetConfig,
+    FlowActionLogConfig,
+    FlowActionMqttPublishConfig,
     FlowConfig,
     FlowTriggerConfig,
     FlowTriggerDbusSignalConfig,
@@ -101,11 +104,11 @@ class FlowActionContext:
         res = []
         for action_config in self.flow_config.actions:
             action = None
-            if action_config.type == "context_set":
+            if action_config.type == FlowActionContextSetConfig.type:
                 action = ContextSetAction(action_config, self.app_context)
-            elif action_config.type == "mqtt_publish":
+            elif action_config.type == FlowActionMqttPublishConfig.type:
                 action = MqttPublishAction(action_config, self.app_context)
-            elif action_config.type == "log":
+            elif action_config.type == FlowActionLogConfig.type:
                 action = LogAction(action_config, self.app_context)
 
             if action:

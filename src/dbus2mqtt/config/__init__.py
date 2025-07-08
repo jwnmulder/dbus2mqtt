@@ -42,9 +42,9 @@ class InterfaceConfig:
         return None
 
 @dataclass
-class FlowTriggerMqttMsgConfig:
+class FlowTriggerMqttMessageConfig:
     topic: str
-    type: Literal["mqtt_msg"] = "mqtt_msg"
+    type: Literal["mqtt_message"] = "mqtt_message"
     filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
@@ -93,7 +93,7 @@ class FlowTriggerObjectRemovedConfig:
     # filter: str | None = None
 
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttMsgConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
+    FlowTriggerMqttMessageConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
     Field(discriminator="type")
 ]
 
