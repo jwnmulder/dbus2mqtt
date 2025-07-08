@@ -119,6 +119,21 @@ When triggered, the following context parameters are available
 | topic     | string | mqtt topic |
 | payload   | any | json deserialized MQTT message payload  |
 
+Example flow
+
+```yaml
+flows:
+  - name: "Mute"
+    triggers:
+      - type: mqtt_message
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+        filter: "{{ payload.get('action') == 'Mute' }}"
+    actions:
+      - type: log
+        msg: |
+          Flow triggered by MQTT message, payload.action={{ payload.get('action') }}
+```
+
 ## Flow actions
 
 ### log
