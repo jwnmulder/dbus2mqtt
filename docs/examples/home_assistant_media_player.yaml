@@ -99,20 +99,6 @@ dbus:
               payload_template:
                 PlaybackStatus: "Off"
         - name: "PlayPause"
-          # TODO: Check what will happen when reusing dbus2mqtt/org.mpris.MediaPlayer2/command
-          # need to check if it works as expected and logs make sense
-
-          # Scenarios
-          # 1. MQTT msg with valid dbus Play command that triggers both dbus and flows
-          # 2. MQTT msg with invalid dbus Play command that triggers both dbus and flows (e.g. play-pause)
-          #      - This will likely just work but might cause warnings in logs
-          #      - MQTT command support 'bus_name' and 'path' wildcard matching, defaulting to '*', '*'
-          #      - Flows doing dbus calls should support wildcard bus_name and path parameters
-          # 3. MQTT msg with valid dbus Play command that triggers just flows
-          #      - Should this be supported? Just use a different queue topic?
-          # 4. MQTT msg with valid invalid dbus payload structure that triggers both dbus and flows
-          #      - Check logs and see if we need to make intent explicit in mqtt payloads
-          #      - Backwards compatibility
           triggers:
             - type: mqtt_msg
               topic: dbus2mqtt/org.mpris.MediaPlayer2/command
@@ -122,13 +108,6 @@ dbus:
               context:
                 mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
                 path: /org/mpris/MediaPlayer2
-            - type: log
-              msg: >-
-                {% set current = dbus_property_get(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus', 0) %}
-                {%- set action = 'Play' if current != 'Playing' else 'Pause' -%}
-                TODO: Implement dbus_call, current_playback_status={{ current }}, action={{ action }}
-              # {{ dbus_call('org.mpris.MediaPlayer2.*', '*', 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
-              # {{ dbus_call(mpris_bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Play', []) }}
             - type: context_set
               context:
                 play_pause_action: >-

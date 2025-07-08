@@ -512,7 +512,7 @@ class DbusClient:
                 # clean lingering interface messgage handler from bus
                 self.bus.remove_message_handler(proxy_interface._message_handler)
 
-            # For now that InterfacesRemoved signal means the entire object is removed form D-Bus
+            # For now that InterfacesRemoved signal means the entire object is removed from D-Bus
             del self.subscriptions[bus_name].path_objects[path]
 
         # cleanup the entire BusNameSubscriptions if no more objects are subscribed

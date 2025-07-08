@@ -42,17 +42,6 @@ class InterfaceConfig:
         return None
 
 @dataclass
-class FlowTriggerMqttMsgConfig:
-    topic: str
-    type: Literal["mqtt_msg"] = "mqtt_msg"
-    filter: str | None = None
-
-    def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
-        if self.filter:
-            return template_engine.render_template(self.filter, bool, trigger_context)
-        return True
-
-@dataclass
 class FlowTriggerScheduleConfig:
     type: Literal["schedule"] = "schedule"
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
@@ -92,8 +81,19 @@ class FlowTriggerObjectRemovedConfig:
     type: Literal["object_removed"] = "object_removed"
     # filter: str | None = None
 
+@dataclass
+class FlowTriggerMqttMessageConfig:
+    topic: str
+    type: Literal["mqtt_message"] = "mqtt_message"
+    filter: str | None = None
+
+    def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
+        if self.filter:
+            return template_engine.render_template(self.filter, bool, trigger_context)
+        return True
+
 FlowTriggerConfig = Annotated[
-    FlowTriggerMqttMsgConfig | FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig,
+    FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig | FlowTriggerMqttMessageConfig,
     Field(discriminator="type")
 ]
 
