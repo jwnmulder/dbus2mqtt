@@ -20,6 +20,7 @@ from dbus2mqtt.config import (
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
+from dbus2mqtt.flow.actions.dbus_call import DbusCallAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
 
@@ -110,6 +111,8 @@ class FlowActionContext:
                 action = MqttPublishAction(action_config, self.app_context)
             elif action_config.type == FlowActionLogConfig.type:
                 action = LogAction(action_config, self.app_context)
+            elif action_config.type == "dbus_call":
+                action = DbusCallAction(action_config, self.app_context)
 
             if action:
                 res.append(action)
