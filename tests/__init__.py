@@ -15,31 +15,33 @@ from dbus2mqtt.config import (
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
+from dbus2mqtt.mqtt.mqtt_client import MqttClient
 from dbus2mqtt.template.templating import TemplateEngine
 
 
 def mocked_app_context():
 
-    test_config = config.Config(dbus=config.DbusConfig(
-        subscriptions=[
-            config.SubscriptionConfig(
-                bus_name="test.bus_name.*",
-                path="/",
-                interfaces=[
-                    InterfaceConfig(
-                        interface="test-interface-name"
-                    )
-                ]
+    test_config = config.Config(
+        dbus=config.DbusConfig(
+            subscriptions=[
+                config.SubscriptionConfig(
+                    bus_name="test.bus_name.*",
+                    path="/",
+                    interfaces=[
+                        InterfaceConfig(
+                            interface="test-interface-name"
+                        )
+                    ]
 
-            )
-        ]
-    ),
-    mqtt=config.MqttConfig(
-        host="localhost",
-        username="test",
-        password=SecretStr("test")
-    ),
-    flows=[]
+                )
+            ]
+        ),
+        mqtt=config.MqttConfig(
+            host="localhost",
+            username="test",
+            password=SecretStr("test")
+        ),
+        flows=[]
     )
 
     event_broker = EventBroker()
@@ -66,3 +68,8 @@ def mocked_dbus_client(app_context: AppContext):
 
         dbus_client = DbusClient(app_context, bus, flow_scheduler)
         return dbus_client
+
+def mocked_mqtt_client(app_context: AppContext):
+
+    dbus_client = MqttClient(app_context, None)
+    return dbus_client
