@@ -94,7 +94,15 @@ media_player:
         current_volume_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') }}"
         current_is_muted_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') == 0 }}"
         current_position_template: "{{ state_attr('sensor.mpris_media_player', 'Position') }}"
-        title_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:title', '') }}"
+
+        # title: 'xesam:title' or filename without extension from 'xesam:url'
+        title_template: >-
+          {% set metadata = state_attr('sensor.mpris_media_player', 'Metadata') or {} %}
+          {% set title = metadata.get('xesam:title', '') %}
+          {% if not title or title == '' %}
+          {% set title = metadata.get('xesam:url', '') | regex_findall(find='([^\\/]+?)(?:\.[^.\\/]+)?$') | first | default('') %}
+          {% endif %}
+          {{ title }}
 
         media_content_type_template: music  # needed to show 'artist'
         media_duration_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) }}"
