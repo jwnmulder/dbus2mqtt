@@ -133,7 +133,7 @@ class MqttClient:
 
         # Skip messages being sent by other dbus2mqtt clients
         if msg.properties:
-            user_properties: list[tuple[str, object]] = getattr(msg.properties, "UserProperty")
+            user_properties: list[tuple[str, object]] = getattr(msg.properties, "UserProperty", [])
             client_id = next((str(v) for k, v in user_properties if k == "client_id"), None)
             if client_id and client_id != self.client_id:
                 logger.info(f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}")

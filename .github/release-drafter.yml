@@ -1,7 +1,8 @@
-name-template: 'v$RESOLVED_VERSION 🌈'
+name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 exclude-labels:
   - dependencies
+  - skip-changelog
 categories:
   - title: 🚨 Breaking changes
     labels:
@@ -13,13 +14,13 @@ categories:
   - title: 🐛 Bug Fixes
     labels:
       - bugfix
-  - title: 🧰 Maintenance
+  - title: 🧰 Misc
     labels:
       - chore
       - documentation
   - title: ⬆️ Dependency updates
     labels:
-      - "dependencies"
+      - dependencies
 exclude-contributors:
   - jwnmulder
 autolabeler:
@@ -47,6 +48,4 @@ version-resolver:
   default: patch
 change-template: '* $TITLE (#$NUMBER)'
 template: |
-  ## Changes
-
   $CHANGES
