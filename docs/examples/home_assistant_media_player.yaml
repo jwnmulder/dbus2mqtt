@@ -64,10 +64,13 @@ dbus:
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
               payload_template: |
+                {% set metadata = player_properties.get('Metadata') or {} %}
+                {% set metadata_xesam_url = metadata.get('xesam:url', '') | urldecode %}
                 {{
                     { 'bus_name': mpris_bus_name }
                     | combine(player_properties)
-                    | combine ({ 'Position': seeked_position } if seeked_position else {})
+                    | combine({ 'Position': seeked_position } if seeked_position else {})
+                    | combine({ 'Metadata': { 'xesam:url': metadata_xesam_url } }, recursive=True)
                 }}
 
         - name: "publish local art image"
