@@ -1,35 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/debugging/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/examples/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/flows/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/examples/bluez/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/examples/dbus2mqtt_internal_state/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
-    <url>
-         <loc>https://jwnmulder.github.io/dbus2mqtt/examples/linux_desktop/</loc>
-         <lastmod>2025-07-13</lastmod>
-    </url>
 </urlset>
