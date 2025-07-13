@@ -1,0 +1,32 @@
+dbus:
+  subscriptions:
+
+    # https://lira.no-ip.org:8443/doc/gnome-session/dbus/gnome-session.html
+    - bus_name: org.gnome.SessionManager
+      path: /org/gnome/SessionManager
+
+      interfaces:
+        - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
+          methods:
+            - method: GetAll
+
+        - interface: org.gnome.SessionManager
+          mqtt_command_topic: dbus2mqtt/SessionManager/command
+          methods:
+            - method: Logout
+            - method: Reboot  # reboot dialog
+
+      flows:
+        - name: "publish state at startup and schedule"
+          triggers:
+            - type: object_added
+            - type: schedule
+              interval: {seconds: 5}
+          actions:
+            - type: mqtt_publish
+              topic: dbus2mqtt/SessionManager
+              payload_type: json
+              payload_template:
+                clients: "{{ dbus_call('org.gnome.SessionManager', '/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetClients') }}"
