@@ -103,6 +103,37 @@ When triggered, the following context parameters are available
 | bus_name | bus_name of the object that was registered on dbus |
 | path     | path of the object that was registered on dbus |
 
+### mqtt_message
+
+Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted
+
+| key | description  |
+|------|-------------|
+| topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
+| filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
+
+When triggered, the following context parameters are available
+
+| name | type | description |
+|------|------|-------------|
+| topic     | string | mqtt topic |
+| payload   | any | json deserialized MQTT message payload  |
+
+Example flow
+
+```yaml
+flows:
+  - name: "Mute"
+    triggers:
+      - type: mqtt_message
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+        filter: "{{ payload.get('action') == 'Mute' }}"
+    actions:
+      - type: log
+        msg: |
+          Flow triggered by MQTT message, payload.action={{ payload.get('action') }}
+```
+
 ## Flow actions
 
 ### log
