@@ -12,13 +12,13 @@
         <meta name="author" content="Jan-Willem Mulder">
       
       
-        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/flows/">
+        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/developer/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../examples/bluez/">
       
       
-        <link rel="next" href="flow_actions/">
+        <link rel="next" href="debugging_dbus/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Flows - dbus2mqtt</title>
+        <title>Developer guide - dbus2mqtt</title>
       
     
     
@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#flows" class="md-skip">
+        <a href="#developer-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Flows
+              Developer guide
             
           </span>
         </div>
@@ -204,13 +204,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../flows/" class="md-tabs__link">
           
   
   
@@ -250,11 +248,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../developer/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -339,8 +339,6 @@
       
   
   
-    
-  
   
   
     
@@ -358,21 +356,18 @@
     
     
       
-        
-        
-      
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
+            <a href="../flows/" class="md-nav__link ">
               
   
   
@@ -385,13 +380,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_2" id="__nav_2_label" tabindex="">
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Flows
@@ -407,7 +402,7 @@
   
   
     <li class="md-nav__item">
-      <a href="flow_actions/" class="md-nav__link">
+      <a href="../flows/flow_actions/" class="md-nav__link">
         
   
   
@@ -430,7 +425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="flow_triggers/" class="md-nav__link">
+      <a href="../flows/flow_triggers/" class="md-nav__link">
         
   
   
@@ -570,6 +565,8 @@
       
   
   
+    
+  
   
   
     
@@ -585,18 +582,21 @@
     
     
       
+        
+        
+      
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../developer/" class="md-nav__link ">
+            <a href="./" class="md-nav__link md-nav__link--active">
               
   
   
@@ -609,13 +609,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+              <label class="md-nav__link md-nav__link--active" for="__nav_4" id="__nav_4_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
@@ -631,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/debugging_dbus/" class="md-nav__link">
+      <a href="debugging_dbus/" class="md-nav__link">
         
   
   
@@ -674,6 +674,32 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specifications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-from-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running from source
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -691,33 +717,16 @@
   
 
 
-<h1 id="flows">Flows</h1>
-<p><strong>dbus2mqtt</strong> allows you to add additional processing logic (flows) for when events occur. Configuration is done in yaml and a complete example can be found in <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml">home_assistant_media_player.yaml</a> which is part of the <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md">MPRIS to Home Assistant Media Player integration</a> example</p>
-<p>Flows can be defined on a global or dbus subscription level and can be triggered by any of the following events:</p>
+<h1 id="developer-guide">Developer guide</h1>
+<h2 id="specifications">Specifications</h2>
+<p>Generic DBus specifications:</p>
 <ul>
-<li><code>schedule</code> for cron based schedules</li>
-<li><code>dbus_signal</code> for when dbus signal occur</li>
-<li><code>object_added</code> when a new bus_name is registered on dbus</li>
-<li><code>object_removed</code> when a bus_name is removed from dbus</li>
+<li><a href="https://dbus.freedesktop.org/doc/dbus-tutorial.html">D-Bus Tutorial</a></li>
+<li><a href="https://dbus.freedesktop.org/doc/dbus-specification.html">D-Bus Specification</a></li>
 </ul>
-<p>Within each flow a set of actions can be configured. These are executed in the order as defined in yaml</p>
-<ul>
-<li><code>log</code> for logging message</li>
-<li><code>context_set</code> to set variables</li>
-<li><code>mqtt_publish</code> to publish a mqtt message</li>
-</ul>
-<p>An example</p>
-<div class="highlight"><pre><span></span><code><span class="nt">flows</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Example</span><span class="nv"> </span><span class="s">flow&quot;</span>
-<span class="w">    </span><span class="nt">triggers</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
-<span class="w">        </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
-<span class="w">    </span><span class="nt">actions</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
-<span class="w">        </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello from example flow</span>
+<h2 id="running-from-source">Running from source</h2>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>config.yaml
 </code></pre></div>
-<p>Some action parameters allow the use of jinja2 templating. dbus2mqtt supports both builtin jinja2 filters and comes with additional filters from <a href="https://pypi.org/project/jinja2-ansible-filters/">jinja2-ansible-filters</a>. When supported, it is documented below.</p>
-<p>Next: <a href="flow_actions/">flow actions</a> &amp; <a href="flow_triggers/">flow triggers</a></p>
 
 
 
