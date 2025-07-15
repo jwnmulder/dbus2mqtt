@@ -15,10 +15,10 @@
         <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/flows/flow_triggers/">
       
       
-        <link rel="prev" href="../flow_actions/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../../examples/">
+        <link rel="next" href="../flow_actions/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -404,29 +404,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../flow_actions/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Flow actions
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -519,6 +496,29 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flow_actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Flow actions
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -815,8 +815,8 @@
 
 <h1 id="flow-triggers">Flow triggers</h1>
 <h2 id="schedule">schedule</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
-<span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
+<span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <p>Schedule based triggers can be configured by setting either a cron or interval parameter. Scheduling is based on the   APScheduler library and allows the following configuration options</p>
 <table>
@@ -853,9 +853,9 @@
 </tbody>
 </table>
 <h2 id="dbus_signal">dbus_signal</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus_signal</span>
-<span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.freedesktop.DBus.Properties</span>
-<span class="nt">signal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus_signal</span>
+<span class="w">  </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.freedesktop.DBus.Properties</span>
+<span class="w">  </span><span class="nt">signal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged</span>
 </code></pre></div>
 <p>DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.</p>
 <table>
@@ -914,7 +914,7 @@
 </tbody>
 </table>
 <h2 id="object_added">object_added</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object_added</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object_added</span>
 </code></pre></div>
 <p>When triggered, the following context parameters are available</p>
 <table>
@@ -936,7 +936,7 @@
 </tbody>
 </table>
 <h2 id="object_removed">object_removed</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object_removed</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object_removed</span>
 </code></pre></div>
 <p>When triggered, the following context parameters are available</p>
 <table>

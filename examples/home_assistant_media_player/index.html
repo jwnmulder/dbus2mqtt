@@ -404,12 +404,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../flows/flow_actions/" class="md-nav__link">
+      <a href="../../flows/flow_triggers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Flow actions
+    Flow triggers
     
   </span>
   
@@ -427,12 +427,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../../flows/flow_triggers/" class="md-nav__link">
+      <a href="../../flows/flow_actions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Flow triggers
+    Flow actions
     
   </span>
   
@@ -879,12 +879,8 @@
 <p>To run, execute the following commands</p>
 <div class="highlight"><pre><span></span><code>dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>docs/examples/home_assistant_media_player.yaml
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>testttt</p>
-</div>
 <h2 id="tested-configurations">Tested configurations</h2>
-<p>The following setup is known to work with Home Assistant.</p>
+<p>The following MPRIS players are known to work with Home Assistant.</p>
 <table>
 <thead>
 <tr>
@@ -951,7 +947,10 @@
 </tr>
 </tbody>
 </table>
-<p>More players that support MPRIS can be found here: <a href="https://wiki.archlinux.org/title/MPRIS">https://wiki.archlinux.org/title/MPRIS</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>More players that support MPRIS (but have not been tested) can be found here: <a href="https://wiki.archlinux.org/title/MPRIS">https://wiki.archlinux.org/title/MPRIS</a></p>
+</div>
 <h2 id="player-commands">Player commands</h2>
 <p>The following table lists player commands, their descriptions, and an example JSON payload for invoking them via MQTT.</p>
 <p>Dbus methods can be invoked by sendig the JSON payload to MQTT topic <code>dbus2mqtt/org.mpris.MediaPlayer2/command</code>. Method calls will be done for all matching players. The same applies to property updates.</p>
@@ -967,52 +966,52 @@
 <tr>
 <td><code>Play</code></td>
 <td>Starts playback</td>
-<td><code>{ "method": "Play" }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>Pause</code></td>
 <td>Pauses playback</td>
-<td><code>{ "method": "Pause" }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pause&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>PlayPause</code></td>
 <td>Toggles between play and pause</td>
-<td><code>{ "method": "PlayPause" }</code></td>
-</tr>
-<tr>
-<td><code>Next</code></td>
-<td>Next</td>
-<td><code>{ "method": "Next" }</code></td>
-</tr>
-<tr>
-<td><code>Previous</code></td>
-<td>Previous</td>
-<td><code>{ "method": "Previous" }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PlayPause&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>Stop</code></td>
 <td>Stops playback</td>
-<td><code>{ "method": "Stop" }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Stop&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
+</tr>
+<tr>
+<td><code>Next</code></td>
+<td>Next</td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Next&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
+</tr>
+<tr>
+<td><code>Previous</code></td>
+<td>Previous</td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Previous&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>Seek</code></td>
 <td>Seek forward or backward in micro seconds</td>
-<td><code>{ "method": "Seek", "args": [60000000] }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seek&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">60000000</span><span class="p">]</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>Volume</code></td>
 <td>Set volume (double between 0 and 1)</td>
-<td><code>{ "property": "Volume", "value": 1.0 }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Volume&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>SetPosition</code></td>
 <td>Set / seek to position in micro seconds. First arguments needs to be trackid which can be determined via Metadata.mpris:trackid</td>
-<td><code>{ "method": "SetPosition", "args": ["/org/mpris/MediaPlayer2/firefox", 170692139] }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SetPosition&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/org/mpris/MediaPlayer2/firefox&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">170692139</span><span class="p">]</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 <tr>
 <td><code>Quit</code></td>
 <td>Quits the media player</td>
-<td><code>{ "method": "Quit" }</code></td>
+<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Quit&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -1029,8 +1028,8 @@
 <span class="w">      </span><span class="nt">state_topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
 <span class="w">      </span><span class="nt">json_attributes_topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
 <span class="w">      </span><span class="nt">value_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">        </span><span class="no">{% set status = value_json.PlaybackStatus %}</span>
-<span class="w">        </span><span class="no">{{ {&#39;Playing&#39;: &#39;playing&#39;, &#39;Paused&#39;: &#39;paused&#39;, &#39;Stopped&#39;: &#39;idle&#39;}.get(status, &#39;off&#39;) }}</span>
+<span class="w">        </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">status</span> <span class="o">=</span> <span class="nv">value_json.PlaybackStatus</span> <span class="cp">%}</span>
+<span class="w">        </span><span class="cp">{{</span> <span class="o">{</span><span class="s1">&#39;Playing&#39;</span><span class="o">:</span> <span class="s1">&#39;playing&#39;</span><span class="o">,</span> <span class="s1">&#39;Paused&#39;</span><span class="o">:</span> <span class="s1">&#39;paused&#39;</span><span class="o">,</span> <span class="s1">&#39;Stopped&#39;</span><span class="o">:</span> <span class="s1">&#39;idle&#39;</span><span class="o">}</span><span class="nv">.get</span><span class="o">(</span><span class="nv">status</span><span class="o">,</span> <span class="s1">&#39;off&#39;</span><span class="o">)</span> <span class="cp">}}</span>
 
 <span class="w">  </span><span class="nt">image</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPRIS Media Player MQTT image</span>
@@ -1042,103 +1041,110 @@
 <span class="w">      </span><span class="nt">mpris_media_player</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">device_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generic</span>
 <span class="w">        </span><span class="nt">friendly_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPRIS Media Player</span>
-<span class="w">        </span><span class="nt">value_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">states(&#39;sensor.mpris_media_player&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">        </span><span class="nt">value_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">states</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&quot;</span>
 
-<span class="w">        </span><span class="nt">current_volume_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">state_attr(&#39;sensor.mpris_media_player&#39;,</span><span class="nv"> </span><span class="s">&#39;Volume&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">        </span><span class="nt">current_is_muted_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">state_attr(&#39;sensor.mpris_media_player&#39;,</span><span class="nv"> </span><span class="s">&#39;Volume&#39;)</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">        </span><span class="nt">current_position_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">state_attr(&#39;sensor.mpris_media_player&#39;,</span><span class="nv"> </span><span class="s">&#39;Position&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">        </span><span class="nt">current_volume_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Volume&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="nt">current_is_muted_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Volume&#39;</span><span class="o">)</span> <span class="o">==</span> <span class="m">0</span> <span class="cp">}}</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="nt">current_position_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Position&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&quot;</span>
 
 <span class="w">        </span><span class="c1"># title: &#39;xesam:title&#39; or filename without extension from &#39;xesam:url&#39;</span>
 <span class="w">        </span><span class="nt">title_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">          </span><span class="no">{% set metadata = state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Metadata&#39;) or {} %}</span>
-<span class="w">          </span><span class="no">{% set title = metadata.get(&#39;xesam:title&#39;, &#39;&#39;) %}</span>
-<span class="w">          </span><span class="no">{% if not title or title == &#39;&#39; %}</span>
-<span class="w">          </span><span class="no">{% set title = metadata.get(&#39;xesam:url&#39;, &#39;&#39;) | regex_findall(find=&#39;([^\\/]+?)(?:\.[^.\\/]+)?$&#39;) | first | default(&#39;&#39;) %}</span>
-<span class="w">          </span><span class="no">{% endif %}</span>
-<span class="w">          </span><span class="no">{{ title }}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">metadata</span> <span class="o">=</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)</span> <span class="k">or</span> <span class="o">{}</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">title</span> <span class="o">=</span> <span class="nv">metadata.get</span><span class="o">(</span><span class="s1">&#39;xesam:title&#39;</span><span class="o">,</span> <span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">if</span> <span class="k">not</span> <span class="nv">title</span> <span class="k">or</span> <span class="nv">title</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">title</span> <span class="o">=</span> <span class="nv">metadata.get</span><span class="o">(</span><span class="s1">&#39;xesam:url&#39;</span><span class="o">,</span> <span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">regex_findall</span><span class="o">(</span><span class="nv">find</span><span class="o">=</span><span class="s1">&#39;([^\\/]+?)(?:\.[^.\\/]+)?$&#39;</span><span class="o">)</span> <span class="o">|</span> <span class="nf">first</span> <span class="o">|</span> <span class="nf">default</span><span class="o">(</span><span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{{</span> <span class="nv">title</span> <span class="cp">}}</span>
 
 <span class="w">        </span><span class="nt">media_content_type_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">music</span><span class="w">  </span><span class="c1"># needed to show &#39;artist&#39;</span>
-<span class="w">        </span><span class="nt">media_duration_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">(state_attr(&#39;sensor.mpris_media_player&#39;,</span><span class="nv"> </span><span class="s">&#39;Metadata&#39;)</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">{}).get(&#39;mpris:length&#39;,</span><span class="nv"> </span><span class="s">0)</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<span class="w">        </span><span class="nt">album_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">(state_attr(&#39;sensor.mpris_media_player&#39;,</span><span class="nv"> </span><span class="s">&#39;Metadata&#39;)</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">{}).get(&#39;xesam:album&#39;,</span><span class="nv"> </span><span class="s">&#39;&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">        </span><span class="nt">media_duration_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)</span> <span class="k">or</span> <span class="o">{})</span><span class="nv">.get</span><span class="o">(</span><span class="s1">&#39;mpris:length&#39;</span><span class="o">,</span> <span class="m">0</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&quot;</span>
+<span class="w">        </span><span class="nt">album_template</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;</span><span class="cp">{{</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)</span> <span class="k">or</span> <span class="o">{})</span><span class="nv">.get</span><span class="o">(</span><span class="s1">&#39;xesam:album&#39;</span><span class="o">,</span> <span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&quot;</span>
 <span class="w">        </span><span class="nt">artist_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">          </span><span class="no">{% set artist = (state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Metadata&#39;) or {}).get(&#39;xesam:artist&#39;, &#39;&#39;) %}</span>
-<span class="w">          </span><span class="no">{% if artist is string %}</span>
-<span class="w">          </span><span class="no">{% set artist = [artist] %}</span>
-<span class="w">          </span><span class="no">{% endif %}</span>
-<span class="w">          </span><span class="no">{{ artist | first }}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">artist</span> <span class="o">=</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)</span> <span class="k">or</span> <span class="o">{})</span><span class="nv">.get</span><span class="o">(</span><span class="s1">&#39;xesam:artist&#39;</span><span class="o">,</span> <span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">artist</span> <span class="k">is</span> <span class="nf">string</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">artist</span> <span class="o">=</span> <span class="o">[</span><span class="nv">artist</span><span class="o">]</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{{</span> <span class="nv">artist</span> <span class="o">|</span> <span class="nf">first</span> <span class="cp">}}</span>
 
 <span class="w">        </span><span class="c1"># mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT</span>
 <span class="w">        </span><span class="nt">media_image_url_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">          </span><span class="no">{% set mpris_metadata = state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Metadata&#39;) or {} %}</span>
-<span class="w">          </span><span class="no">{% set mpris_art_url = mpris_metadata.get(&#39;mpris:artUrl&#39;, &#39;&#39;) %}</span>
-<span class="w">          </span><span class="no">{% set mpris_url = mpris_metadata.get(&#39;xesam:url&#39;) %}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">mpris_metadata</span> <span class="o">=</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)</span> <span class="k">or</span> <span class="o">{}</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">mpris_art_url</span> <span class="o">=</span> <span class="nv">mpris_metadata.get</span><span class="o">(</span><span class="s1">&#39;mpris:artUrl&#39;</span><span class="o">,</span> <span class="s1">&#39;&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">set</span> <span class="nv">mpris_url</span> <span class="o">=</span> <span class="nv">mpris_metadata.get</span><span class="o">(</span><span class="s1">&#39;xesam:url&#39;</span><span class="o">)</span> <span class="cp">%}</span>
 
-<span class="w">          </span><span class="no">{% if mpris_art_url.startswith(&#39;http&#39;) %}</span>
-<span class="w">            </span><span class="no">{{ mpris_art_url }}</span>
-<span class="w">          </span><span class="no">{% elif mpris_art_url.startswith(&#39;file://&#39;) %}</span>
-<span class="w">            </span><span class="no">http://127.0.0.1:8123{{ state_attr(&#39;image.mpris_media_player_mqtt_image&#39;, &#39;entity_picture&#39;) }}</span>
-<span class="w">          </span><span class="no">{% else %}</span>
-<span class="w">            </span><span class="no">{{</span>
-<span class="w">                </span><span class="no">mpris_url | regex_replace(</span>
-<span class="w">                  </span><span class="no">find=&#39;https:\/\/www\\.youtube\\.com\/watch\\?v=([^&amp;]+).*&#39;,</span>
-<span class="w">                  </span><span class="no">replace=&#39;https://img.youtube.com/vi/\\1/maxresdefault.jpg&#39;</span>
-<span class="w">                </span><span class="no">)</span>
-<span class="w">            </span><span class="no">}}</span>
-<span class="w">          </span><span class="no">{% endif %}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">mpris_art_url.startswith</span><span class="o">(</span><span class="s1">&#39;http&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">            </span><span class="cp">{{</span> <span class="nv">mpris_art_url</span> <span class="cp">}}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">elif</span> <span class="nv">mpris_art_url.startswith</span><span class="o">(</span><span class="s1">&#39;file://&#39;</span><span class="o">)</span> <span class="cp">%}</span>
+<span class="w">            </span><span class="no">http://127.0.0.1:8123</span><span class="cp">{{</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;image.mpris_media_player_mqtt_image&#39;</span><span class="o">,</span> <span class="s1">&#39;entity_picture&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+<span class="w">            </span><span class="cp">{{</span>
+                <span class="nv">mpris_url</span> <span class="o">|</span> <span class="nf">regex_replace</span><span class="o">(</span>
+                  <span class="nv">find</span><span class="o">=</span><span class="s1">&#39;https:\/\/www\\.youtube\\.com\/watch\\?v=([^&amp;]+).*&#39;</span><span class="o">,</span>
+                  <span class="nv">replace</span><span class="o">=</span><span class="s1">&#39;https://img.youtube.com/vi/\\1/maxresdefault.jpg&#39;</span>
+                <span class="o">)</span>
+            <span class="cp">}}</span>
+<span class="w">          </span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
 
 <span class="w">        </span><span class="nt">turn_off</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Quit&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Quit&quot;}</span>
 <span class="w">        </span><span class="nt">play</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Play&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Play&quot;}</span>
 <span class="w">        </span><span class="nt">pause</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Pause&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Pause&quot;}</span>
 <span class="w">        </span><span class="nt">stop</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Stop&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Stop&quot;}</span>
 <span class="w">        </span><span class="nt">next</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Next&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Next&quot;}</span>
 <span class="w">        </span><span class="nt">previous</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;method&quot;:</span><span class="nv"> </span><span class="s">&quot;Previous&quot;}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;method&quot;: &quot;Previous&quot;}</span>
 <span class="w">        </span><span class="nt">seek</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
 <span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
-<span class="w">              </span><span class="no">{ &quot;method&quot;: &quot;SetPosition&quot;, &quot;args&quot;: [&quot;{{ state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Metadata&#39;)[&#39;mpris:trackid&#39;] }}&quot;, {{ position | int }}] }</span>
+<span class="w">              </span><span class="no">{ &quot;method&quot;: &quot;SetPosition&quot;, &quot;args&quot;: [&quot;</span><span class="cp">{{</span> <span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Metadata&#39;</span><span class="o">)[</span><span class="s1">&#39;mpris:trackid&#39;</span><span class="o">]</span> <span class="cp">}}</span><span class="no">&quot;, </span><span class="cp">{{</span> <span class="nv">position</span> <span class="o">|</span> <span class="nf">int</span> <span class="cp">}}</span><span class="no">] }</span>
 <span class="w">        </span><span class="nt">set_volume</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
-<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;property&quot;:</span><span class="nv"> </span><span class="s">&quot;Volume&quot;,</span><span class="nv"> </span><span class="s">&quot;value&quot;:</span><span class="nv"> </span><span class="s">{{volume}}</span><span class="nv"> </span><span class="s">}&#39;</span>
+<span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: </span><span class="cp">{{</span><span class="nv">volume</span><span class="cp">}}</span><span class="no"> }</span>
 <span class="w">        </span><span class="nt">volume_up</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
 <span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
-<span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: {{ [1, (state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Volume&#39;) + 0.1)] | min }} }</span>
+<span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: </span><span class="cp">{{</span> <span class="o">[</span><span class="m">1</span><span class="o">,</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Volume&#39;</span><span class="o">)</span> <span class="o">+</span> <span class="m">0.1</span><span class="o">)]</span> <span class="o">|</span> <span class="nf">min</span> <span class="cp">}}</span><span class="no"> }</span>
 <span class="w">        </span><span class="nt">volume_down</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt.publish</span>
 <span class="w">          </span><span class="nt">data</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
 <span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
-<span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: {{ [0, (state_attr(&#39;sensor.mpris_media_player&#39;, &#39;Volume&#39;) - 0.1)] | max }} }</span>
+<span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: </span><span class="cp">{{</span> <span class="o">[</span><span class="m">0</span><span class="o">,</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Volume&#39;</span><span class="o">)</span> <span class="o">-</span> <span class="m">0.1</span><span class="o">)]</span> <span class="o">|</span> <span class="nf">max</span> <span class="cp">}}</span><span class="no"> }</span>
 </code></pre></div>
 
 

@@ -15,10 +15,10 @@
         <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/flows/flow_actions/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../flow_triggers/">
       
       
-        <link rel="next" href="../flow_triggers/">
+        <link rel="next" href="../../examples/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -404,6 +404,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../flow_triggers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Flow triggers
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -487,29 +510,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../flow_triggers/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Flow triggers
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -797,9 +797,9 @@
 
 <h1 id="flow-actions">Flow actions</h1>
 <h2 id="log">log</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
-<span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your log message</span>
-<span class="nt">levvel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+<span class="w">  </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your log message</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
 </code></pre></div>
 <table>
 <thead>
@@ -818,15 +818,15 @@
 <tr>
 <td>level</td>
 <td>str</td>
-<td>One of ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], defaults to 'INFO'</td>
+<td>One of <code>DEBUG</code>, <code>INFO</code> (default), <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="context_set">context_set</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">context_set</span>
-<span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">dbus_object_context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
-<span class="nt">global_context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">context_set</span>
+<span class="w">  </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">dbus_object_context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">global_context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
 </code></pre></div>
 <table>
 <thead>
@@ -855,10 +855,10 @@
 </tbody>
 </table>
 <h2 id="mqtt_publish">mqtt_publish</h2>
-<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_publish</span>
-<span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
-<span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
-<span class="nt">payload_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">PlaybackStatus</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Off&quot;</span><span class="p p-Indicator">}</span>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_publish</span>
+<span class="w">  </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
+<span class="w">  </span><span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<span class="w">  </span><span class="nt">payload_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">PlaybackStatus</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Off&quot;</span><span class="p p-Indicator">}</span>
 </code></pre></div>
 <table>
 <thead>
@@ -877,7 +877,7 @@
 <tr>
 <td>payload_type</td>
 <td>string</td>
-<td>any of [json, yaml, text], defaults to json, format the message is published in to mqtt</td>
+<td>Message format for MQTT: <code>json</code> (default), <code>yaml</code>, or <code>text</code></td>
 </tr>
 <tr>
 <td>payload_template</td>
