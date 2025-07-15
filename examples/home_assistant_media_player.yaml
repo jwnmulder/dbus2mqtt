@@ -23,14 +23,14 @@ dbus:
           signals:
             - signal: Seeked
           methods:
-            - method: Pause
             - method: Play
+            - method: Pause
+            - method: PlayPause
             - method: Stop
             - method: Next
             - method: Previous
             - method: Seek
             - method: SetPosition
-            - method: PlayPause
             - method: OpenUri
           properties:
             - property: Volume
