@@ -891,9 +891,9 @@ It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bu
 </ul>
 <h2 id="project-status">Project status</h2>
 <p><strong>dbus2mqtt</strong> is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.</p>
-<p>Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: <a href="https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player">Mediaplayer integration with Home Assistant</a></p>
+<p>Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: <a href="examples/home_assistant_media_player/">Mediaplayer integration with Home Assistant</a></p>
 <h2 id="getting-started-with-dbus2mqtt">Getting started with dbus2mqtt</h2>
-<p>Create a <code>config.yaml</code> file with the contents shown below. This configuration will expose all bus properties from the <code>org.mpris.MediaPlayer2.Player</code> interface to MQTT on the <code>dbus2mqtt/org.mpris.MediaPlayer2/state</code> topic. Have a look at <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/index.md">docs/examples</a> for more examples</p>
+<p>Create a <code>config.yaml</code> file with the contents shown below. This configuration will expose all bus properties from the <code>org.mpris.MediaPlayer2.Player</code> interface to MQTT on the <code>dbus2mqtt/org.mpris.MediaPlayer2/state</code> topic.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
@@ -954,7 +954,8 @@ sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </
 sudo<span class="w"> </span>docker<span class="w"> </span>logs<span class="w"> </span>dbus2mqtt<span class="w"> </span>-f
 </code></pre></div>
 <h2 id="examples">Examples</h2>
-<p>This repository contains examples under <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main//docs/examples/index.md">docs/examples</a>. The most complete one being <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md">MPRIS to Home Assistant Media Player integration</a></p>
+<p>More dbus2mqtt examples can be found here: <a href="examples/">examples</a>.
+The most complete one being <a href="examples/home_assistant_media_player/">MPRIS to Home Assistant Media Player integration</a></p>
 <h2 id="configuration-reference">Configuration reference</h2>
 <p>dbus2mqtt leverages <a href="https://jsonargparse.readthedocs.io/en/stable/">jsonargparse</a> which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.</p>
 <h3 id="mqtt-and-d-bus-connection-details">MQTT and D-Bus connection details</h3>
@@ -1025,9 +1026,9 @@ sudo<span class="w"> </span>docker<span class="w"> </span>logs<span class="w"> <
 <span class="w">              </span><span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 </code></pre></div>
 <h2 id="flows">Flows</h2>
-<p>A reference of all supported flow triggers and actions can be found on <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/flows/index.md">Flows</a></p>
+<p>A reference of all supported flow triggers and actions can be found on <a href="flows/">Flows</a></p>
 <h2 id="jinja-templating">Jinja templating</h2>
-<p>TODO: Document Jinja templating, for now see the <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md">MPRIS to Home Assistant Media Player integration</a> example</p>
+<p>TODO: Document Jinja templating, for now see the <a href="examples/home_assistant_media_player/">MPRIS to Home Assistant Media Player integration</a> example</p>
 
 
 
