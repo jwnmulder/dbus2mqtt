@@ -42,7 +42,7 @@ repos:
           - I
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.0
+    rev: "0.8.0"
     hooks:
       - id: uv-lock
 
@@ -50,3 +50,8 @@ repos:
     rev: v1.1.403
     hooks:
       - id: pyright
+
+  - repo: https://github.com/fpgmaas/deptry
+    rev: "0.23.0"
+    hooks:
+      - id: deptry

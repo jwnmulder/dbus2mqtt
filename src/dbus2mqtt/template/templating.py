@@ -5,6 +5,7 @@ from typing import Any, TypeVar
 
 from jinja2 import BaseLoader, StrictUndefined, TemplateError
 from jinja2.nativetypes import NativeEnvironment
+from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
 TemplateResultType = TypeVar('TemplateResultType')
 
@@ -23,14 +24,14 @@ class TemplateEngine:
 
         self.jinja2_env = NativeEnvironment(
             loader=BaseLoader(),
-            extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
+            extensions=[AnsibleCoreFiltersExtension],
             undefined=StrictUndefined,
             keep_trailing_newline=False
         )
 
         self.jinja2_async_env = NativeEnvironment(
             loader=BaseLoader(),
-            extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
+            extensions=[AnsibleCoreFiltersExtension],
             undefined=StrictUndefined,
             enable_async=True
         )

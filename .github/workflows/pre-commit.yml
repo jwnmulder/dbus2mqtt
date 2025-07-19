@@ -18,12 +18,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      # - name: "Set up Python"
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version-file: ".python-version"
-
       - name: Uv sync
-        run: uv sync
+        run: uv sync --all-packages
 
       - uses: pre-commit/action@v3.0.1
