@@ -52,6 +52,6 @@ repos:
       - id: pyright
 
   - repo: https://github.com/fpgmaas/deptry
-    rev: "0.23.0"
+    rev: "0.23.1"
     hooks:
       - id: deptry
