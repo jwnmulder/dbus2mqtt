@@ -10,6 +10,7 @@ import dbus_fast.constants as dbus_constants
 import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
 import dbus_fast.message as dbus_message
+import dbus_fast.signature as dbus_signature
 import janus
 
 from dbus2mqtt import AppContext
@@ -23,6 +24,7 @@ from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     unwrap_dbus_object,
     unwrap_dbus_objects,
+    convert_mqtt_args_to_dbus_explicit_variants,
 )
 from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
     mpris_introspection_playerctl,
@@ -796,8 +798,10 @@ class DbusClient:
                                         result = None
                                         error = None
                                         try:
-                                            logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            result = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                            converted_args = convert_mqtt_args_to_dbus_explicit_variants(payload_method_args)
+
+                                            logger.info(f"on_mqtt_msg: method={method.method}, args={converted_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                            result = await self.call_dbus_interface_method(interface, method.method, converted_args)
                                             
                                             # Send response if configured
                                             await self._send_mqtt_response(
@@ -823,6 +827,7 @@ class DbusClient:
 
                                         try:
                                             logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                            # converted_property_value = convert_connman_property_args(payload_value)
                                             await self.set_dbus_interface_property(interface, property.property, payload_value)
                                             
                                             # Send property set response if configured
@@ -860,7 +865,7 @@ class DbusClient:
                 "path": path,
                 "interface": interface_config.interface,
                 "method": method_name,
-                "args": method_args,
+                "method_args": method_args,
                 "timestamp": datetime.now().isoformat()
             }
             

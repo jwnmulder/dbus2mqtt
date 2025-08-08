@@ -32,7 +32,7 @@ class PropertyConfig:
 class InterfaceConfig:
     interface: str
     mqtt_command_topic: str | None = None
-    mqtt_response_topic: str | None = None  # NEW: Response topic template
+    mqtt_response_topic: str | None = None
     signals: list[SignalConfig] = field(default_factory=list)
     methods: list[MethodConfig] = field(default_factory=list)
     properties: list[PropertyConfig] = field(default_factory=list)
