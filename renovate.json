@@ -4,11 +4,11 @@
 
   "labels": ["dependencies"],
 
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+
   "packageRules": [
-    {
-      "matchJsonata": ["isBreaking"],
-      "dependencyDashboardApproval": true
-    },
     {
       "matchFileNames": [".pre-commit-config.yaml"],
       "matchUpdateTypes": ["minor", "patch"],
@@ -29,7 +29,15 @@
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": "python",
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
       "matchUpdateTypes": ["patch", "pin", "digest"],
+      "automerge": true,
+      "addLabels": ["automerge"],
       "extends": ["schedule:weekly"]
     }
   ]

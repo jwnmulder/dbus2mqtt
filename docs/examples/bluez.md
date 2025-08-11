@@ -1,4 +1,11 @@
+---
+hide:
+  - toc
+---
+
 # Bluez
+
+## Introduction
 
 This configuration file demonstrates how to use dbus2mqtt to bridge D-Bus events from BlueZ (the official Linux Bluetooth protocol stack) to MQTT topics. It subscribes to relevant D-Bus signals and properties for both the Bluetooth adapter (`hci0`) and all Bluetooth devices managed by BlueZ. The configuration defines flows that:
 
@@ -8,7 +15,7 @@ This configuration file demonstrates how to use dbus2mqtt to bridge D-Bus events
 
 This setup allows MQTT clients to receive updates about Bluetooth adapter and device states, as well as notifications when devices are removed, making it easier to integrate Bluetooth events into broader automation workflows.
 
-Configuration activities
+## Setup activities
 
 * dbus2mqtt setup using the supplied [bluez.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/bluez.yaml)
 
@@ -24,14 +31,15 @@ The following table lists commands, their descriptions, and an example JSON payl
 
 Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/bluez/hci0/command`. Method calls will be done for all matching dbus objects.
 
-| Interface            | Method<br />Property  | Description                          | Example MQTT JSON Payload                          |
-|----------------------|-----------------------|--------------------------------------|-------------------------------------------------|
-| `org.bluez.Adapter1` | `StartDiscovery`      | Starts bluetooth discovery           | `{ "method": "StartDiscovery" }`                |
-| `org.bluez.Adapter1` | `StopDiscovery`       | Stops bluetooth discovery            | `{ "method": "StopDiscovery" }`                         |
-| `org.bluez.Device1` | `Connect`              |                                      | `{ "method": "Connect", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                |
-| `org.bluez.Device1` | `Disconnect`           |                                      | `{ "method": "Disconnect", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                         |
-| `org.bluez.Device1` | `Pair`                 |                                      | `{ "method": "Pair", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                |
-| `org.bluez.Device1` | `CancelPairing`        |                                      | `{ "method": "CancelPairing", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                         |
+| Method<br />Property  | Description                          | Example MQTT JSON Payload                          |
+|-----------------------|--------------------------------------|-------------------------------------------------|
+| `StartDiscovery`      | Starts bluetooth discovery           | `#!json { "method": "StartDiscovery" }`                |
+| `StopDiscovery`       | Stops bluetooth discovery            | `#!json { "method": "StopDiscovery" }`                         |
+| `Connect`             |                                      | `#!json { "method": "Connect", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                |
+| `Disconnect`          |                                      | `#!json { "method": "Disconnect", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                         |
+| `Pair`                |                                      | `#!json { "method": "Pair", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                |
+| `CancelPairing`       |                                      | `#!json { "method": "CancelPairing", "path": "/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6" }`                         |
 
+## References
 
-https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.
+* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez>

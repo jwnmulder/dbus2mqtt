@@ -6,7 +6,10 @@ name: docker-dev
       - main
     paths-ignore:
       - 'docs/**'
+      - 'tests/**'
       - '.pre-commit-config.yaml'
+      - 'README.md'
+      - 'renovate.json'
   workflow_dispatch:
 
 jobs:

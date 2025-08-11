@@ -1,6 +1,15 @@
-# Linux Desktop
+---
+hide:
+  - toc
+---
+
+# Linux Desktop (WIP)
+
+## Introduction
 
 > **Warning:** This is not working, dbus-next is validating property names and bails on `power-saver-enable`
+
+## Setup activities
 
 Trying out this example
 
@@ -8,9 +17,7 @@ Trying out this example
 uv run dbus2mqtt --config docs/examples/linux_desktop.yaml
 ```
 
-This example shows how this dbus2mqtt can act as a bridge between the MPRIS player and Home Assistant.
-
-Features:
+## Features
 
 * ...
 

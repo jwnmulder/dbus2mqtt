@@ -10,22 +10,23 @@ local_scheme = "no-local-version"
 
 [project]
 name = "dbus2mqtt"
-# version = "0.1.0"
 dynamic = ["version"]
 description = """\
-    A Python tool to expose Linux D-Bus signals, methods and properties over MQTT \
-    - featuring templating, payload enrichment and Home Assistant-ready examples \
+    General purpose DBus to MQTT bridge \
+    - expose signals, methods and properties over MQTT \
+    - featuring jinja based templating, payload enrichment and MPRIS / BlueZ / Home Assistant ready examples \
     """
 readme = "README.md"
 license = "MIT"
-keywords = ["python", "mqtt", "mpris", "dbus", "home-assistant"]
+keywords = ["python", "mqtt", "jinja2", "bridge", "mpris", "dbus", "home-assistant", "bluez"]
 classifiers = [
     # https://pypi.org/classifiers/
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
 
     "Intended Audience :: Developers",
     "Operating System :: POSIX :: Linux",
     "License :: OSI Approved :: MIT License",
+    "Topic :: Home Automation",
 
     # Supported Python versions
     "Programming Language :: Python :: 3",
@@ -48,7 +49,7 @@ dependencies = [
     "paho-mqtt>=2.1.0",
     "pydantic>=2.11.3",
     "python-dotenv>=1.1.0",
-    "schedule>=1.2.2",
+    "pyyaml>=6.0.2",
 ]
 
 [dependency-groups]
@@ -60,18 +61,24 @@ dev = [
     "pyright>=1.1.396",
     "pre-commit>=4.2.0",
     "pip>=25.0.1",
-    "pytest-asyncio>=1.0.0"
+    "pytest-asyncio>=1.0.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.15",
+    "mkdocs-open-in-new-tab>=1.0.8",
+    "deptry>=0.23.0",
 ]
 
 [project.urls]
-# Homepage = "https://example.com"
-# Documentation = "https://readthedocs.org"
-Repository = "https://github.com/jwnmulder/dbus2mqtt.git"
+Documentation = "https://jwnmulder.github.io/dbus2mqtt"
+Source = "https://github.com/jwnmulder/dbus2mqtt"
 Issues = "https://github.com/jwnmulder/dbus2mqtt/issues"
-# Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [project.scripts]
 dbus2mqtt = "dbus2mqtt.main:main"
+
+[tool.deptry.per_rule_ignores]
+DEP003 = ["dbus2mqtt"]
+DEP004 = ["mkdocs"]
 
 [tool.taskipy.tasks]
 lint-ruff = "ruff check"

@@ -5,7 +5,7 @@ It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bu
 
 This makes it easy to integrate Linux desktop services or system signals into MQTT-based workflows - including **Home Assistant**.
 
-## ✨ Features
+## Features
 
 * 🔗 Forward **D-Bus signals** to MQTT topics.
 * 🧠 Enrich or transform **MQTT payloads** using Jinja2 templates and additional D-Bus calls.
@@ -17,11 +17,11 @@ This makes it easy to integrate Linux desktop services or system signals into MQ
 
 **dbus2mqtt** is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.
 
-Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: [home_assistant_media_player.md](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md)
+Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
 ## Getting started with dbus2mqtt
 
-Create a `config.yaml` file with the contents shown below. This configuration will expose all bus properties from the `org.mpris.MediaPlayer2.Player` interface to MQTT on the `dbus2mqtt/org.mpris.MediaPlayer2/state` topic. Have a look at [docs/examples](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples.md) for more examples
+Create a `config.yaml` file with the contents shown below. This configuration will expose all bus properties from the `org.mpris.MediaPlayer2.Player` interface to MQTT on the `dbus2mqtt/org.mpris.MediaPlayer2/state` topic.
 
 ```yaml
 dbus:
@@ -60,6 +60,7 @@ MQTT__USERNAME=
 MQTT__PASSWORD=
 ```
 
+
 ### Install and run dbus2mqtt
 
 ```bash
@@ -97,7 +98,8 @@ sudo docker logs dbus2mqtt -f
 
 ## Examples
 
-This repository contains examples under [docs/examples](https://github.com/jwnmulder/dbus2mqtt/blob/main//docs/examples.md). The most complete one being [MPRIS to Home Assistant Media Player integration](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md)
+More dbus2mqtt examples can be found here: [examples](https://jwnmulder.github.io/dbus2mqtt/examples/).
+The most complete one being [MPRIS to Home Assistant Media Player integration](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
 ## Configuration reference
 
@@ -194,8 +196,8 @@ dbus:
 
 ## Flows
 
-A reference of all supported flow triggers and actions can be found on [Flows](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/flows.md)
+A reference of all supported flow triggers and actions can be found on [Flows](https://jwnmulder.github.io/dbus2mqtt/flows/)
 
 ## Jinja templating
 
-TODO: Document Jinja templating, for now see the [MPRIS to Home Assistant Media Player integration](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.md) example
+TODO: Document Jinja templating, for now see the [MPRIS to Home Assistant Media Player integration](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/) example
