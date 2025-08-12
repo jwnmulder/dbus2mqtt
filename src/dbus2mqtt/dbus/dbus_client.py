@@ -10,6 +10,7 @@ import dbus_fast.constants as dbus_constants
 import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
 import dbus_fast.message as dbus_message
+import dbus_fast.signature as dbus_signature
 import janus
 
 from dbus2mqtt import AppContext
@@ -23,6 +24,7 @@ from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     unwrap_dbus_object,
     unwrap_dbus_objects,
+    convert_mqtt_args_to_dbus_explicit_variants,
 )
 from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
     mpris_introspection_playerctl,
@@ -756,7 +758,6 @@ class DbusClient:
         found_matching_topic = False
         for subscription_configs in self.config.subscriptions:
             for interface_config in subscription_configs.interfaces:
-                # TODO, performance improvement
                 mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
                 found_matching_topic |= mqtt_topic == msg.topic
 
@@ -789,17 +790,34 @@ class DbusClient:
                             for interface_config in subscription_configs.interfaces:
 
                                 for method in interface_config.methods:
-
                                     # filter configured method, configured topic, ...
                                     if method.method == payload_method:
                                         interface = proxy_object.get_interface(name=interface_config.interface)
                                         matched_method = True
 
+                                        result = None
+                                        error = None
                                         try:
-                                            logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                            converted_args = convert_mqtt_args_to_dbus_explicit_variants(payload_method_args)
+
+                                            logger.info(f"on_mqtt_msg: method={method.method}, args={converted_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                            result = await self.call_dbus_interface_method(interface, method.method, converted_args)
+                                            
+                                            # Send response if configured
+                                            await self._send_mqtt_response(
+                                                interface_config, method.method, payload_method_args,
+                                                result, None, bus_name, path
+                                            )
+                                            
                                         except Exception as e:
+                                            error = e
                                             logger.warning(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name} failed, exception={e}")
+                                            
+                                            # Send error response if configured
+                                            await self._send_mqtt_response(
+                                                interface_config, method.method, payload_method_args,
+                                                None, error, bus_name, path
+                                            )
 
                                 for property in interface_config.properties:
                                     # filter configured property, configured topic, ...
@@ -809,12 +827,77 @@ class DbusClient:
 
                                         try:
                                             logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                            # converted_property_value = convert_connman_property_args(payload_value)
                                             await self.set_dbus_interface_property(interface, property.property, payload_value)
+                                            
+                                            # Send property set response if configured
+                                            await self._send_mqtt_response(
+                                                interface_config, f"set_{property.property}", [payload_value],
+                                                payload_value, None, bus_name, path
+                                            )
+                                            
                                         except Exception as e:
                                             logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name} failed, exception={e}")
+                                            
+                                            # Send property set error response if configured
+                                            await self._send_mqtt_response(
+                                                interface_config, f"set_{property.property}", [payload_value],
+                                                None, e, bus_name, path
+                                            )
 
         if not matched_method and not matched_property:
             if payload_method:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path or '*'}, active bus_names={list(self.subscriptions.keys())}")
             if payload_property:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path or '*'}, active bus_names={list(self.subscriptions.keys())}")
+
+    async def _send_mqtt_response(self, interface_config, method_name: str, method_args: list[Any], 
+                             result: Any, error: Exception | None, bus_name: str, path: str):
+        """Send MQTT response for a method call if response topic is configured"""
+    
+        if not interface_config.mqtt_response_topic:
+            return
+        
+        try:
+            # Build response context
+            response_context = {
+                "bus_name": bus_name,
+                "path": path,
+                "interface": interface_config.interface,
+                "method": method_name,
+                "method_args": method_args,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Add result or error to context
+            if error:
+                response_context.update({
+                    "success": False,
+                    "error": str(error),
+                    "error_type": error.__class__.__name__
+                })
+            else:
+                response_context.update({
+                    "success": True,
+                    "result": result
+                })
+            
+            # Render response topic
+            response_topic = interface_config.render_mqtt_response_topic(
+                self.templating, response_context
+            )
+            
+            if response_topic:
+                # Send response via MQTT
+                from dbus2mqtt.event_broker import MqttMessage
+                response_msg = MqttMessage(
+                    topic=response_topic,
+                    payload=response_context,
+                    payload_serialization_type="json"
+                )
+                await self.event_broker.publish_to_mqtt(response_msg)
+                
+                logger.debug(f"Sent MQTT response: topic={response_topic}, success={response_context['success']}")
+                
+        except Exception as e:
+            logger.warning(f"Failed to send MQTT response: {e}")
