@@ -118,8 +118,40 @@ class FlowActionLogConfig:
     type: Literal["log"] = "log"
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
+@dataclass
+class FlowActionDbusCallConfig:
+    """ Calls a method on a dbus object.
+        When any of the arguments contains a * wildcard, only subscribed objects interfaces are matched.
+        The given method is called on all matching objects and interfaces
+    """
+    bus_name: str
+    """bus_name pattern, supporting * wildcards"""
+    path: str
+    """path pattern, supporting * wildcards"""
+    interface: str
+    """interface pattern, supporting * wildcards"""
+    method: str
+    args: str | list[object] = field(default_factory=list)
+    type: Literal["dbus_call"] = "dbus_call"
+
+@dataclass
+class FlowActionDbusSetPropertyConfig:
+    """ Set a property to given value on a dbus object.
+        When any of the arguments contains a * wildcard, only subscribed object interfaces are matched.
+        The given property is set to given value for all matching objects and interfaces
+    """
+    bus_name: str
+    """bus_name pattern, supporting * wildcards"""
+    path: str
+    """path pattern, supporting * wildcards"""
+    interface: str
+    """interface pattern, supporting * wildcards"""
+    property: str
+    value: object
+    type: Literal["dbus_set_property"] = "dbus_set_property"
+
 FlowActionConfig = Annotated[
-    FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig,
+    FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig | FlowActionDbusCallConfig,
     Field(discriminator="type")
 ]
 
