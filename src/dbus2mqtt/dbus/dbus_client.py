@@ -799,7 +799,7 @@ class DbusClient:
                                             logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
                                             await self.call_dbus_interface_method(interface, method.method, payload_method_args)
                                         except Exception as e:
-                                            logger.warning(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name} failed, exception={e}")
+                                            logger.warning(f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={bus_name}, exception={e}")
 
                                 for property in interface_config.properties:
                                     # filter configured property, configured topic, ...
