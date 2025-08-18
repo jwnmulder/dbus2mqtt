@@ -5,7 +5,7 @@ from mkdocs.structure.pages import Page
 
 def on_page_markdown(markdown: str, page: Page, config: MkDocsConfig, files: Files):
 
-    print(f"on_page_markdown: {page}")
+    # print(f"on_page_markdown: {page}")
     return markdown
 
 def on_page_content(html: str, page: Page, config: MkDocsConfig, files: Files):
