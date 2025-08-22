@@ -2,46 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/index.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/developer/index.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/developer/debugging_dbus.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/index.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/bluez.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/dbus2mqtt_internal_state.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/linux_desktop.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/index.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/flow_actions.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/flow_triggers.html</loc>
-         <lastmod>2025-08-18</lastmod>
+         <lastmod>2025-08-22</lastmod>
     </url>
 </urlset>
