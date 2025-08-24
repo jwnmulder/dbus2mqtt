@@ -12,13 +12,9 @@
         <meta name="author" content="Jan-Willem Mulder">
       
       
-        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/developer/index.html">
+        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/examples/connman-config.html">
       
       
-        <link rel="prev" href="../examples/bluez.html">
-      
-      
-        <link rel="next" href="debugging_dbus.html">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Developer guide - dbus2mqtt</title>
+        <title>Connman (WIP) - dbus2mqtt</title>
       
     
     
@@ -82,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#developer-guide" class="md-skip">
+        <a href="#connman-wip" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Developer guide
+              Connman (WIP)
             
           </span>
         </div>
@@ -194,6 +190,8 @@
         <div class="md-main__inner md-grid">
           
             
+              
+                
               
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
@@ -432,7 +430,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../examples/index.html" class="md-nav__link ">
+            <a href="index.html" class="md-nav__link ">
               
   
   
@@ -467,7 +465,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/home_assistant_media_player.html" class="md-nav__link">
+      <a href="home_assistant_media_player.html" class="md-nav__link">
         
   
   
@@ -490,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/bluez.html" class="md-nav__link">
+      <a href="bluez.html" class="md-nav__link">
         
   
   
@@ -517,8 +515,6 @@
       
   
   
-    
-  
   
   
     
@@ -534,15 +530,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="index.html" class="md-nav__link md-nav__link--active">
+            <a href="../developer/index.html" class="md-nav__link ">
               
   
   
@@ -555,13 +551,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_6" id="__nav_6_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
@@ -577,7 +573,7 @@
   
   
     <li class="md-nav__item">
-      <a href="debugging_dbus.html" class="md-nav__link">
+      <a href="../developer/debugging_dbus.html" class="md-nav__link">
         
   
   
@@ -608,7 +604,9 @@
             
             
               
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -627,18 +625,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#specifications" class="md-nav__link">
+  <a href="#introduction" class="md-nav__link">
     <span class="md-ellipsis">
-      Specifications
+      Introduction
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-from-source" class="md-nav__link">
+  <a href="#setup-activities" class="md-nav__link">
     <span class="md-ellipsis">
-      Running from source
+      Setup activities
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Features
     </span>
   </a>
   
@@ -657,22 +664,23 @@
               <article class="md-content__inner md-typeset">
                 
                   
+  
+
 
 
   
   
 
 
-<h1 id="developer-guide">Developer guide</h1>
-<h2 id="specifications">Specifications</h2>
-<p>Generic DBus specifications:</p>
-<ul>
-<li><a href="https://dbus.freedesktop.org/doc/dbus-tutorial.html">D-Bus Tutorial</a></li>
-<li><a href="https://dbus.freedesktop.org/doc/dbus-specification.html">D-Bus Specification</a></li>
-</ul>
-<h2 id="running-from-source">Running from source</h2>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>config.yaml
+<h1 id="connman-wip">Connman (WIP)</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Using dbus2mqtt, you can control you network configuration using connman through mqtt topics.</p>
+<h2 id="setup-activities">Setup activities</h2>
+<p>Trying out this example</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>docs/examples/connman-config.yaml
 </code></pre></div>
+<h2 id="features">Features</h2>
+<p>This configuration is a passthrough of the D-BUS architecture of connman. refer to connman D-BUS API.</p>
 
 
 
@@ -680,8 +688,13 @@
 
 
 
+  
+  
 
 
+
+
+  
 
 
 
@@ -697,44 +710,6 @@
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../examples/bluez.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bluez">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Bluez
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="debugging_dbus.html" class="md-footer__link md-footer__link--next" aria-label="Next: Debugging dbus">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Debugging dbus
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">

@@ -12,11 +12,13 @@
         <meta name="author" content="Jan-Willem Mulder">
       
       
-        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/index.html">
+        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/subscriptions.html">
       
       
+        <link rel="prev" href="setup.html">
       
-        <link rel="next" href="setup.html">
+      
+        <link rel="next" href="flows/index.html">
       
       
       <link rel="icon" href="assets/images/favicon.png">
@@ -24,7 +26,7 @@
     
     
       
-        <title>dbus2mqtt</title>
+        <title>Subscriptions - dbus2mqtt</title>
       
     
     
@@ -80,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dbus2mqtt" class="md-skip">
+        <a href="#d-bus-subscriptions" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Subscriptions
             
           </span>
         </div>
@@ -229,32 +231,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Home
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="index.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
         
   
   
@@ -265,104 +245,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project status
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started-with-dbus2mqtt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting started with dbus2mqtt
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting started with dbus2mqtt">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#install-and-run-dbus2mqtt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install and run dbus2mqtt
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Examples
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#exposing-dbus-methods-properties-and-signals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Exposing dbus methods, properties and signals
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#flows" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flows
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jinja-templating" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jinja templating
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -393,10 +275,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="subscriptions.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Subscriptions
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="subscriptions.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -407,6 +311,77 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mqtt-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      MQTT commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MQTT commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calling-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calling methods
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Property updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command responses
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exposing-dbus-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exposing dbus signals
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -743,37 +718,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#mqtt-commands" class="md-nav__link">
     <span class="md-ellipsis">
-      Features
+      MQTT commands
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      Project status
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started-with-dbus2mqtt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Getting started with dbus2mqtt
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting started with dbus2mqtt">
+    <nav class="md-nav" aria-label="MQTT commands">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#install-and-run-dbus2mqtt" class="md-nav__link">
+  <a href="#calling-methods" class="md-nav__link">
     <span class="md-ellipsis">
-      Install and run dbus2mqtt
+      Calling methods
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Property updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command responses
     </span>
   </a>
   
@@ -785,36 +760,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#exposing-dbus-signals" class="md-nav__link">
     <span class="md-ellipsis">
-      Examples
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#exposing-dbus-methods-properties-and-signals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Exposing dbus methods, properties and signals
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#flows" class="md-nav__link">
-    <span class="md-ellipsis">
-      Flows
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#jinja-templating" class="md-nav__link">
-    <span class="md-ellipsis">
-      Jinja templating
+      Exposing dbus signals
     </span>
   </a>
   
@@ -839,73 +787,236 @@
   
 
 
-<h1 id="dbus2mqtt">dbus2mqtt</h1>
-<p><strong>dbus2mqtt</strong> is a Python application that bridges <strong>DBus</strong> with <strong>MQTT</strong>.
-It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages, and shape payloads using flexible <strong>Jinja2 templating</strong>.</p>
-<p>This makes it easy to integrate Linux desktop services or system signals into MQTT-based workflows - including <strong>Home Assistant</strong>.</p>
-<h2 id="features">Features</h2>
-<ul>
-<li>🔗 Forward <strong>D-Bus signals</strong> to MQTT topics.</li>
-<li>🧠 Enrich or transform <strong>MQTT payloads</strong> using Jinja2 templates and additional D-Bus calls.</li>
-<li>⚡ Trigger message publishing via <strong>signals, timers, property changes, or startup events</strong>.</li>
-<li>📡 Expose <strong>D-Bus methods</strong> for remote control via MQTT messages.</li>
-<li>🏠 Includes example configurations for <strong>MPRIS</strong> and <strong>Home Assistant Media Player</strong> integration.</li>
-</ul>
-<h2 id="project-status">Project status</h2>
-<p><strong>dbus2mqtt</strong> is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.</p>
-<p>Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: <a href="examples/home_assistant_media_player.html">Mediaplayer integration with Home Assistant</a></p>
-<h2 id="getting-started-with-dbus2mqtt">Getting started with dbus2mqtt</h2>
-<p>Create a <code>config.yaml</code> file with the contents shown below. This configuration will expose all bus properties from the <code>org.mpris.MediaPlayer2.Player</code> interface to MQTT on the <code>dbus2mqtt/org.mpris.MediaPlayer2/state</code> topic.</p>
+<h1 id="d-bus-subscriptions">D-Bus subscriptions</h1>
+<p>In order to call D-Bus methods, update properties or expose signals, configure <code>dbus2mqtt</code> with at least one subscription to one or more D-Bus objects.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
+<span class="w">      </span><span class="nt">interfaces</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
+<span class="w">          </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+</code></pre></div>
+<p><code>bus_name</code>, <code>path</code> and <code>interface</code> should match the dbus object you want to subscribe to. Wildcard patterns are supported for both <code>bus_name</code> and <code>path</code></p>
+<p>For each subscription, you can configure the behavior of <code>dbus2mqtt</code> using any of the options below.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>interface</code></td>
+<td>The D-Bus interface that defines the set of methods, signals, and properties available</td>
+</tr>
+<tr>
+<td><code>mqtt_command_topic</code></td>
+<td>MQTT topic where <code>dbus2mqtt</code> listens for JSON commands. For example <code>dbus2mqtt/mpris/command</code></td>
+</tr>
+<tr>
+<td><code>mqtt_response_topic</code></td>
+<td>MQTT topic where <code>dbus2mqtt</code> published responses on. For example <code>dbus2mqtt/mpris/response</code></td>
+</tr>
+<tr>
+<td><code>methods</code></td>
+<td>List of methods to expose over MQTT</td>
+</tr>
+<tr>
+<td><code>properties</code></td>
+<td>List of properties to expose over MQTT</td>
+</tr>
+<tr>
+<td><code>signals</code></td>
+<td>List of D-Bus signals to subscribe to</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Setting <code>mqtt_command_topic</code> will automatically make all configured methods and properties available over MQTT without any additional work</p>
+</div>
+<h2 id="mqtt-commands">MQTT commands</h2>
+<p>Any D-Bus method (when configured) can be called by publishing a MQTT message to the configured <code>mqtt_command_topic</code>.</p>
+<p>The example configuration below expose 3 methods and one property.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
+<span class="w">      </span><span class="nt">interfaces</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.Player</span>
+<span class="w">          </span><span class="nt">mqtt_command_topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/command</span>
+<span class="w">          </span><span class="nt">mqtt_response_topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/response/{{ method }}</span>
+<span class="w">          </span><span class="nt">methods</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pause</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Play</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Seek</span>
+<span class="w">          </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">property</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Volume</span>
+</code></pre></div>
+<h3 id="calling-methods">Calling methods</h3>
+<p>Methods are invoked after publishing a specific JSON message to the <code>dbus2mqtt/org.mpris.MediaPlayer2/command</code> MQTT topic. Arguments can be passed along in <code>args</code>.</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>method</td>
+<td>str</td>
+<td>Method name</td>
+</tr>
+<tr>
+<td>args</td>
+<td>list</td>
+<td>Optional list of arguments that matches the methods D-Bus signature</td>
+</tr>
+<tr>
+<td>bus_name</td>
+<td>str</td>
+<td>Only invoke on dbus objects where bus_name matches, defaults to <code>*</code></td>
+</tr>
+<tr>
+<td>path</td>
+<td>str</td>
+<td>Only invoke on dbus objects where path matches, defaults to <code>*</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no <code>bus_name</code> and <code>path</code> is given, commands are executed against all matching
+dbus objects. To target specific dbus objects make sure to set both keys.</p>
+</div>
+<p>Example 1, calling <code>Play</code> on all registered MPRIS players</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Example 2, invoking <code>Seek</code> with arguments and targeting only the VLC MPRIS player</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seek&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">60000000</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.vlc&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="property-updates">Property updates</h3>
+<p>Properties can be updated by publishing a specific JSON message to the <code>dbus2mqtt/org.mpris.MediaPlayer2/command</code> MQTT topic.</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>property</td>
+<td>str</td>
+<td>Property name</td>
+</tr>
+<tr>
+<td>value</td>
+<td>list</td>
+<td>Property value</td>
+</tr>
+<tr>
+<td>bus_name</td>
+<td>str</td>
+<td>Only invoke on dbus objects where bus_name matches, defaults to <code>*</code></td>
+</tr>
+<tr>
+<td>path</td>
+<td>str</td>
+<td>Only invoke on dbus objects where path matches, defaults to <code>*</code></td>
+</tr>
+</tbody>
+</table>
+<p>Example, setting <code>Volume</code> to 1.0 for Firefox MPRIS player only</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Volume&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.firefox&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="command-responses">Command responses</h3>
+<p>If set, D-Bus responses to commands will be published the configured <code>mqtt_response_topic</code> MQTT topic.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>dbus2mqtt</code> publishes one response per targeted dbus object.
+When two dbus objects are targeted, two separate responses will be published.</p>
+</div>
+<p>Example response for method calls</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.mpris.MediaPlayer2.vlc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;interface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.freedesktop.DBus.Properties&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08-24T16:36:42.522104&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GetAll&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;org.mpris.MediaPlayer2.Player&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="nt">&quot;Position&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;PlaybackStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Stopped&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;LoopStatus&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Shuffle&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Volume&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Rate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;MinimumRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.032</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;MaximumRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">32.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanControl&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanPlay&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanGoNext&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanGoPrevious&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanPause&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;CanSeek&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Example response for property updates</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.mpris.MediaPlayer2.vlc&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;interface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;org.mpris.MediaPlayer2.Player&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-08-24T16:39:13.199826&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;property&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Volume&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.99</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.99</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="exposing-dbus-signals">Exposing dbus signals</h2>
+<p>Publishing signals to MQTT topics works by subscribing to the relevant signal and using flows for publishing.</p>
+<p>In contrast to calling methods or setting properties, signals are not automatically published to MQTT topcis.
+To do so, configure a flow as shown below.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
 <span class="w">      </span><span class="nt">interfaces</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.freedesktop.DBus.Properties</span>
-<span class="w">          </span><span class="nt">methods</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GetAll</span>
+<span class="w">          </span><span class="nt">signals</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">signal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged</span>
 
 <span class="w">      </span><span class="nt">flows</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Publish</span><span class="nv"> </span><span class="s">MPRIS</span><span class="nv"> </span><span class="s">state&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Property</span><span class="nv"> </span><span class="s">Changed</span><span class="nv"> </span><span class="s">flow&quot;</span>
 <span class="w">          </span><span class="nt">triggers</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object_added</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
-<span class="w">              </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">on_signal</span>
 <span class="w">          </span><span class="nt">actions</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">context_set</span>
-<span class="w">              </span><span class="nt">context</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">mpris_bus_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">dbus_list(&quot;org.mpris.MediaPlayer2.*&quot;)</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">first</span><span class="nv"> </span><span class="s">}}&#39;</span>
-<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_publish</span>
-<span class="w">              </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
+<span class="w">              </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/signals/PropertiesChanged</span>
 <span class="w">              </span><span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
-<span class="w">              </span><span class="nt">payload_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">                </span><span class="no">{{ dbus_call(mpris_bus_name, path, &#39;org.freedesktop.DBus.Properties&#39;, &#39;GetAll&#39;, [&#39;org.mpris.MediaPlayer2.Player&#39;]) }}</span>
 </code></pre></div>
-<p>MQTT connection details can be configured in that same <code>config.yaml</code> file or via environment variables. For now create a <code>.env</code> file with the following contents.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">MQTT__HOST</span><span class="o">=</span>localhost
-<span class="nv">MQTT__PORT</span><span class="o">=</span><span class="m">1883</span>
-<span class="nv">MQTT__USERNAME</span><span class="o">=</span>
-<span class="nv">MQTT__PASSWORD</span><span class="o">=</span>
-</code></pre></div>
-<h3 id="install-and-run-dbus2mqtt">Install and run dbus2mqtt</h3>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dbus2mqtt
-dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>config.yaml
-</code></pre></div>
-<p>See <a href="setup.html">Setup</a> for more installation options and configuration details.</p>
-<h2 id="examples">Examples</h2>
-<p>More dbus2mqtt examples can be found here: <a href="examples/index.html">Examples</a>.
-The most complete one being <a href="examples/home_assistant_media_player.html">Mediaplayer integration with Home Assistant</a></p>
-<h2 id="exposing-dbus-methods-properties-and-signals">Exposing dbus methods, properties and signals</h2>
-<p>See <a href="subscriptions.html">subscriptions</a> for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="flows">Flows</h2>
-<p>A reference of all supported flow triggers and actions can be found on <a href="flows/">flows</a></p>
-<h2 id="jinja-templating">Jinja templating</h2>
-<p>TODO: Document Jinja templating, for now see the <a href="examples/home_assistant_media_player.html">Mediaplayer integration with Home Assistant</a> example</p>
+<p>More information on flows can be found here: <a href="flows/index.html">flows</a></p>
 
 
 
@@ -934,15 +1045,31 @@ The most complete one being <a href="examples/home_assistant_media_player.html">
       
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
+          
+          <a href="setup.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Setup">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Setup
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="setup.html" class="md-footer__link md-footer__link--next" aria-label="Next: Setup">
+          <a href="flows/index.html" class="md-footer__link md-footer__link--next" aria-label="Next: Flows">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Setup
+                Flows
               </div>
             </div>
             <div class="md-footer__button md-icon">

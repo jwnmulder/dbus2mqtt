@@ -12,28 +12,28 @@
         <meta name="author" content="Jan-Willem Mulder">
       
       
-        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/developer/index.html">
+        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/setup.html">
       
       
-        <link rel="prev" href="../examples/bluez.html">
+        <link rel="prev" href="index.html">
       
       
-        <link rel="next" href="debugging_dbus.html">
+        <link rel="next" href="subscriptions.html">
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
     
     
       
-        <title>Developer guide - dbus2mqtt</title>
+        <title>Setup - dbus2mqtt</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,11 +52,11 @@
       
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../css/open_in_new_tab.css">
+      <link rel="stylesheet" href="css/open_in_new_tab.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#developer-guide" class="md-skip">
+        <a href="#setup" class="md-skip">
           Skip to content
         </a>
       
@@ -98,7 +98,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../index.html" title="dbus2mqtt" class="md-header__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
+    <a href="index.html" title="dbus2mqtt" class="md-header__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Developer guide
+              Setup
             
           </span>
         </div>
@@ -204,7 +204,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../index.html" title="dbus2mqtt" class="md-nav__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
+    <a href="index.html" title="dbus2mqtt" class="md-nav__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -234,7 +234,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../index.html" class="md-nav__link">
+      <a href="index.html" class="md-nav__link">
         
   
   
@@ -253,10 +253,32 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../setup.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Setup
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="setup.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -267,6 +289,101 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-dbus2mqtt-with-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing dbus2mqtt with pip
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-based-setup-with-auto-start-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker based setup (with auto start behavior)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-mqtt-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt mqtt config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-dbus-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt dbus config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-flow-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt flow config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -278,7 +395,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../subscriptions.html" class="md-nav__link">
+      <a href="subscriptions.html" class="md-nav__link">
         
   
   
@@ -322,7 +439,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../flows/index.html" class="md-nav__link ">
+            <a href="flows/index.html" class="md-nav__link ">
               
   
   
@@ -357,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../flows/flow_triggers.html" class="md-nav__link">
+      <a href="flows/flow_triggers.html" class="md-nav__link">
         
   
   
@@ -380,7 +497,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../flows/flow_actions.html" class="md-nav__link">
+      <a href="flows/flow_actions.html" class="md-nav__link">
         
   
   
@@ -432,7 +549,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../examples/index.html" class="md-nav__link ">
+            <a href="examples/index.html" class="md-nav__link ">
               
   
   
@@ -467,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/home_assistant_media_player.html" class="md-nav__link">
+      <a href="examples/home_assistant_media_player.html" class="md-nav__link">
         
   
   
@@ -490,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/bluez.html" class="md-nav__link">
+      <a href="examples/bluez.html" class="md-nav__link">
         
   
   
@@ -517,8 +634,6 @@
       
   
   
-    
-  
   
   
     
@@ -534,15 +649,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="index.html" class="md-nav__link md-nav__link--active">
+            <a href="developer/index.html" class="md-nav__link ">
               
   
   
@@ -555,13 +670,13 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_6" id="__nav_6_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
@@ -577,7 +692,7 @@
   
   
     <li class="md-nav__item">
-      <a href="debugging_dbus.html" class="md-nav__link">
+      <a href="developer/debugging_dbus.html" class="md-nav__link">
         
   
   
@@ -627,20 +742,77 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#specifications" class="md-nav__link">
+  <a href="#installation" class="md-nav__link">
     <span class="md-ellipsis">
-      Specifications
+      Installation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-dbus2mqtt-with-pip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing dbus2mqtt with pip
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#running-from-source" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#docker-based-setup-with-auto-start-behavior" class="md-nav__link">
     <span class="md-ellipsis">
-      Running from source
+      Docker based setup (with auto start behavior)
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-mqtt-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt mqtt config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-dbus-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt dbus config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dbus2mqtt-flow-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      dbus2mqtt flow config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -663,16 +835,120 @@
   
 
 
-<h1 id="developer-guide">Developer guide</h1>
-<h2 id="specifications">Specifications</h2>
-<p>Generic DBus specifications:</p>
-<ul>
-<li><a href="https://dbus.freedesktop.org/doc/dbus-tutorial.html">D-Bus Tutorial</a></li>
-<li><a href="https://dbus.freedesktop.org/doc/dbus-specification.html">D-Bus Specification</a></li>
-</ul>
-<h2 id="running-from-source">Running from source</h2>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>config.yaml
+<h1 id="setup">Setup</h1>
+<h2 id="installation">Installation</h2>
+<p>First, create your own dbus2mqtt configuration file or pick one of the examples. Like the <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml">home_assistant_media_player.yaml</a> example from this repository.</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$HOME</span>/.config/dbus2mqtt
+cp<span class="w"> </span>.env.example<span class="w"> </span><span class="nv">$HOME</span>/.config/dbus2mqtt/.env
+curl<span class="w"> </span>https://raw.githubusercontent.com/jwnmulder/dbus2mqtt/main/docs/examples/home_assistant_media_player.yaml<span class="w"> </span>-o<span class="w"> </span><span class="nv">$HOME</span>/.config/dbus2mqtt/config.yaml
 </code></pre></div>
+<p>Make sure to update the .env file with your correct MQTT connection details. It will look like this</p>
+<div class="highlight"><pre><span></span><code><span class="nv">MQTT__HOST</span><span class="o">=</span>localhost
+<span class="nv">MQTT__PORT</span><span class="o">=</span><span class="m">1883</span>
+<span class="nv">MQTT__USERNAME</span><span class="o">=</span>
+<span class="nv">MQTT__PASSWORD</span><span class="o">=</span>
+</code></pre></div>
+<h3 id="installing-dbus2mqtt-with-pip">Installing dbus2mqtt with pip</h3>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dbus2mqtt
+
+<span class="nb">cd</span><span class="w"> </span><span class="nv">$HOME</span>/.config/dbus2mqtt
+dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>config.yaml
+</code></pre></div>
+<h3 id="docker-based-setup-with-auto-start-behavior">Docker based setup (with auto start behavior)</h3>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>docker<span class="w"> </span>pull<span class="w"> </span>jwnmulder/dbus2mqtt
+sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--detach<span class="w"> </span>--name<span class="w"> </span>dbus2mqtt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--volume<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">&quot;</span>/.config/dbus2mqtt:<span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">&quot;</span>/.config/dbus2mqtt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--volume<span class="w"> </span>/run/user:/run/user<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--env<span class="w"> </span><span class="nv">DBUS_SESSION_BUS_ADDRESS</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$DBUS_SESSION_BUS_ADDRESS</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--env-file<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">&quot;</span>/.config/dbus2mqtt/.env<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--user<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--privileged<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--restart<span class="w"> </span>unless-stopped<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jwnmulder/dbus2mqtt<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--config<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">&quot;</span>/.config/dbus2mqtt/config.yaml
+
+<span class="c1"># view logs</span>
+sudo<span class="w"> </span>docker<span class="w"> </span>logs<span class="w"> </span>dbus2mqtt<span class="w"> </span>-f
+</code></pre></div>
+<h2 id="configuration-reference">Configuration reference</h2>
+<p>dbus2mqtt leverages <a href="https://jsonargparse.readthedocs.io/en/stable/">jsonargparse</a> which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.</p>
+<h3 id="dbus2mqtt-mqtt-config">dbus2mqtt <strong>mqtt</strong> config</h3>
+<p>MQTT connection details can be configured via a mix of environment variables and yaml configuration.</p>
+<table>
+<thead>
+<tr>
+<th>YAML config key</th>
+<th>Env vars</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mqtt.host</code></td>
+<td><code>MQTT__HOST</code></td>
+<td>Hostname or IP</td>
+</tr>
+<tr>
+<td><code>mqtt.port</code></td>
+<td><code>MQTT__PORT</code></td>
+<td>Port, defaults to <code>1883</code></td>
+</tr>
+<tr>
+<td><code>mqtt.username</code></td>
+<td><code>MQTT__USERNAME</code></td>
+<td>Username</td>
+</tr>
+<tr>
+<td><code>mqtt.password</code></td>
+<td><nobr><code>MQTT__PASSWORD</code></nobr></td>
+<td>Password</td>
+</tr>
+<tr>
+<td><code>mqtt.subscription_topics</code></td>
+<td></td>
+<td>List of topics that dbus2mqtt will subscribe to, defaults to <code>["dbus2mqtt/#"]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dbus2mqtt-dbus-config">dbus2mqtt <strong>dbus</strong> config</h3>
+<table>
+<thead>
+<tr>
+<th>YAML config key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dbus.bus_type</code></td>
+<td>One of <code>SESSION</code> or <code>SYSTEM</code>, defaults to <code>SESSION</code></td>
+</tr>
+<tr>
+<td><code>dbus.subscriptions</code></td>
+<td>See <a href="subscriptions.html">subscriptions</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dbus2mqtt-flow-config">dbus2mqtt <strong>flow</strong> config</h3>
+<p>Flows allow for additional actions to be executed on pre-defined triggers. Details in flow action and flow triggers can be found on: <a href="flows">flows</a></p>
+<table>
+<thead>
+<tr>
+<th>YAML config key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flows</code></td>
+<td>Global flow definitions, see <a href="flows">flows</a> for details</td>
+</tr>
+<tr>
+<td><code>dbus.subscriptions[].flows</code></td>
+<td>Subscription specific flow definitions, see <a href="flows">flows</a> for details</td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -702,7 +978,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../examples/bluez.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Bluez">
+          <a href="index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -712,20 +988,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Bluez
+                Home
               </div>
             </div>
           </a>
         
         
           
-          <a href="debugging_dbus.html" class="md-footer__link md-footer__link--next" aria-label="Next: Debugging dbus">
+          <a href="subscriptions.html" class="md-footer__link md-footer__link--next" aria-label="Next: Subscriptions">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Debugging dbus
+                Subscriptions
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -798,12 +1074,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant", "navigation.footer"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": ".", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant", "navigation.footer"], "search": "assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="assets/javascripts/bundle.50899def.min.js"></script>
       
-        <script src="../js/open_in_new_tab.js"></script>
+        <script src="js/open_in_new_tab.js"></script>
       
     
   </body>
