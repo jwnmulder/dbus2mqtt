@@ -21,6 +21,9 @@ validation:
 watch:
   - README.md
 
+exclude_docs: |
+  hooks.py
+
 theme:
   name: material
   language: en
@@ -91,6 +94,7 @@ nav:
       - examples/index.md
       - examples/home_assistant_media_player.md
       - examples/bluez.md
+      - examples/linux_desktop.md
   - Developer guide:
       - developer/index.md
       - developer/debugging_dbus.md
