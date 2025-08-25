@@ -418,6 +418,61 @@
           
         
       
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../templating/index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Templating
+    
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Templating
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
         
       
         
@@ -430,7 +485,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -447,14 +502,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Examples
           </label>
@@ -538,7 +593,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -555,14 +610,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
           </label>
@@ -652,9 +707,9 @@
 <li><code>context_set</code> to set variables</li>
 <li><code>mqtt_publish</code> to publish a mqtt message</li>
 </ul>
-<p>An example</p>
-<div class="highlight"><pre><span></span><code><span class="nt">flows</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Example</span><span class="nv"> </span><span class="s">flow&quot;</span>
+<p>Global flows are started even when dbus2mqtt is not subscribed to any dbus objects. An example for global flows:</p>
+<div class="highlight"><span class="filename">Global flow</span><pre><span></span><code><span class="nt">flows</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Example flow</span>
 <span class="w">    </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
 <span class="w">        </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
@@ -662,7 +717,21 @@
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
 <span class="w">        </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello from example flow</span>
 </code></pre></div>
-<p>Some action parameters allow the use of jinja2 templating. dbus2mqtt supports both builtin jinja2 filters and comes with additional filters from <a href="https://pypi.org/project/jinja2-ansible-filters/">jinja2-ansible-filters</a>. When supported, it is documented below.</p>
+<p>Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the amount of dbus objects subscribed, there is at most one flow instance running.</p>
+<div class="highlight"><span class="filename">Subscription based flows</span><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/org/mpris/MediaPlayer2</span>
+<span class="w">      </span><span class="nt">flows</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Example flow</span>
+<span class="w">          </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
+<span class="w">              </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
+<span class="w">          </span><span class="nt">actions</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+<span class="w">              </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello from example flow</span>
+</code></pre></div>
+<p>Some action parameters allow the use of Jinja templating. dbus2mqtt supports both builtin jinja filters and comes with additional filters. See <a href="../templating/index.html">templating</a> for details. When supported, it is documented for each individual trigger and action.</p>
 <p>Next: <a href="flow_actions.html">flow actions</a> &amp; <a href="flow_triggers.html">flow triggers</a></p>
 
 

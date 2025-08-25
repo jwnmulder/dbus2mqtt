@@ -509,6 +509,61 @@
           
         
       
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="templating/index.html" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Templating
+    
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Templating
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
         
       
         
@@ -521,7 +576,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -538,14 +593,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Examples
           </label>
@@ -629,7 +684,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -646,14 +701,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_7" id="__nav_7_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Developer guide
           </label>
@@ -813,11 +868,11 @@
 </tr>
 <tr>
 <td><code>mqtt_command_topic</code></td>
-<td>MQTT topic where <code>dbus2mqtt</code> listens for JSON commands. For example <code>dbus2mqtt/mpris/command</code></td>
+<td>MQTT topic where <code>dbus2mqtt</code> listens for JSON commands. For example <code>dbus2mqtt/mpris/command</code>. Value can be a <code>string</code> or <code>templated string</code></td>
 </tr>
 <tr>
 <td><code>mqtt_response_topic</code></td>
-<td>MQTT topic where <code>dbus2mqtt</code> published responses on. For example <code>dbus2mqtt/mpris/response</code></td>
+<td>MQTT topic where <code>dbus2mqtt</code> published responses on. For example <code>dbus2mqtt/mpris/response</code>. Value can be a <code>string</code> or <code>templated string</code></td>
 </tr>
 <tr>
 <td><code>methods</code></td>
@@ -924,7 +979,7 @@ dbus objects. To target specific dbus objects make sure to set both keys.</p>
 </tr>
 <tr>
 <td>value</td>
-<td>list</td>
+<td>any</td>
 <td>Property value</td>
 </tr>
 <tr>
@@ -996,6 +1051,25 @@ When two dbus objects are targeted, two separate responses will be published.</p
 </code></pre></div>
 <h2 id="exposing-dbus-signals">Exposing dbus signals</h2>
 <p>Publishing signals to MQTT topics works by subscribing to the relevant signal and using flows for publishing.</p>
+<p>Signals configuration parameters</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>signal</code></td>
+<td>Name of the signal</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Templated string that should evaluate to a boolean result. <code>True</code> will accept signals, <code>False</code> will drop signals</td>
+</tr>
+</tbody>
+</table>
 <p>In contrast to calling methods or setting properties, signals are not automatically published to MQTT topcis.
 To do so, configure a flow as shown below.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
@@ -1006,6 +1080,7 @@ To do so, configure a flow as shown below.</p>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.freedesktop.DBus.Properties</span>
 <span class="w">          </span><span class="nt">signals</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">signal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged</span>
+<span class="w">              </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">args[0]</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;org.mpris.MediaPlayer2.Player&#39;</span><span class="nv"> </span><span class="s">}}&quot;</span>
 
 <span class="w">      </span><span class="nt">flows</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Property</span><span class="nv"> </span><span class="s">Changed</span><span class="nv"> </span><span class="s">flow&quot;</span>
@@ -1016,7 +1091,7 @@ To do so, configure a flow as shown below.</p>
 <span class="w">              </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/signals/PropertiesChanged</span>
 <span class="w">              </span><span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
 </code></pre></div>
-<p>More information on flows can be found here: <a href="flows/index.html">flows</a></p>
+<p>More information on flows can be found in the <a href="flows/index.html">flows</a> section.</p>
 
 
 
