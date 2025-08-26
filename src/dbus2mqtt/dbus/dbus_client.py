@@ -7,10 +7,11 @@ from typing import Any
 
 import dbus_fast.aio as dbus_aio
 import dbus_fast.constants as dbus_constants
-import dbus_fast.errors as dbus_errors
 import dbus_fast.introspection as dbus_introspection
 import dbus_fast.message as dbus_message
 import janus
+
+from dbus_fast import SignatureTree
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import SubscriptionConfig
@@ -639,10 +640,17 @@ class DbusClient:
 
         converted_args = convert_mqtt_args_to_dbus(method_args)
         call_method_name = "call_" + camel_to_snake(method)
+
+        # In case of a payload that doesn't match the dbus signature type, this prints a better error message
+        interface_method = next((m for m in interface.introspection.methods if m.name == method), None)
+        if interface_method:
+            in_signature_tree = SignatureTree(interface_method.in_signature)
+            in_signature_tree.verify(converted_args)
+
         try:
             res = await interface.__getattribute__(call_method_name)(*converted_args)
-        except dbus_errors.DBusError as e:
-            logger.warning(f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={method}")
+        except Exception as e:
+            logger.debug(f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={method}, converted_args={converted_args}", exc_info=True)
             raise e
 
         if res:
@@ -809,7 +817,7 @@ class DbusClient:
 
                                         except Exception as e:
                                             error = e
-                                            logger.warning(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name} failed, exception={e}")
+                                            logger.warning(f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={bus_name}, exception={e}")
 
                                             # Send error response if configured
                                             await self._send_mqtt_response(
