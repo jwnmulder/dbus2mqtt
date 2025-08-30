@@ -5,7 +5,7 @@
 
   <!-- DBus node in purple -->
   <circle cx="20" cy="40" r="14" fill="#7B1FA2"/>
-  
+
   <!-- MQTT node in purple -->
   <circle cx="80" cy="40" r="14" fill="#7B1FA2"/>
 </svg>
