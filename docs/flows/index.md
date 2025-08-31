@@ -15,11 +15,11 @@ Within each flow a set of actions can be configured. These are executed in the o
 * `context_set` to set variables
 * `mqtt_publish` to publish a mqtt message
 
-An example
+Global flows are started even when dbus2mqtt is not subscribed to any dbus objects. An example for global flows:
 
-```yaml
+```yaml title="Global flow"
 flows:
-  - name: "Example flow"
+  - name: Example flow
     triggers:
       - type: schedule
         interval: {seconds: 5}
@@ -28,6 +28,23 @@ flows:
         msg: hello from example flow
 ```
 
-Some action parameters allow the use of jinja2 templating. dbus2mqtt supports both builtin jinja2 filters and comes with additional filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/). When supported, it is documented below.
+Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the amount of dbus objects subscribed, there is at most one flow instance running.
+
+```yaml title="Subscription based flows"
+dbus:
+  subscriptions:
+    - bus_name: org.mpris.MediaPlayer2.*
+      path: /org/mpris/MediaPlayer2
+      flows:
+        - name: Example flow
+          triggers:
+            - type: schedule
+              interval: {seconds: 5}
+          actions:
+            - type: log
+              msg: hello from example flow
+```
+
+Some action parameters allow the use of Jinja templating. dbus2mqtt supports both builtin jinja filters and comes with additional filters. See [templating](../templating/index.md) for details. When supported, it is documented for each individual trigger and action.
 
 Next: [flow actions](flow_actions.md) & [flow triggers](flow_triggers.md)

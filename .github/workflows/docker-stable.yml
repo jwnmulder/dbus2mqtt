@@ -19,7 +19,7 @@ jobs:
       versions_matrix: ${{ steps.supported_release_versions.outputs.versions_matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Docker meta
         id: meta

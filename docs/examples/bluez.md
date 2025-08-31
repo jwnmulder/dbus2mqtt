@@ -5,8 +5,6 @@ hide:
 
 # Bluez
 
-## Introduction
-
 This configuration file demonstrates how to use dbus2mqtt to bridge D-Bus events from BlueZ (the official Linux Bluetooth protocol stack) to MQTT topics. It subscribes to relevant D-Bus signals and properties for both the Bluetooth adapter (`hci0`) and all Bluetooth devices managed by BlueZ. The configuration defines flows that:
 
 * Monitor property changes and object lifecycle events (added/removed) for the Bluetooth adapter and devices.

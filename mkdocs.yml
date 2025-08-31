@@ -21,9 +21,15 @@ validation:
 watch:
   - README.md
 
+exclude_docs: |
+  hooks.py
+
 theme:
   name: material
   language: en
+  logo: assets/logo-light-text.svg
+  favicon: assets/logo-dark-img.svg
+  custom_dir: docs/overrides
   features:
 
     # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-annotations
@@ -48,7 +54,7 @@ theme:
 
     # Enable navigation footer (next/previous buttons at the bottom of the page).
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#navigation
-    - navigation.footer
+    # - navigation.footer
 
   palette:
 
@@ -72,45 +78,35 @@ theme:
         icon: material/brightness-4
         name: Switch to system preference
 
-# nav from https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/?h=navigation#navigation-tabs-with-tabs
-# Home
-# Getting started
-# Setup
-# Reference
-## CLI
-## Configuration files
-# Changelog
-
-# nav from chezmoi
-# Home
-# User guide
-# Reference
-# Developer guide
-# Links
-# License
-
 not_in_nav: |
   examples/dbus2mqtt_internal_state.md
   examples/linux_desktop.md
+  examples/connman-config.md
 
 nav:
   - Home: index.md
-  # - User guide:
-  # - installation - docker
+  - Setup: setup.md
+  - Subscriptions: subscriptions.md
   - Flows:
       - flows/index.md
       - flows/flow_triggers.md
       - flows/flow_actions.md
-  # - References:
+  - Templating:
+      - templating/index.md
   - Examples:
       - examples/index.md
       - examples/home_assistant_media_player.md
       - examples/bluez.md
+      - examples/linux_desktop.md
+      # - examples/connman-config.md
   - Developer guide:
       - developer/index.md
       - developer/debugging_dbus.md
 
 extra:
+  analytics:
+    provider: google
+    property: G-BRH1JXWE40
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/jwnmulder
@@ -118,6 +114,9 @@ extra:
       link: https://hub.docker.com/r/jwnmulder/dbus2mqtt
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/dbus2mqtt
+
+extra_css:
+  - stylesheets/extra.css
 
 # https://facelessuser.github.io/pymdown-extensions
 markdown_extensions:

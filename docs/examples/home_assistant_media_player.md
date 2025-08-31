@@ -5,8 +5,6 @@ hide:
 
 # Mediaplayer integration with Home Assistant
 
-## Introduction
-
 With dbus2mqtt as a bridge between MPRIS players and Home Assistant, it becomes possible to control Linux based media players via Home Assistant.
 
 The Media Player Remote Interfacing Specification (MPRIS) is a standard for controlling Linux media players. It provides a mechanism for compliant media players discovery, basic playback and media player state control as well as a tracklist interface which is used to add context to the current item.
@@ -38,7 +36,7 @@ dbus2mqtt --config docs/examples/home_assistant_media_player.yaml
 
 The following MPRIS players are known to work with Home Assistant.
 
-| Application  | Play<br />Pause<br /> | Stop | Next<br />Previous | Seek<br />SetPosition | Volume | Quit | Media Info | Media Image | Notes
+| Application  | Play<br />Pause<br /> | Stop | Next<br />Previous | Seek<br />SetPosition | Volume | Quit | Media Info | Media Image | Notes |
 |--------------|-----------------------|------|--------------------|------|--------|------|------------|-------------|-------------------|
 | `Firefox`    | ✅ | ✅ | ✅ | ✅ |    | ❌ | ✅ | ✅ |  |
 | `VLC`        | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    |  |
@@ -46,7 +44,6 @@ The following MPRIS players are known to work with Home Assistant.
 | `Kodi`       | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Requires Kodi plugin [MediaPlayerRemoteInterface](https://github.com/wastis/MediaPlayerRemoteInterface) |
 
 !!! note
-
     More players that support MPRIS (but have not been tested) can be found here: <https://wiki.archlinux.org/title/MPRIS>
 
 ## Player commands
@@ -95,7 +92,7 @@ media_player:
   - platform: media_player_template
     media_players:
       mpris_media_player:
-        device_class: generic
+        device_class: receiver
         friendly_name: MPRIS Media Player
         value_template: "{{ states('sensor.mpris_media_player') }}"
 

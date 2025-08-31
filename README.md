@@ -17,7 +17,7 @@ This makes it easy to integrate Linux desktop services or system signals into MQ
 
 **dbus2mqtt** is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.
 
-Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found here: [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
+Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player.html)
 
 ## Getting started with dbus2mqtt
 
@@ -60,7 +60,6 @@ MQTT__USERNAME=
 MQTT__PASSWORD=
 ```
 
-
 ### Install and run dbus2mqtt
 
 ```bash
@@ -68,136 +67,25 @@ python -m pip install dbus2mqtt
 dbus2mqtt --config config.yaml
 ```
 
-
-### Run using docker with auto start behavior
-
-To build and run dbus2mqtt using Docker with the [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml) example from this repository.
-
-```bash
-# setup configuration
-mkdir -p $HOME/.config/dbus2mqtt
-cp docs/examples/home_assistant_media_player.yaml $HOME/.config/dbus2mqtt/config.yaml
-cp .env.example $HOME/.config/dbus2mqtt/.env
-
-# run image and automatically start on reboot
-sudo docker pull jwnmulder/dbus2mqtt
-sudo docker run --detach --name dbus2mqtt \
-  --volume "$HOME"/.config/dbus2mqtt:"$HOME"/.config/dbus2mqtt \
-  --volume /run/user:/run/user \
-  --env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
-  --env-file "$HOME"/.config/dbus2mqtt/.env \
-  --user $(id -u):$(id -g) \
-  --privileged \
-  --restart unless-stopped \
-  jwnmulder/dbus2mqtt \
-  --config "$HOME"/.config/dbus2mqtt/config.yaml
-
-# view logs
-sudo docker logs dbus2mqtt -f
-```
+See [setup](https://jwnmulder.github.io/dbus2mqtt/setup.html) for more installation options and configuration details.
 
 ## Examples
 
-More dbus2mqtt examples can be found here: [examples](https://jwnmulder.github.io/dbus2mqtt/examples/).
-The most complete one being [MPRIS to Home Assistant Media Player integration](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
+More dbus2mqtt examples can be found in the [examples](https://jwnmulder.github.io/dbus2mqtt/examples/index.html) section.
+The most complete one being [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player.html)
 
-## Configuration reference
+## Exposing dbus methods, properties and signals
 
-dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/) which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
-
-### MQTT and D-Bus connection details
-
-```bash
-# dbus_fast configuration
-export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
-
-# dbus2mqtt configuration
-MQTT__HOST=localhost
-MQTT__PORT=1883
-MQTT__USERNAME=
-MQTT__PASSWORD=
-```
-
-or
-
-```yaml
-mqtt:
-  host: localhost
-  port: 1883
-  subscription_topics:
-    - dbus2mqtt/#
-```
-
-### Exposing dbus methods
-
-```yaml
-dbus:
-  subscriptions:
-    - bus_name: org.mpris.MediaPlayer2.*
-      path: /org/mpris/MediaPlayer2
-      interfaces:
-        - interface: org.mpris.MediaPlayer2.Player
-          mqtt_command_topic: dbus2mqtt/org.mpris.MediaPlayer2/command
-          methods:
-            - method: Pause
-            - method: Play
-```
-
-This configuration will expose 2 methods. Triggering methods can be done by publishing json messages to the `dbus2mqtt/org.mpris.MediaPlayer2/command` MQTT topic. Arguments can be passed along in `args`.
-
-Some examples that call methods  on **all** bus_names matching the configured pattern
+See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions.html) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
 
 ```json
 {
-    "method": "Play",
+    "method": "Play"
 }
 ```
 
-```json
-{
-    "method": "OpenUri",
-    "args": []
-}
-```
+## Flows and Jinja based templating
 
-To specifically target objects the properties `bus_name` and/or `path` can be used. Both properties support wildcards
+For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/index.html)
 
-```json
-{
-    "method": "Play",
-    "bus_name": "*.firefox",
-    "path": "/org/mpris/MediaPlayer2"
-}
-```
-
-### Exposing dbus signals
-
-Publishing signals to MQTT topics works by subscribing to the relevant signal and using flows for publishing
-
-```yaml
-dbus:
-  subscriptions:
-    - bus_name: org.mpris.MediaPlayer2.*
-      path: /org/mpris/MediaPlayer2
-      interfaces:
-        - interface: org.freedesktop.DBus.Properties
-           signals:
-             - signal: PropertiesChanged
-
-      flows:
-        - name: "Property Changed flow"
-          triggers:
-            - type: on_signal
-          actions:
-            - type: mqtt_publish
-              topic: dbus2mqtt/org.mpris.MediaPlayer2/signals/PropertiesChanged
-              payload_type: json
-```
-
-## Flows
-
-A reference of all supported flow triggers and actions can be found on [Flows](https://jwnmulder.github.io/dbus2mqtt/flows/)
-
-## Jinja templating
-
-TODO: Document Jinja templating, for now see the [MPRIS to Home Assistant Media Player integration](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/) example
+Jinja templating documentation can be found here: [templating](templating/index.md)

@@ -125,20 +125,20 @@ class MqttClient:
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
 
-        # Skip retained messages
-        payload = msg.payload.decode()
-        if msg.retain:
-            logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")
-            return
-
         # Skip messages being sent by other dbus2mqtt clients
         if msg.properties:
             user_properties: list[tuple[str, object]] = getattr(msg.properties, "UserProperty", [])
             client_id = next((str(v) for k, v in user_properties if k == "client_id"), None)
             if client_id and client_id != self.client_id:
-                logger.info(f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}")
+                logger.debug(f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}")
             if client_id and client_id.startswith(self.client_id_prefix):
                 return
+
+        # Skip retained messages
+        payload = msg.payload.decode()
+        if msg.retain:
+            logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")
+            return
 
         try:
             json_payload = json.loads(payload) if payload else {}

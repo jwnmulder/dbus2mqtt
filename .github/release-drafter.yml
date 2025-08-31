@@ -27,7 +27,7 @@ autolabeler:
   - label: enhancement
     branch:
       - '/feature\/.+/'
-  - label: fix
+  - label: bugfix
     branch:
       - '/fix\/.+/'
     title:
@@ -46,6 +46,6 @@ version-resolver:
       - feature  # patch until we are on 1.x
       - enhancement  # patch until we are on 1.x
   default: patch
-change-template: '* $TITLE (#$NUMBER)'
+change-template: '* $TITLE (#$NUMBER) by @$AUTHOR'
 template: |
   $CHANGES

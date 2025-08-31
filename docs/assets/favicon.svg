@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 47" role="img" aria-label="dbus2 MQTT logo">
+  <defs>
+    <style>
+      .word {
+        font-family: Inter, Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+        font-size: 64px;
+        font-weight: 600;
+        fill: #1F2937;
+      }
+      .num {
+        font-family: Inter, Roboto, system-ui, sans-serif;
+        font-size: 64px;
+        font-weight: 700;
+        fill: #7B1FA2;
+      }
+    </style>
+  </defs>
+
+  <!-- <text x="0" y="50" class="word">dbus</text> -->
+  <text x="0" y="46" class="num">2</text>
+  <!-- <text x="0" y="105" class="word">MQTT</text> -->
+</svg>
