@@ -158,7 +158,7 @@ class MqttClient:
 
     def _trigger_flows(self, topic: str, trigger_context: dict):
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic
-           and matches configured filters."""
+           and configured filters."""
 
         all_flows: list[FlowConfig] = []
         all_flows.extend(self.app_context.config.flows)
