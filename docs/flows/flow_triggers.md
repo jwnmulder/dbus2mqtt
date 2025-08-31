@@ -73,7 +73,7 @@ When triggered, the following context parameters are available
 
 ### mqtt_message
 
-Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted
+Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted.
 
 | key | description  |
 |------|-------------|
