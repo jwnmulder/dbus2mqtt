@@ -1,0 +1,143 @@
+site_name: dbus2mqtt
+site_description: General purpose DBus to MQTT bridge
+site_url: https://jwnmulder.github.io/dbus2mqtt
+site_author: Jan-Willem Mulder
+repo_name: jwnmulder/dbus2mqtt
+repo_url: https://github.com/jwnmulder/dbus2mqtt
+edit_uri: edit/main/docs/
+strict: true
+
+# Some examples to have a look at
+# https://github.com/mkdocstrings/mkdocstrings/blob/main/mkdocs.yml
+# https://github.com/facelessuser/pymdown-extensions/blob/main/mkdocs.yml
+# https://github.com/renovatebot/renovate/blob/main/tools/mkdocs/mkdocs.yml
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+watch:
+  - README.md
+
+exclude_docs: |
+  hooks.py
+
+theme:
+  name: material
+  language: en
+  logo: assets/logo-light-text.svg
+  favicon: assets/logo-dark-img.svg
+  custom_dir: docs/overrides
+  features:
+
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-annotations
+    - content.code.annotate
+
+    # Enable copy-to-clipboard button
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-copy-button
+    - content.code.copy
+
+    # # Enable edit source button.
+    # # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
+    # - content.action.edit
+
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation
+    - navigation.indexes
+    # - navigation.tabs
+    # - navigation.tabs.sticky
+
+    # Use instant loading for internal links
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#instant-loading
+    - navigation.instant
+
+    # Enable navigation footer (next/previous buttons at the bottom of the page).
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#navigation
+    # - navigation.footer
+
+  palette:
+
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+not_in_nav: |
+  examples/dbus2mqtt_internal_state.md
+  examples/linux_desktop.md
+  examples/connman-config.md
+
+nav:
+  - Home: index.md
+  - Setup: setup.md
+  - Subscriptions: subscriptions.md
+  - Flows:
+      - flows/index.md
+      - flows/flow_triggers.md
+      - flows/flow_actions.md
+  - Templating:
+      - templating/index.md
+  - Examples:
+      - examples/index.md
+      - examples/home_assistant_media_player.md
+      - examples/bluez.md
+      - examples/linux_desktop.md
+      # - examples/connman-config.md
+  - Developer guide:
+      - developer/index.md
+      - developer/debugging_dbus.md
+
+extra:
+  analytics:
+    provider: google
+    property: G-BRH1JXWE40
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jwnmulder
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/jwnmulder/dbus2mqtt
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/dbus2mqtt
+
+extra_css:
+  - stylesheets/extra.css
+
+# https://facelessuser.github.io/pymdown-extensions
+markdown_extensions:
+
+  # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+  - admonition
+
+  # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#highlighting-inline-code-blocks
+  - pymdownx.inlinehilite
+
+  # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
+  # https://facelessuser.github.io/pymdown-extensions/extensions/superfences/
+  - pymdownx.superfences
+
+  - pymdownx.snippets:
+      check_paths: true
+
+hooks:
+  - docs/hooks.py
+
+plugins:
+  - open-in-new-tab:
+      add_icon: true
+#   - git-revision-date-localized: {}

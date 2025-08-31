@@ -1,5 +1,4 @@
-%YAML 1.2
----
+# Intended comment as jinja expressions in comment in first line was tripping config parsing: {{ "shouldnotfail" }}
 dbus:
   subscriptions: []
 flows:
@@ -17,3 +16,9 @@ flows:
         topic: dbus2mqtt/org.mpris.MediaPlayer2/state
         payload_template: |-
           {% set val = "testvalue" %}
+  - name: "jinja expression in the middle"
+    triggers: []
+    actions:
+      - type: log
+        msg: |-
+          jinja value {{ "testvalue" }} in the middle of a string

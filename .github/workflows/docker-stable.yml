@@ -19,14 +19,14 @@ jobs:
       versions_matrix: ${{ steps.supported_release_versions.outputs.versions_matrix }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Determine supported release versions
         id: supported_release_versions
         run: |
-          SUPPORTED_CYCLES=("0.1" "0.2" "0.3" "0.4" "0.5" "0.6" "0.7" "0.8" "0.9" "1.0" "2.0")
+          SUPPORTED_CYCLES=("0.4" "0.5" "0.6" "0.7" "0.8" "0.9" "1.0" "2.0")
 
           VERSIONS_JSON=$(python3 .github/scripts/release-versions.py "${SUPPORTED_CYCLES[@]}")
 
@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Docker meta
         id: meta

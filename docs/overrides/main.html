@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {% if page.url == "index.html" %}
+    <meta name="google-site-verification" content="aOoGHv4pjWVhFZ2fRm2JYLoFDvzV8UE65Km0cy_3qlA" />
+  {% endif %}
+  {{ super() }}
+{% endblock %}

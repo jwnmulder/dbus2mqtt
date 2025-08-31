@@ -14,6 +14,8 @@ import paho.mqtt.client as mqtt
 import yaml
 
 from paho.mqtt.enums import CallbackAPIVersion
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
 from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from dbus2mqtt import AppContext
@@ -30,8 +32,11 @@ class MqttClient:
         self.event_broker = app_context.event_broker
 
         unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        self.client_id_prefix = "dbus2mqtt-"
+        self.client_id = f"{self.client_id_prefix}{unique_client_id_postfix}"
+
         self.client = mqtt.Client(
-            client_id=f"dbus2mqtt-{unique_client_id_postfix}",
+            client_id=self.client_id,
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2
         )
@@ -87,7 +92,16 @@ class MqttClient:
                 if first_message:
                     await asyncio.wait_for(self.connected_event.wait(), timeout=5)
 
-                self.client.publish(topic=msg.topic, payload=payload or "").wait_for_publish(timeout=1000)
+                publish_properties = Properties(PacketTypes.PUBLISH)
+                publish_properties.UserProperty = ("client_id", self.client_id)
+
+                publish_info = self.client.publish(
+                    topic=msg.topic,
+                    payload=payload or "",
+                    properties=publish_properties
+                )
+                publish_info.wait_for_publish(timeout=1000)
+
                 if first_message:
                     logger.info(f"First message published: topic={msg.topic}, payload={payload_log_msg}")
                     first_message = False
@@ -111,8 +125,16 @@ class MqttClient:
 
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
 
-        # TODO: Skip messages being sent by other dbus2mqtt clients
+        # Skip messages being sent by other dbus2mqtt clients
+        if msg.properties:
+            user_properties: list[tuple[str, object]] = getattr(msg.properties, "UserProperty", [])
+            client_id = next((str(v) for k, v in user_properties if k == "client_id"), None)
+            if client_id and client_id != self.client_id:
+                logger.debug(f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}")
+            if client_id and client_id.startswith(self.client_id_prefix):
+                return
 
+        # Skip retained messages
         payload = msg.payload.decode()
         if msg.retain:
             logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")

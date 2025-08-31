@@ -1,6 +1,3 @@
-# https://github.com/github/gitignore/blob/main/Python.gitignore
-# https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -8,6 +5,7 @@ __pycache__/
 
 # Distribution / packaging
 dist/
+site/
 
 # Environments
 .env

@@ -49,6 +49,7 @@ def test_cron_trigger_string_value():
 
 def test_jsonargparse_jinja_expressions():
     """values starting with {{ are not parsed correctly
+       values containing {{ are not parsed correctly
     """
     dotenv.load_dotenv(".env.example")
 
@@ -68,3 +69,7 @@ def test_jsonargparse_jinja_expressions():
     action = config.flows[1].actions[0]
     assert action.type == "mqtt_publish"
     assert action.payload_template == """{% set val = "testvalue" %}"""
+
+    action = config.flows[2].actions[0]
+    assert action.type == "log"
+    assert action.msg == """jinja value {{ "testvalue" }} in the middle of a string"""
