@@ -82,7 +82,7 @@ Listens for MQTT message on the configured topic. The message payload is expecte
 | filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 !!! note
-    It is recommended to use a different value for topic `topic` if `subscription[].interfaces[].mqtt_command_topic` is already set. Altough it will work if both topic names are the same, it will generate some warnings the log
+    It is recommended to use a different value for topic `topic` if `subscription[].interfaces[].mqtt_command_topic` is already set. Although it will work if both topic names are the same, it will generate some warnings the log
 
 When triggered, the following context parameters are available
 
