@@ -1037,10 +1037,6 @@
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If <code>topic</code> overlaps with <code>subscription[].interfaces[].mqtt_command_topic</code> and the JSON payload structure follows <code>mqtt_command_topic</code> layout, a dbus call will be executed as well. Similar, warnings will be logged if a messaage does not match flows or valid D-Bus methods.</p>
-</div>
 <p>When triggered, the following context parameters are available</p>
 <table>
 <thead>
@@ -1075,6 +1071,10 @@
 <span class="w">        </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">          </span><span class="no">Flow triggered by MQTT message, payload.action={{ payload.get(&#39;action&#39;) }}</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <code>topic</code> overlaps with <code>subscription[].interfaces[].mqtt_command_topic</code> and the JSON payload structure follows <code>mqtt_command_topic</code> layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.</p>
+</div>
 
 
 
