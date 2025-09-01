@@ -1018,7 +1018,7 @@
 <span class="w">  </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger</span>
 <span class="w">  </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">payload.get(&#39;action&#39;)</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;Mute&#39;</span><span class="nv"> </span><span class="s">}}&quot;</span>
 </code></pre></div>
-<p>Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted</p>
+<p>Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted</p>
 <table>
 <thead>
 <tr>
@@ -1039,7 +1039,7 @@
 </table>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If <code>topic</code> overlaps with <code>subscription[].interfaces[].mqtt_command_topic</code> and the JSON payload structure follows <code>mqtt_command_topic</code> layout, a dbus call will be executed as well.</p>
+<p>If <code>topic</code> overlaps with <code>subscription[].interfaces[].mqtt_command_topic</code> and the JSON payload structure follows <code>mqtt_command_topic</code> layout, a dbus call will be executed as well. Similar, warnings will be logged if a messaage does not match flows or valid D-Bus methods.</p>
 </div>
 <p>When triggered, the following context parameters are available</p>
 <table>
