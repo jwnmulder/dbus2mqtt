@@ -47,11 +47,12 @@ When triggered, the following context parameters are available
 
 ## object_added
 
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+
 ```yaml
 - type: object_added
 ```
 
-This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
 When triggered, the following context parameters are available
 
 | name | description |
@@ -74,6 +75,12 @@ When triggered, the following context parameters are available
 
 ## mqtt_message
 
+```yaml
+- type: mqtt_message
+  topic: dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger
+  filter: "{{ payload.get('action') == 'Mute' }}"
+```
+
 Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted
 
 | key | description  |
@@ -82,7 +89,7 @@ Listens for MQTT message on the configured topic. The message payload is expecte
 | filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 !!! note
-    It is recommended to use a different value for topic `topic` if `subscription[].interfaces[].mqtt_command_topic` is already set. Although it will work if both topic names are the same, it will generate some warnings the log
+    It is recommended to use a different value for topic `topic` if `subscription[].interfaces[].mqtt_command_topic` is already set. Although it will work when both topic names are the same, it will likely generate warnings in the log
 
 When triggered, the following context parameters are available
 
