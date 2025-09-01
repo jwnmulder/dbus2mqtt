@@ -20,7 +20,7 @@ class MqttMessage:
 
 @dataclass
 class MqttReceiveHints:
-    log_on_unmatched_message: bool = True
+    log_unmatched_message: bool = True
 
 @dataclass
 class FlowTriggerMessage:
