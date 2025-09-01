@@ -89,7 +89,7 @@ Listens for MQTT message on the configured topic. The message payload is expecte
 | filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 !!! note
-    It is recommended to use a different value for topic `topic` if `subscription[].interfaces[].mqtt_command_topic` is already set. Although it will work when both topic names are the same, it will likely generate warnings in the log
+    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well.
 
 When triggered, the following context parameters are available
 
@@ -105,7 +105,7 @@ flows:
   - name: "Mute"
     triggers:
       - type: mqtt_message
-        topic: dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/command
         filter: "{{ payload.get('action') == 'Mute' }}"
     actions:
       - type: log
