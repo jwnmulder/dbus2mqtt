@@ -1035,12 +1035,13 @@
 </table>
 <p>For an overview of MPRIS commands have a look at <a href="https://mpris2.readthedocs.io/en/latest/interfaces.html#mpris2.MediaPlayer2">https://mpris2.readthedocs.io/en/latest/interfaces.html#mpris2.MediaPlayer2</a></p>
 <h2 id="home-assistant-configuration">Home Assistant configuration</h2>
-<p>The configuration shown below creates a few components in Home Assistant</p>
+<p>Besides setting up <code>dbus2mqtt</code>, Home Assistant needs to be configured as well. The configuration shown below creates the necessary components in Home Assistant for controlling MPRIS Media Players. Three components will be setup.</p>
 <ul>
-<li>Media Player</li>
 <li>MQTT sensor listening on topic <code>dbus2mqtt/org.mpris.MediaPlayer2/state</code></li>
+<li>MQTT image listening on topic <code>dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage</code></li>
+<li>Media Player</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nt">mqtt</span><span class="p">:</span>
+<div class="highlight"><span class="filename">config/packages/mqtt_mediaplayer.yaml</span><pre><span></span><code><span class="nt">mqtt</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sensor</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MPRIS Media Player</span>
 <span class="w">      </span><span class="nt">state_topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
@@ -1164,6 +1165,7 @@
 <span class="w">            </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">              </span><span class="no">{&quot;property&quot;: &quot;Volume&quot;, &quot;value&quot;: </span><span class="cp">{{</span> <span class="o">[</span><span class="m">0</span><span class="o">,</span> <span class="o">(</span><span class="nv">state_attr</span><span class="o">(</span><span class="s1">&#39;sensor.mpris_media_player&#39;</span><span class="o">,</span> <span class="s1">&#39;Volume&#39;</span><span class="o">)</span> <span class="o">-</span> <span class="m">0.1</span><span class="o">)]</span> <span class="o">|</span> <span class="nf">max</span> <span class="cp">}}</span><span class="no"> }</span>
 </code></pre></div>
+<p>Source: <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player/mqtt_mediaplayer.yaml">mqtt_mediaplayer.yaml</a></p>
 
 
 
