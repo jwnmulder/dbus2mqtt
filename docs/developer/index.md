@@ -20,6 +20,16 @@ uv sync
 source .venv/bin/activate
 ```
 
+## Linting
+
+```bash
+# run pre-commit linters
+uv run pre-commit run --all-files
+
+# setup pre-commit to automatically run linters via git hooks
+uv run pre-commit install
+```
+
 ## Publishing and subscribing to MQTT messages
 
 Multiple MQTT client exist that can be used for testing, e.g.
