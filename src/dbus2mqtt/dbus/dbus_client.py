@@ -18,6 +18,7 @@ from dbus2mqtt.config import SubscriptionConfig
 from dbus2mqtt.dbus.dbus_types import (
     BusNameSubscriptions,
     DbusSignalWithState,
+    ExecuteCommandResults,
     SubscribedInterface,
 )
 from dbus2mqtt.dbus.dbus_util import (
@@ -772,23 +773,51 @@ class DbusClient:
         if not found_matching_topic:
             return
 
-        logger.debug(f"on_mqtt_msg: topic={msg.topic}, payload={json.dumps(msg.payload)}")
-        matched_method = False
-        matched_property = False
-
         payload_bus_name = msg.payload.get("bus_name") or "*"
         payload_path = msg.payload.get("path") or "*"
 
         payload_method = msg.payload.get("method")
-        payload_method_args = msg.payload.get("args") or []
+        # payload_method_args = msg.payload.get("args") or []
 
         payload_property = msg.payload.get("property")
-        payload_value = msg.payload.get("value")
+        # payload_value = msg.payload.get("value")
+
+        logger.debug(f"on_mqtt_msg: topic={msg.topic}, payload={json.dumps(msg.payload)}")
+
+        result = await self.execute_command(
+            msg.payload,
+            hints.log_unmatched_message
+        )
+
+        # TODO: Move command response handling in here
+        # for result in command_results
+        if not result.matched_method and not result.matched_property and hints.log_unmatched_message:
+            if payload_method:
+                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
+            if payload_property:
+                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
+
+
+    # TODO, cleanup untyped payload_method and payload_property handling
+    # Maybe iterate just twice, once for methods and once for properties?
+    async def execute_command(self, payload, log_unmatched_message: bool) -> ExecuteCommandResults:
+
+        matched_method = False
+        matched_property = False
+
+        payload_bus_name = payload.get("bus_name") or "*"
+        payload_path = payload.get("path") or "*"
+
+        payload_method = payload.get("method")
+        payload_method_args = payload.get("args") or []
+
+        payload_property = payload.get("property")
+        payload_value = payload.get("value")
 
         if payload_method is None and (payload_property is None or payload_value is None):
-            if msg.payload and hints.log_unmatched_message:
-                logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}")
-            return
+            if payload and log_unmatched_message:
+                logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {payload}")
+            return ExecuteCommandResults(matched_method=False, matched_property=False, results=None)
 
         for [bus_name, bus_name_subscription] in self.subscriptions.items():
             if fnmatch.fnmatchcase(bus_name, payload_bus_name):
@@ -835,6 +864,7 @@ class DbusClient:
                                             logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
                                             await self.set_dbus_interface_property(interface, property.property, payload_value)
 
+                                            # TODO, move out to _on_mqtt_msg
                                             # Send property set response if configured
                                             await self._send_mqtt_response(
                                                 interface_config, payload_value, None, bus_name, path,
@@ -844,17 +874,15 @@ class DbusClient:
                                         except Exception as e:
                                             logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name} failed, exception={e}")
 
+                                            # TODO, move out to _on_mqtt_msg
                                             # Send property set error response if configured
                                             await self._send_mqtt_response(
                                                 interface_config, None, e, bus_name, path,
                                                 property=property.property, value=[payload_value],
                                             )
 
-        if not matched_method and not matched_property and hints.log_unmatched_message:
-            if payload_method:
-                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
-            if payload_property:
-                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
+        # TODO, implement results so that we can move out response handling above
+        return ExecuteCommandResults(matched_method=matched_method, matched_property=matched_property, results=None)
 
     async def _send_mqtt_response(self, interface_config, result: Any, error: Exception | None, bus_name: str, path: str, *args, **kwargs):
         """Send MQTT response for a method call if response topic is configured
