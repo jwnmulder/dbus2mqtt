@@ -154,7 +154,7 @@ class MqttClient:
             self.event_broker.on_mqtt_receive(
                 MqttMessage(msg.topic, json_payload),
                 MqttReceiveHints(
-                    log_warning_on_unmatched_message=len(flow_trigger_messages) == 0
+                    log_on_unmatched_message=len(flow_trigger_messages) == 0
                 )
             )
 
