@@ -10,6 +10,7 @@ name: docker-dev
       - '.pre-commit-config.yaml'
       - 'README.md'
       - 'renovate.json'
+      - 'mkdocs.yaml'
   workflow_dispatch:
 
 jobs:

@@ -47,6 +47,8 @@ When triggered, the following context parameters are available
 
 ## object_added
 
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+
 ```yaml
 - type: object_added
 ```
@@ -71,9 +73,15 @@ When triggered, the following context parameters are available
 | bus_name | bus_name of the object that was registered on dbus |
 | path     | path of the object that was registered on dbus |
 
-### mqtt_message
+## mqtt_message
 
-Listens for MQTT message on the configured topic. The message payload is expected to be JSON formatted.
+```yaml
+- type: mqtt_message
+  topic: dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger
+  filter: "{{ payload.get('action') == 'Mute' }}"
+```
+
+Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted
 
 | key | description  |
 |------|-------------|
@@ -86,3 +94,21 @@ When triggered, the following context parameters are available
 |------|------|-------------|
 | topic     | string | mqtt topic |
 | payload   | any | json deserialized MQTT message payload  |
+
+Example flow
+
+```yaml
+flows:
+  - name: "Mute"
+    triggers:
+      - type: mqtt_message
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+        filter: "{{ payload.get('action') == 'Mute' }}"
+    actions:
+      - type: log
+        msg: |
+          Flow triggered by MQTT message, payload.action={{ payload.get('action') }}
+```
+
+!!! note
+    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.

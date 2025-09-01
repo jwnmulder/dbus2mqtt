@@ -134,6 +134,8 @@ markdown_extensions:
   - pymdownx.snippets:
       check_paths: true
 
+  - footnotes
+
 hooks:
   - docs/hooks.py
 

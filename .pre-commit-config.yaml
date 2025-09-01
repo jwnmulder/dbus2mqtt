@@ -51,7 +51,13 @@ repos:
     hooks:
       - id: pyright
 
-  - repo: https://github.com/fpgmaas/deptry
-    rev: "0.23.1"
+  - repo: local
     hooks:
       - id: deptry
+        name: deptry
+        entry: uv run deptry .
+        language: python
+        additional_dependencies:
+          - uv
+        always_run: true
+        pass_filenames: false

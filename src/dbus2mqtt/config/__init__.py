@@ -48,12 +48,6 @@ class InterfaceConfig:
         return None
 
 @dataclass
-class FlowTriggerMqttConfig:
-    type: Literal["mqtt"]
-    topic: str
-    filter: str | None = None
-
-@dataclass
 class FlowTriggerScheduleConfig:
     type: Literal["schedule"] = "schedule"
     id: str = field(default_factory=lambda: uuid.uuid4().hex)

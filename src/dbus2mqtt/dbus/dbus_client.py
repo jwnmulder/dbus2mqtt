@@ -30,7 +30,7 @@ from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
     mpris_introspection_playerctl,
 )
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
-from dbus2mqtt.event_broker import MqttMessage
+from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler, FlowTriggerMessage
 
 logger = logging.getLogger(__name__)
@@ -682,9 +682,9 @@ class DbusClient:
     async def mqtt_receive_queue_processor_task(self):
         """Continuously processes messages from the async queue."""
         while True:
-            msg = await self.event_broker.mqtt_receive_queue.async_q.get()  # Wait for a message
+            msg, hints = await self.event_broker.mqtt_receive_queue.async_q.get()  # Wait for a message
             try:
-                await self._on_mqtt_msg(msg)
+                await self._on_mqtt_msg(msg, hints)
             except Exception as e:
                 logger.warning(f"mqtt_receive_queue_processor_task: Exception {e}", exc_info=True)
             finally:
@@ -755,7 +755,7 @@ class DbusClient:
                 path = message.body[0]
                 await self._handle_interfaces_removed(bus_name, path)
 
-    async def _on_mqtt_msg(self, msg: MqttMessage):
+    async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
         """Executes dbus method calls or property updates on objects when messages have
         1. a matching subscription configured
         2. a matching method
@@ -786,7 +786,7 @@ class DbusClient:
         payload_value = msg.payload.get("value")
 
         if payload_method is None and (payload_property is None or payload_value is None):
-            if msg.payload:
+            if msg.payload and hints.log_unmatched_message:
                 logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}")
             return
 
@@ -850,11 +850,11 @@ class DbusClient:
                                                 property=property.property, value=[payload_value],
                                             )
 
-        if not matched_method and not matched_property:
+        if not matched_method and not matched_property and hints.log_unmatched_message:
             if payload_method:
-                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path or '*'}, active bus_names={list(self.subscriptions.keys())}")
+                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
             if payload_property:
-                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path or '*'}, active bus_names={list(self.subscriptions.keys())}")
+                logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
 
     async def _send_mqtt_response(self, interface_config, result: Any, error: Exception | None, bus_name: str, path: str, *args, **kwargs):
         """Send MQTT response for a method call if response topic is configured

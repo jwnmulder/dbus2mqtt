@@ -20,7 +20,7 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowConfig, FlowTriggerMqttMessageConfig
-from dbus2mqtt.event_broker import FlowTriggerMessage, MqttMessage
+from dbus2mqtt.event_broker import FlowTriggerMessage, MqttMessage, MqttReceiveHints
 
 logger = logging.getLogger(__name__)
 
@@ -144,21 +144,28 @@ class MqttClient:
             json_payload = json.loads(payload) if payload else {}
             logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={json.dumps(json_payload)}")
 
-            # publish on a queue that is being processed by dbus_client
-            self.event_broker.on_mqtt_receive(MqttMessage(msg.topic, json_payload))
-
             # publish to flow trigger queue for any configured mqtt_message triggers
-            self._trigger_flows(msg.topic, {
+            flow_trigger_messages = self._trigger_flows(msg.topic, {
                 "topic": msg.topic,
                 "payload": json_payload
             })
 
+            # publish on a queue that is being processed by dbus_client
+            self.event_broker.on_mqtt_receive(
+                MqttMessage(msg.topic, json_payload),
+                MqttReceiveHints(
+                    log_unmatched_message=len(flow_trigger_messages) == 0
+                )
+            )
+
         except json.JSONDecodeError as e:
             logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")
 
-    def _trigger_flows(self, topic: str, trigger_context: dict):
+    def _trigger_flows(self, topic: str, trigger_context: dict) -> list[FlowTriggerMessage]:
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic
-           and matches configured filters."""
+           and configured filters."""
+
+        flow_trigger_messages = []
 
         all_flows: list[FlowConfig] = []
         all_flows.extend(self.app_context.config.flows)
@@ -180,4 +187,7 @@ class MqttClient:
                             trigger_context=trigger_context,
                         )
 
+                        flow_trigger_messages.append(trigger_message)
                         self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
+
+        return flow_trigger_messages

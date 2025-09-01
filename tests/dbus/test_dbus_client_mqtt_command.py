@@ -7,7 +7,7 @@ import dbus2mqtt.config as config
 from dbus2mqtt import AppContext
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions
-from dbus2mqtt.event_broker import MqttMessage
+from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from tests import mocked_app_context, mocked_dbus_client
 
 
@@ -149,8 +149,9 @@ async def _publish_msg(msg: MqttMessage):
 
     app_context = _mocked_app_context()
     dbus_client, proxy_interface = _mocked_dbus_client(app_context)
+    hints = MqttReceiveHints()
 
-    await dbus_client._on_mqtt_msg(msg)
+    await dbus_client._on_mqtt_msg(msg, hints)
 
     return proxy_interface
 

@@ -88,4 +88,4 @@ See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions.html) fo
 
 For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/index.html)
 
-Jinja templating documentation can be found here: [templating](templating/index.md)
+Jinja templating documentation can be found here: [templating](https://jwnmulder.github.io/dbus2mqtt/templating/index.html)

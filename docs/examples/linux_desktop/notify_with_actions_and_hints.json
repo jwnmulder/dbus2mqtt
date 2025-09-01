@@ -1,0 +1,13 @@
+{
+  "method": "Notify",
+  "args": [
+    "dbus2mqtt",
+    0,
+    "dialog-information",
+    "dbus2mqtt",
+    "Message from <b><i>dbus2mqtt</i></b>",
+    ["ok", "OK", "cancel", "Cancel"],
+    { "urgency": 1, "category": "device" },
+    5000
+  ]
+}

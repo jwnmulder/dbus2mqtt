@@ -19,6 +19,10 @@ class MqttMessage:
     payload_serialization_type: str = "json"
 
 @dataclass
+class MqttReceiveHints:
+    log_unmatched_message: bool = True
+
+@dataclass
 class FlowTriggerMessage:
     flow_config: FlowConfig
     flow_trigger_config: FlowTriggerConfig
@@ -27,7 +31,7 @@ class FlowTriggerMessage:
 
 class EventBroker:
     def __init__(self):
-        self.mqtt_receive_queue = janus.Queue[MqttMessage]()
+        self.mqtt_receive_queue = janus.Queue[tuple[MqttMessage, MqttReceiveHints]]()
         self.mqtt_publish_queue = janus.Queue[MqttMessage]()
         self.flow_trigger_queue = janus.Queue[FlowTriggerMessage]()
         # self.dbus_send_queue: janus.Queue
@@ -40,9 +44,9 @@ class EventBroker:
             return_exceptions=True
         )
 
-    def on_mqtt_receive(self, msg: MqttMessage):
+    def on_mqtt_receive(self, msg: MqttMessage, hints: MqttReceiveHints):
         # logger.debug("on_mqtt_receive")
-        self.mqtt_receive_queue.sync_q.put(msg)
+        self.mqtt_receive_queue.sync_q.put((msg, hints))
 
     async def publish_to_mqtt(self, msg: MqttMessage):
         # logger.debug("publish_to_mqtt")

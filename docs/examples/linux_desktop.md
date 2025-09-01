@@ -5,8 +5,6 @@ hide:
 
 # Linux Desktop
 
-## Introduction
-
 Use dbus2mqtt to interface with your Linux desktop
 
 Pre-requisites:
@@ -29,40 +27,16 @@ uv run dbus2mqtt --config docs/examples/linux_desktop.yaml
 
 Trigger a desktop notification by sending one of the following example payloads to `dbus2mqtt/Notifications/command`
 
-Simple notification with no timeout
+Example notification with no timeout
 
 ```json
-{
-  "method": "Notify",
-  "args": [
-    "dbus2mqtt",
-    0,
-    "dialog-information",
-    "dbus2mqtt",
-    "Message from <b><i>dbus2mqtt</i></b>",
-    [],
-    {},
-    0
-  ]
-}
+--8<-- "docs/examples/linux_desktop/notify.json"
 ```
 
-Notification with actions and hints that automatically disappears after 5 seconds
+Example notification with actions and hints, that automatically disappears after 5 seconds
 
 ```json
-{
-  "method": "Notify",
-  "args": [
-    "dbus2mqtt",
-    0,
-    "dialog-information",
-    "dbus2mqtt",
-    "Message from <b><i>dbus2mqtt</i></b>",
-    ["ok", "OK", "cancel", "Cancel"],
-    { "urgency": 1, "category": "device" },
-    5000
-  ]
-}
+--8<-- "docs/examples/linux_desktop/notify_with_actions_and_hints.json"
 ```
 
 Further references:
@@ -70,7 +44,7 @@ Further references:
 * <https://specifications.freedesktop.org/notification-spec/1.3/>
 * <https://specifications.freedesktop.org/icon-naming-spec/latest/>
 
-## Gnome SessionManager
+<!-- ## Gnome SessionManager
 
 !!! note
     work in progress
@@ -79,4 +53,4 @@ The following table lists the supported commands, their descriptions, and an exa
 
 dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/SessionManager/command`.
 
-For an overview of commands have a look at <https://docs.flatpak.org/en/latest/portal-api-reference.html>
+For an overview of commands have a look at <https://docs.flatpak.org/en/latest/portal-api-reference.html> -->
