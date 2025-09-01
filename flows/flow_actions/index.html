@@ -12,28 +12,28 @@
         <meta name="author" content="Jan-Willem Mulder">
       
       
-        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/examples/bluez.html">
+        <link rel="canonical" href="https://jwnmulder.github.io/dbus2mqtt/flows/flow_actions/">
       
       
-        <link rel="prev" href="home_assistant_media_player.html">
+        <link rel="prev" href="../flow_triggers/">
       
       
-        <link rel="next" href="../developer/index.html">
+        <link rel="next" href="../../templating/">
       
       
-      <link rel="icon" href="../assets/logo-dark-img.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+      <link rel="icon" href="../../assets/logo-dark-img.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
     
     
       
-        <title>Bluez - dbus2mqtt</title>
+        <title>Flow actions - dbus2mqtt</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e37652d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,11 +52,11 @@
       
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-      <link rel="stylesheet" href="../css/open_in_new_tab.css">
+      <link rel="stylesheet" href="../../css/open_in_new_tab.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -95,7 +95,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#bluez" class="md-skip">
+        <a href="#flow-actions" class="md-skip">
           Skip to content
         </a>
       
@@ -111,9 +111,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../index.html" title="dbus2mqtt" class="md-header__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
+    <a href="../.." title="dbus2mqtt" class="md-header__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
       
-  <img src="../assets/logo-light-text.svg" alt="logo">
+  <img src="../../assets/logo-light-text.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -130,7 +130,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Bluez
+              Flow actions
             
           </span>
         </div>
@@ -207,8 +207,6 @@
           
             
               
-                
-              
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -218,9 +216,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../index.html" title="dbus2mqtt" class="md-nav__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
+    <a href="../.." title="dbus2mqtt" class="md-nav__button md-logo" aria-label="dbus2mqtt" data-md-component="logo">
       
-  <img src="../assets/logo-light-text.svg" alt="logo">
+  <img src="../../assets/logo-light-text.svg" alt="logo">
 
     </a>
     dbus2mqtt
@@ -247,7 +245,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../index.html" class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -269,7 +267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../setup.html" class="md-nav__link">
+      <a href="../../setup/" class="md-nav__link">
         
   
   
@@ -291,7 +289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../subscriptions.html" class="md-nav__link">
+      <a href="../../subscriptions/" class="md-nav__link">
         
   
   
@@ -310,6 +308,8 @@
       
   
   
+    
+  
   
   
     
@@ -327,15 +327,15 @@
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../flows/index.html" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -354,7 +354,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Flows
@@ -370,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../flows/flow_triggers.html" class="md-nav__link">
+      <a href="../flow_triggers/" class="md-nav__link">
         
   
   
@@ -390,10 +390,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../flows/flow_actions.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Flow actions
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -404,6 +426,53 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#log" class="md-nav__link">
+    <span class="md-ellipsis">
+      log
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context_set" class="md-nav__link">
+    <span class="md-ellipsis">
+      context_set
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mqtt_publish" class="md-nav__link">
+    <span class="md-ellipsis">
+      mqtt_publish
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -441,7 +510,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../templating/index.html" class="md-nav__link ">
+            <a href="../../templating/" class="md-nav__link ">
               
   
   
@@ -475,8 +544,6 @@
       
   
   
-    
-  
   
   
     
@@ -490,19 +557,21 @@
       
         
       
+        
+      
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="index.html" class="md-nav__link ">
+            <a href="../../examples/" class="md-nav__link ">
               
   
   
@@ -521,7 +590,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             Examples
@@ -537,7 +606,7 @@
   
   
     <li class="md-nav__item">
-      <a href="home_assistant_media_player.html" class="md-nav__link">
+      <a href="../../examples/home_assistant_media_player/" class="md-nav__link">
         
   
   
@@ -557,32 +626,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Bluez
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="bluez.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../examples/bluez/" class="md-nav__link">
         
   
   
@@ -593,53 +640,29 @@
   
 
       </a>
-      
-        
+    </li>
+  
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+              
+            
+              
+                
   
   
   
+  
+    <li class="md-nav__item">
+      <a href="../../examples/linux_desktop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linux Desktop
     
+  </span>
   
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup-activities" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup activities
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      Commands
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
+
+      </a>
     </li>
   
 
@@ -679,7 +702,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../developer/index.html" class="md-nav__link ">
+            <a href="../../developer/" class="md-nav__link ">
               
   
   
@@ -714,7 +737,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer/debugging_dbus.html" class="md-nav__link">
+      <a href="../../developer/debugging_dbus/" class="md-nav__link">
         
   
   
@@ -745,9 +768,7 @@
             
             
               
-                
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -766,27 +787,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setup-activities" class="md-nav__link">
+  <a href="#log" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup activities
+      log
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#commands" class="md-nav__link">
+  <a href="#context_set" class="md-nav__link">
     <span class="md-ellipsis">
-      Commands
+      context_set
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
+  <a href="#mqtt_publish" class="md-nav__link">
     <span class="md-ellipsis">
-      References
+      mqtt_publish
     </span>
   </a>
   
@@ -805,77 +826,99 @@
               <article class="md-content__inner md-typeset">
                 
                   
-  
-
 
 
   
   
 
 
-<h1 id="bluez">Bluez</h1>
-<p>This configuration file demonstrates how to use dbus2mqtt to bridge D-Bus events from BlueZ (the official Linux Bluetooth protocol stack) to MQTT topics. It subscribes to relevant D-Bus signals and properties for both the Bluetooth adapter (<code>hci0</code>) and all Bluetooth devices managed by BlueZ. The configuration defines flows that:</p>
-<ul>
-<li>Monitor property changes and object lifecycle events (added/removed) for the Bluetooth adapter and devices.</li>
-<li>Retrieve the current state of the adapter or device using the <code>GetAll</code> method from the <code>org.freedesktop.DBus.Properties</code> interface.</li>
-<li>Publish the retrieved state as JSON payloads to structured MQTT topics, enabling real-time monitoring and integration with home automation or IoT systems.</li>
-</ul>
-<p>This setup allows MQTT clients to receive updates about Bluetooth adapter and device states, as well as notifications when devices are removed, making it easier to integrate Bluetooth events into broader automation workflows.</p>
-<h2 id="setup-activities">Setup activities</h2>
-<ul>
-<li>dbus2mqtt setup using the supplied <a href="https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/bluez.yaml">bluez.yaml</a></li>
-</ul>
-<p>Execute the following command to run dbus2mqtt with the example configuration in this repository.</p>
-<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>docs/examples/bluez.yaml
+<h1 id="flow-actions">Flow actions</h1>
+<h2 id="log">log</h2>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
+<span class="w">  </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your log message</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
 </code></pre></div>
-<h2 id="commands">Commands</h2>
-<p>The following table lists commands, their descriptions, and an example JSON payload for invoking them via MQTT.</p>
-<p>Dbus methods can be invoked by sendig the JSON payload to MQTT topic <code>dbus2mqtt/bluez/hci0/command</code>. Method calls will be done for all matching dbus objects.</p>
 <table>
 <thead>
 <tr>
-<th>Method<br />Property</th>
-<th>Description</th>
-<th>Example MQTT JSON Payload</th>
+<th>key</th>
+<th>type</th>
+<th>description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>StartDiscovery</code></td>
-<td>Starts bluetooth discovery</td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartDiscovery&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
+<td>msg</td>
+<td>str</td>
+<td>A <code>string</code> or <code>templated string</code></td>
 </tr>
 <tr>
-<td><code>StopDiscovery</code></td>
-<td>Stops bluetooth discovery</td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StopDiscovery&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
-</tr>
-<tr>
-<td><code>Connect</code></td>
-<td></td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Connect&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
-</tr>
-<tr>
-<td><code>Disconnect</code></td>
-<td></td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Disconnect&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
-</tr>
-<tr>
-<td><code>Pair</code></td>
-<td></td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pair&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
-</tr>
-<tr>
-<td><code>CancelPairing</code></td>
-<td></td>
-<td><code class="highlight"><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CancelPairing&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/bluez/hci0/dev_A1_A2_A3_A4_A5_A6&quot;</span><span class="w"> </span><span class="p">}</span></code></td>
+<td>level</td>
+<td>str</td>
+<td>One of <code>DEBUG</code>, <code>INFO</code> (default), <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="references">References</h2>
-<ul>
-<li><a href="https://manpages.ubuntu.com/manpages/noble/man5/org.bluez">https://manpages.ubuntu.com/manpages/noble/man5/org.bluez</a></li>
-</ul>
+<h2 id="context_set">context_set</h2>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">context_set</span>
+<span class="w">  </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">  </span><span class="nt">global_context</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>context</td>
+<td>dict</td>
+<td>Per flow execution context. Value can be a <code>dict of strings</code> or <code>dict of templated strings</code></td>
+</tr>
+<tr>
+<td>global_context</td>
+<td>dict</td>
+<td>Global context, shared between multiple flow executions, over all subscriptions. Value can be a <code>dict of strings</code> or <code>dict of templated strings</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="mqtt_publish">mqtt_publish</h2>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_publish</span>
+<span class="w">  </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/state</span>
+<span class="w">  </span><span class="nt">payload_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">json</span>
+<span class="w">  </span><span class="nt">payload_template</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">PlaybackStatus</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Off&quot;</span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>type</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic</td>
+<td>string</td>
+<td>mqtt topic the messaage is published to</td>
+</tr>
+<tr>
+<td>payload_type</td>
+<td>string</td>
+<td>Message format for MQTT: <code>json</code> (default), <code>yaml</code>, or <code>text</code></td>
+</tr>
+<tr>
+<td>payload_template</td>
+<td>string, dict</td>
+<td>value can be a <code>string</code>, a <code>dict of strings</code>, a <code>templated string</code> or a nested <code>dict of templated strings</code></td>
+</tr>
+</tbody>
+</table>
+
+
 
 
 
@@ -884,14 +927,7 @@
 
 
   
-  
 
-
-
-  
-
-
-  
 
 
 
@@ -919,7 +955,8 @@
   
 </div>
       
-        <div class="md-social">
+        
+<div class="md-social">
   
     
     
@@ -968,12 +1005,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.code.copy", "navigation.indexes", "navigation.instant"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.50899def.min.js"></script>
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
       
-        <script src="../js/open_in_new_tab.js"></script>
+        <script src="../../js/open_in_new_tab.js"></script>
       
     
   </body>
