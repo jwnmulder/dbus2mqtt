@@ -3,9 +3,9 @@ import uuid
 import warnings
 
 from dataclasses import dataclass, field
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import Field, SecretStr
+from jsonargparse.typing import SecretStr
 
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -98,10 +98,15 @@ class FlowTriggerMqttMessageConfig:
             return template_engine.render_template(self.filter, bool, trigger_context)
         return True
 
-FlowTriggerConfig = Annotated[
-    FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig | FlowTriggerMqttMessageConfig,
-    Field(discriminator="type")
-]
+FlowTriggerConfig = (
+    FlowTriggerScheduleConfig
+    | FlowTriggerDbusSignalConfig
+    | FlowTriggerBusNameAddedConfig
+    | FlowTriggerBusNameRemovedConfig
+    | FlowTriggerObjectAddedConfig
+    | FlowTriggerObjectRemovedConfig
+    | FlowTriggerMqttMessageConfig
+)
 
 @dataclass
 class FlowActionContextSetConfig:
@@ -124,10 +129,11 @@ class FlowActionLogConfig:
     type: Literal["log"] = "log"
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
-FlowActionConfig = Annotated[
-    FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig,
-    Field(discriminator="type")
-]
+FlowActionConfig = (
+    FlowActionMqttPublishConfig
+    | FlowActionContextSetConfig
+    | FlowActionLogConfig
+)
 
 @dataclass
 class FlowConfig:

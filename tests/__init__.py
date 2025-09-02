@@ -1,9 +1,8 @@
-
 from unittest.mock import patch
 
 import dbus_fast.aio as dbus_aio
 
-from pydantic import SecretStr
+from jsonargparse.typing import SecretStr
 
 from dbus2mqtt import AppContext, config
 from dbus2mqtt.config import (
