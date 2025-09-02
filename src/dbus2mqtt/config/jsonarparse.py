@@ -1,32 +1,38 @@
+from typing import Any
+
 import jsonargparse
 
+from yaml import YAMLError
 
-def _custom_yaml_load(stream):
-    if isinstance(stream, str):
-        v = stream.strip()
+default_yaml_loader = jsonargparse.get_loader("yaml")
+def _custom_yaml_load(stream: str) -> Any:
 
-        # jsonargparse tries to parse yaml 1.1 boolean like values
-        # Without this, str:"{'PlaybackStatus': 'Off'}" would become dict:{'PlaybackStatus': False}
-        if v in ['on', 'On', 'off', 'Off', 'TRUE', 'FALSE', 'True', 'False']:
-            return stream
+    v = stream.strip()
 
-        # Anoyingly, values starting with {{ and ending with }} are working with the default yaml_loader
-        # from jsonargparse. Somehow its not when we use the custom yaml loader.
-        # This fixes it
-        first_line = v.splitlines()[0].strip()
-        if "#" not in first_line and ("{{" in first_line or first_line.startswith("{%")):
-            return stream
+    # jsonargparse tries to parse yaml 1.1 boolean like values
+    # Without this, str:"{'PlaybackStatus': 'Off'}" would become dict:{'PlaybackStatus': False}
+    if v in ['on', 'On', 'off', 'Off', 'TRUE', 'FALSE', 'True', 'False']:
+        return stream
 
     # Delegate to default yaml loader from jsonargparse
-    yaml_loader = jsonargparse.get_loader("yaml")
-    return yaml_loader(stream)
+    return default_yaml_loader(stream)
 
 def new_argument_parser() -> jsonargparse.ArgumentParser:
 
     # register out custom yaml loader for jsonargparse
-    jsonargparse.set_loader("yaml_custom", _custom_yaml_load)
+    jsonargparse.set_loader(
+        mode="yaml_custom",
+        loader_fn=_custom_yaml_load,
+        exceptions=(YAMLError,),
+        json_superset=True
+    )
 
     # unless specified otherwise, load config from config.yaml
-    parser = jsonargparse.ArgumentParser(default_config_files=["config.yaml"], default_env=True, env_prefix=False, parser_mode="yaml_custom")
+    parser = jsonargparse.ArgumentParser(
+        default_config_files=["config.yaml"],
+        default_env=True,
+        env_prefix=False,
+        parser_mode="yaml_custom"
+    )
 
     return parser
