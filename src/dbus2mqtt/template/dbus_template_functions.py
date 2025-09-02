@@ -3,8 +3,8 @@ import logging
 
 from typing import Any
 
-from dbus_next.constants import ErrorType
-from dbus_next.errors import DBusError
+from dbus_fast.constants import ErrorType
+from dbus_fast.errors import DBusError
 
 from dbus2mqtt.dbus.dbus_client import DbusClient
 
@@ -29,10 +29,10 @@ class DbusContext:
     async def async_dbus_call_fn(self, bus_name: str, path: str, interface: str, method:str, method_args: list[Any] = []):
 
         if not isinstance(method_args, list):
-            # Pylance will mentiod this line is unreachable. It is not as jinja2 can pass in any type
+            # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
             raise ValueError("method_args must be a list")
 
-        proxy_object = self.dbus_client.get_proxy_object(bus_name, path)
+        proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:
             raise ValueError(f"No matching subscription found for bus_name: {bus_name}, path: {path}")
 
@@ -42,7 +42,7 @@ class DbusContext:
 
     async def async_dbus_property_get_fn(self, bus_name: str, path: str, interface: str, property:str, default_unsupported: Any = None):
 
-        proxy_object = self.dbus_client.get_proxy_object(bus_name, path)
+        proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:
             raise ValueError(f"No matching subscription found for bus_name: {bus_name}, path: {path}")
 

@@ -1,28 +1,37 @@
+import urllib.parse
 
 from datetime import datetime
 from typing import Any, TypeVar
 
 from jinja2 import BaseLoader, StrictUndefined, TemplateError
 from jinja2.nativetypes import NativeEnvironment
+from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
 TemplateResultType = TypeVar('TemplateResultType')
+
+def urldecode(string):
+    return urllib.parse.unquote(string)
 
 class TemplateEngine:
     def __init__(self):
 
         engine_globals = {}
         engine_globals['now'] = datetime.now
+        engine_globals['urldecode'] = urldecode
+
+        engine_filters = {}
+        engine_filters['urldecode'] = urldecode
 
         self.jinja2_env = NativeEnvironment(
             loader=BaseLoader(),
-            extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
+            extensions=[AnsibleCoreFiltersExtension],
             undefined=StrictUndefined,
             keep_trailing_newline=False
         )
 
         self.jinja2_async_env = NativeEnvironment(
             loader=BaseLoader(),
-            extensions=['jinja2_ansible_filters.AnsibleCoreFiltersExtension'],
+            extensions=[AnsibleCoreFiltersExtension],
             undefined=StrictUndefined,
             enable_async=True
         )
@@ -32,6 +41,9 @@ class TemplateEngine:
         self.jinja2_env.globals.update(engine_globals)
         self.jinja2_async_env.globals.update(engine_globals)
 
+        self.jinja2_env.filters.update(engine_filters)
+        self.jinja2_async_env.filters.update(engine_filters)
+
     def add_functions(self, custom_functions: dict[str, Any]):
         self.jinja2_env.globals.update(custom_functions)
         self.jinja2_async_env.globals.update(custom_functions)
@@ -40,6 +52,9 @@ class TemplateEngine:
         self.app_context.update(context)
 
     def _convert_value(self, res: Any, res_type: type[TemplateResultType]) -> TemplateResultType:
+
+        if res is None:
+            return res
 
         if isinstance(res, res_type):
             return res

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -26,14 +26,14 @@ repos:
       - id: codespell
 
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.0
+    rev: v1.37.1
     hooks:
       - id: yamllint
         args:
           - --strict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.6
+    rev: v0.12.11
     hooks:
       - id: ruff
         args:
@@ -42,11 +42,22 @@ repos:
           - I
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.6.16
+    rev: 0.8.14
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.399
+    rev: v1.1.404
     hooks:
       - id: pyright
+
+  - repo: local
+    hooks:
+      - id: deptry
+        name: deptry
+        entry: uv run deptry .
+        language: python
+        additional_dependencies:
+          - uv
+        always_run: true
+        pass_filenames: false

@@ -48,6 +48,10 @@ def test_str_template_int_result_as_str():
     res = templating.render_template("{{ 3 }}", str)
     assert res == "3"
 
+def test_none_result():
+    templating = TemplateEngine()
+    res = templating.render_template("{{ None }}", str)
+    assert res is None
 
 def test_dict_with_integer_expression():
 

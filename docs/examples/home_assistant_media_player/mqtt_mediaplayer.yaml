@@ -1,0 +1,123 @@
+mqtt:
+  sensor:
+    - name: MPRIS Media Player
+      state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+      json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+      value_template: >-
+        {% set status = value_json.PlaybackStatus %}
+        {{ {'Playing': 'playing', 'Paused': 'paused', 'Stopped': 'idle'}.get(status, 'off') }}
+
+  image:
+    - name: MPRIS Media Player MQTT image
+      image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+
+media_player:
+  - platform: media_player_template
+    media_players:
+      mpris_media_player:
+        device_class: receiver
+        friendly_name: MPRIS Media Player
+        value_template: "{{ states('sensor.mpris_media_player') }}"
+
+        current_volume_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') }}"
+        current_is_muted_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') == 0 }}"
+        current_position_template: "{{ state_attr('sensor.mpris_media_player', 'Position') }}"
+
+        # title: 'xesam:title' or filename without extension from 'xesam:url'
+        title_template: >-
+          {% set metadata = state_attr('sensor.mpris_media_player', 'Metadata') or {} %}
+          {% set title = metadata.get('xesam:title', '') %}
+          {% if not title or title == '' %}
+          {% set title = metadata.get('xesam:url', '') | regex_findall(find='([^\\/]+?)(?:\.[^.\\/]+)?$') | first | default('') %}
+          {% endif %}
+          {{ title }}
+
+        media_content_type_template: music  # needed to show 'artist'
+        media_duration_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) }}"
+        album_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:album', '') }}"
+        artist_template: >-
+          {% set artist = (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', '') %}
+          {% if artist is string %}
+          {% set artist = [artist] %}
+          {% endif %}
+          {{ artist | first }}
+
+        # mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT
+        media_image_url_template: >-
+          {% set mpris_metadata = state_attr('sensor.mpris_media_player', 'Metadata') or {} %}
+          {% set mpris_art_url = mpris_metadata.get('mpris:artUrl', '') %}
+          {% set mpris_url = mpris_metadata.get('xesam:url') %}
+
+          {% if mpris_art_url.startswith('http') %}
+            {{ mpris_art_url }}
+          {% elif mpris_art_url.startswith('file://') %}
+            http://127.0.0.1:8123{{ state_attr('image.mpris_media_player_mqtt_image', 'entity_picture') }}
+          {% else %}
+            {{
+                mpris_url | regex_replace(
+                  find='https:\/\/www\\.youtube\\.com\/watch\\?v=([^&]+).*',
+                  replace='https://img.youtube.com/vi/\\1/maxresdefault.jpg'
+                )
+            }}
+          {% endif %}
+
+        turn_off:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Quit"}
+        play:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Play"}
+        pause:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Pause"}
+        stop:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Stop"}
+        next:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Next"}
+        previous:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Previous"}
+        seek:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player', 'Metadata')['mpris:trackid'] }}", {{ position | int }}] }
+        set_volume:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{volume}} }
+        volume_up:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{ [1, (state_attr('sensor.mpris_media_player', 'Volume') + 0.1)] | min }} }
+        volume_down:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{ [0, (state_attr('sensor.mpris_media_player', 'Volume') - 0.1)] | max }} }

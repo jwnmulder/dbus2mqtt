@@ -1,4 +1,4 @@
-import dbus_next.introspection as dbus_introspection
+import dbus_fast.introspection as dbus_introspection
 
 # taken from https://code.videolan.org/videolan/vlc/-/blob/master/modules/control/dbus/dbus_introspect.h
 mpris_introspection_vlc = dbus_introspection.Node.parse("""\
@@ -10,6 +10,7 @@ mpris_introspection_vlc = dbus_introspection.Node.parse("""\
       <arg name="data" direction="out" type="s"/>
     </method>
   </interface>
+
   <interface name="org.freedesktop.DBus.Properties">
     <method name="Get">
       <arg direction="in" type="s"/>
@@ -31,6 +32,7 @@ mpris_introspection_vlc = dbus_introspection.Node.parse("""\
       <arg type="as"/>
     </signal>
   </interface>
+
   <interface name="org.mpris.MediaPlayer2">
     <property name="CanQuit" type="b" access="read"/>
     <property name="Fullscreen" type="b" access="readwrite"/>
@@ -44,6 +46,7 @@ mpris_introspection_vlc = dbus_introspection.Node.parse("""\
     <method name="Raise"/>
     <method name="Quit"/>
   </interface>
+
   <interface name="org.mpris.MediaPlayer2.Player">
     <property name="PlaybackStatus" type="s" access="read"/>
     <property name="LoopStatus" type="s" access="readwrite"/>
@@ -80,6 +83,7 @@ mpris_introspection_vlc = dbus_introspection.Node.parse("""\
       <arg type="x"/>
     </signal>
   </interface>
+
   <interface name="org.mpris.MediaPlayer2.TrackList">
     <property name="Tracks" type="ao" access="read"/>
     <property name="CanEditTracks" type="b" access="read"/>

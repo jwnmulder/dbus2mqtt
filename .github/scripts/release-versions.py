@@ -26,16 +26,16 @@ def get_versions_from_git_tags() -> list[version.Version]:
 
 def latest_version_by_cycle(versions: list[version.Version], cycles: list[str]) -> dict[str, version.Version]:
     res = {}
-    for cycle in cycles:
-        parsed_cycle = version.parse(cycle)
+    for cycle_str in cycles:
+        cycle = version.parse(cycle_str)
 
         for v in versions:
             # check if version is in cycle range
             # cycle can be major or major.minor or major.minor.patch
-            if len(v.release) > len(parsed_cycle.release):
+            if len(v.release) > len(cycle.release) and v.base_version.startswith(cycle.base_version):
                 # update if version is later within cycle
-                if cycle not in cycles or v > parsed_cycle:
-                    res[cycle] = v
+                if cycle not in cycles or v > cycle:
+                    res[cycle_str] = v
     return res
 
 def main():

@@ -1,6 +1,8 @@
 # mqtt:
 #   host:
 #   port:
+#   subscription_topics:
+#     - dbus2mqtt/#
 
 dbus:
   subscriptions:
@@ -28,7 +30,7 @@ dbus:
 flows:
   - name: "publish internal state"
     triggers:
-      - type: bus_name_added
+      - type: object_added
       - type: schedule
         interval: {seconds: 5}
     actions:
@@ -37,4 +39,8 @@ flows:
         payload_type: json
         payload_template:
           now: "{{ now().isoformat() }}"
-          dbus_list: "{{ dbus_list('*') }}"
+          dbus_list_res: "{{ dbus_list('*') }}"
+      - type: log
+        level: INFO
+        msg: >
+          Just published: dbus_list={{ dbus_list('*') }} to topic 'dbus2mqtt/state'

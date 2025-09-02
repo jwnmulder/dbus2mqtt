@@ -1,7 +1,3 @@
-# mqtt:
-#   host:
-#   port:
-
 dbus:
   subscriptions:
 
@@ -25,7 +21,7 @@ dbus:
       flows:
         - name: "publish state at startup and schedule"
           triggers:
-            - type: bus_name_added
+            - type: object_added
             - type: schedule
               interval: {seconds: 5}
           actions:
@@ -34,3 +30,33 @@ dbus:
               payload_type: json
               payload_template:
                 clients: "{{ dbus_call('org.gnome.SessionManager', '/org/gnome/SessionManager', 'org.gnome.SessionManager', 'GetClients') }}"
+
+    - bus_name: org.freedesktop.Notifications
+      path: /org/freedesktop/Notifications
+
+      interfaces:
+        - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
+        - interface: org.freedesktop.Notifications
+          mqtt_command_topic: dbus2mqtt/Notifications/command
+          signals:
+            - signal: NotificationClosed
+            - signal: ActionInvoked
+          methods:
+            - method: Notify
+            - method: CloseNotification
+            - method: GetServerInformation
+
+      flows:
+        - name: "signal received"
+          triggers:
+            - type: dbus_signal
+              interface: org.freedesktop.Notifications
+              signal: NotificationClosed
+            - type: dbus_signal
+              interface: org.freedesktop.Notifications
+              signal: ActionInvoked
+          actions:
+            - type: log
+              msg: "dbus signal received: signal={{ signal }}, args={{ args }}"

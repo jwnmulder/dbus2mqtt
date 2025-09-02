@@ -1,4 +1,4 @@
-name: Upload Python Package
+name: Publish Python Package
 
 "on":
   release:
@@ -12,19 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
+          activate-environment: true
           enable-cache: true
 
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
+      # - name: "Set up Python"
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version-file: ".python-version"
 
       - name: Build
         run: uv build
@@ -47,7 +48,7 @@ jobs:
 
     steps:
       - name: Retrieve release distributions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release-dists
           path: dist/

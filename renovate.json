@@ -1,10 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "local>jwnmulder/renovate-config"
-  ],
+  "extends": ["local>jwnmulder/renovate-config"],
 
   "labels": ["dependencies"],
+
+  "lockFileMaintenance": {
+    "enabled": true
+  },
 
   "packageRules": [
     {
@@ -17,6 +19,26 @@
       "description": "Disable Renovate for .python-version",
       "matchFileNames": [".python-version"],
       "enabled": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
+      "pinDigests": true,
+      "separateMinorPatch": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "automerge": true,
+      "addLabels": ["automerge"],
+      "extends": ["schedule:weekly"]
     }
   ]
 }

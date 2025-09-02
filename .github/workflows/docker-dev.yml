@@ -4,6 +4,13 @@ name: docker-dev
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'tests/**'
+      - '.pre-commit-config.yaml'
+      - 'README.md'
+      - 'renovate.json'
+      - 'mkdocs.yaml'
   workflow_dispatch:
 
 jobs:
@@ -13,17 +20,17 @@ jobs:
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
 
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
+      # - name: "Set up Python"
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version-file: ".python-version"
 
       - name: Determine version from hatch
         id: version
@@ -66,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./docker/Dockerfile.latest
+          file: ./docker/Dockerfile.dev
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
