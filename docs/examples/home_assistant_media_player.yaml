@@ -103,7 +103,7 @@ dbus:
                 PlaybackStatus: "Off"
         - name: "Mute"
           triggers:
-            - type: mqtt_msg
+            - type: mqtt_message
               topic: dbus2mqtt/org.mpris.MediaPlayer2/command
               filter: "{{ value_json.action == 'mute' }}"
           actions:

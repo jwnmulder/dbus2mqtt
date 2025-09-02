@@ -128,7 +128,7 @@ class _FlowActionsExecutor:
 
         return res
 
-    async def execute_actions(self, dbus_object_context: dict[str, Any] | None, trigger_context: dict[str, Any] | None):
+    async def execute_actions(self, trigger_type: str, dbus_object_context: dict[str, Any] | None, trigger_context: dict[str, Any] | None):
 
         # per flow execution context
         flow_execution_context = FlowExecutionContext(
@@ -136,6 +136,7 @@ class _FlowActionsExecutor:
             global_context=self.global_context,
             dbus_object_context=dbus_object_context
         )
+        flow_execution_context.context["trigger_type"] = trigger_type
 
         # non updatable trigger_context, add it to context to avoid dict processing for each action
         if trigger_context:
@@ -220,6 +221,7 @@ class FlowProcessor:
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
 
+        trigger_type = flow_trigger_message.flow_trigger_config.type
         trigger_str = self._trigger_config_to_str(flow_trigger_message)
         flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
 
@@ -237,6 +239,7 @@ class FlowProcessor:
         # need dbus_object_context
         # need trigger_context
         await flow.execute_actions(
+            trigger_type=trigger_type,
             dbus_object_context=flow_trigger_message.dbus_object_context,
             trigger_context=flow_trigger_message.trigger_context
         )
