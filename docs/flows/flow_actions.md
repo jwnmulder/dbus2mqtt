@@ -18,6 +18,7 @@
 ```yaml
 - type: context_set
   context: {}
+  dbus_object_context: {}
   global_context: {}
 ```
 
