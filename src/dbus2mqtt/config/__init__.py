@@ -113,6 +113,8 @@ class FlowActionContextSetConfig:
     type: Literal["context_set"] = "context_set"
     context: dict[str, object] | None = None
     """Per flow execution context"""
+    dbus_object_context: dict[str, object] | None = None
+    """Per dbus object context, shared between multiple flow executions"""
     global_context: dict[str, object] | None = None
     """Global context, shared between multiple flow executions, over all subscriptions"""
 

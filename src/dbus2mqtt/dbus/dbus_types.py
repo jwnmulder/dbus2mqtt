@@ -17,6 +17,8 @@ class BusNameSubscriptions:
         self.bus_name = bus_name
         self.unique_name = unique_name
         self.path_objects: dict[str, dbus_aio.proxy_object.ProxyObject] = {}
+        self.dbus_object_context: dict[str, Any] = {}
+        """Mutable context for each dbus object"""
 
 @dataclass
 class SubscribedInterface:

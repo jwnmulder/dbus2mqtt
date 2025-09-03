@@ -424,6 +424,9 @@ class DbusClient:
         if bus_name_subscriptions:
             for path, proxy_object in bus_name_subscriptions.path_objects.items():
 
+                bus_name_subscriptions = self.subscriptions[bus_name]
+                dbus_object_context = bus_name_subscriptions.dbus_object_context
+
                 subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
                 for subscription_config in subscription_configs:
 
@@ -432,10 +435,10 @@ class DbusClient:
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
                     # Trigger flows that have a bus_name_removed trigger configured
-                    await self._trigger_bus_name_removed(subscription_config, bus_name, path)
+                    await self._trigger_bus_name_removed(subscription_config, bus_name, path, dbus_object_context)
 
                     # Trigger flows that have an object_removed trigger configured
-                    await self._trigger_object_removed(subscription_config, bus_name, path)
+                    await self._trigger_object_removed(subscription_config, bus_name, path, dbus_object_context)
 
 
                 # Wait for completion
@@ -491,8 +494,11 @@ class DbusClient:
             # TODO, only stop if this subscription is not used for any other objects / paths
             self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
+            bus_name_subscriptions = self.subscriptions[bus_name]
+            dbus_object_context = bus_name_subscriptions.dbus_object_context
+
             # Trigger flows that have an object_removed trigger configured
-            await self._trigger_object_removed(subscription_config, bus_name, path)
+            await self._trigger_object_removed(subscription_config, bus_name, path, dbus_object_context)
 
         proxy_object = self.get_subscribed_proxy_object(bus_name, path)
         if proxy_object is not None:
@@ -580,61 +586,70 @@ class DbusClient:
                     # Only process subscription_config once, no matter how many paths it matches
                     if subscription_config.id not in processed_new_subscriptions:
 
+                        bus_name_subscriptions = self.subscriptions[bus_name]
+                        dbus_object_context = bus_name_subscriptions.dbus_object_context
+
                         # Ensure all schedulers are started
                         # If a scheduler is already active for this subscription flow, it will be reused
-                        self.flow_scheduler.start_flow_set(subscription_config.flows)
+                        self.flow_scheduler.start_flow_set(subscription_config.flows, dbus_object_context)
 
                         # Trigger flows that have a bus_name_added trigger configured
 
                         # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
                         # leaving it now for backwards compatibility
-                        await self._trigger_bus_name_added(subscription_config, bus_name, object_path)
+                        await self._trigger_bus_name_added(subscription_config, bus_name, object_path, dbus_object_context)
 
                         processed_new_subscriptions.add(subscription_config.id)
 
                     # Trigger flows that have a object_added trigger configured
-                    await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
+                    await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces, dbus_object_context)
 
-    async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
+    async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, trigger_context: dict, dbus_object_context: dict[str, Any]):
 
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == type:
-                    trigger_message = FlowTriggerMessage(flow, trigger, datetime.now(), context)
+                    trigger_message = FlowTriggerMessage(
+                        flow,
+                        trigger,
+                        datetime.now(),
+                        dbus_object_context=dbus_object_context,
+                        trigger_context=trigger_context
+                    )
                     await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
-    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+    async def _trigger_bus_name_added(self, subscription_config: SubscriptionConfig, bus_name: str, path: str, dbus_object_context: dict[str, Any]):
 
         # Trigger flows that have a bus_name_added trigger configured
         await self._trigger_flows(subscription_config, "bus_name_added", {
             "bus_name": bus_name,
             "path": path
-        })
+        }, dbus_object_context)
 
-    async def _trigger_bus_name_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+    async def _trigger_bus_name_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str, dbus_object_context: dict[str, Any]):
 
         # Trigger flows that have a bus_name_removed trigger configured
         await self._trigger_flows(subscription_config, "bus_name_removed", {
             "bus_name": bus_name,
             "path": path
-        })
+        }, dbus_object_context)
 
-    async def _trigger_object_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str]):
+    async def _trigger_object_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str], dbus_object_context: dict[str, Any]):
 
         # Trigger flows that have a object_added trigger configured
         await self._trigger_flows(subscription_config, "object_added", {
             "bus_name": bus_name,
             "path": object_path
             # "interfaces": object_interfaces
-        })
+        }, dbus_object_context)
 
-    async def _trigger_object_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
+    async def _trigger_object_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str, dbus_object_context: dict[str, Any]):
 
         # Trigger flows that have a object_removed trigger configured
         await self._trigger_flows(subscription_config, "object_removed", {
             "bus_name": bus_name,
             "path": path
-        })
+        }, dbus_object_context)
 
     async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]):
 
@@ -708,6 +723,9 @@ class DbusClient:
 
         logger.debug(f"dbus_signal: signal={signal.signal_config.signal}, args={signal.args}, bus_name={signal.bus_name}, path={signal.path}, interface={signal.interface_name}")
 
+        bus_name_subscriptions = self.subscriptions[signal.bus_name]
+        dbus_object_context = bus_name_subscriptions.dbus_object_context
+
         for flow in signal.subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == "dbus_signal" and signal.signal_config.signal == trigger.signal:
@@ -730,6 +748,7 @@ class DbusClient:
                                 flow,
                                 trigger,
                                 datetime.now(),
+                                dbus_object_context=dbus_object_context,
                                 trigger_context=trigger_context
                             )
 
