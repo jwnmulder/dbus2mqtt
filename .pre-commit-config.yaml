@@ -47,7 +47,7 @@ repos:
       - id: uv-lock
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.404
+    rev: v1.1.405
     hooks:
       - id: pyright
 
