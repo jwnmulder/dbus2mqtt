@@ -36,7 +36,7 @@ async def test_bus_name_added_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_bus_name_added(subscription_config, "test-bus-name", "/some/test/path")
+    await dbus_client._trigger_bus_name_added(subscription_config, "test-bus-name", "/some/test/path", {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions
@@ -72,7 +72,7 @@ async def test_bus_name_removed_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_bus_name_removed(subscription_config, "test-bus-name", "/some/test/path")
+    await dbus_client._trigger_bus_name_removed(subscription_config, "test-bus-name", "/some/test/path", {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions
@@ -108,7 +108,7 @@ async def test_object_added_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_object_added(subscription_config, "test-bus-name", "/some/test/path", [])
+    await dbus_client._trigger_object_added(subscription_config, "test-bus-name", "/some/test/path", [], {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions
@@ -144,7 +144,7 @@ async def test_object_removed_trigger():
     subscription_config = app_context.config.dbus.subscriptions[0]
 
     # trigger dbus_client and capture the triggered message
-    await dbus_client._trigger_object_removed(subscription_config, "test-bus-name", "/some/test/path")
+    await dbus_client._trigger_object_removed(subscription_config, "test-bus-name", "/some/test/path", {})
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     # execute all flow actions

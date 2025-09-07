@@ -4,28 +4,22 @@ from typing import Any
 
 class FlowExecutionContext:
 
-    def __init__(self, name: str | None, global_flows_context: dict[str, Any], flow_context: dict[str, Any]):
+    def __init__(self, name: str | None, global_context: dict[str, Any], dbus_object_context: dict[str, Any] | None):
         self.name = name
 
-        self.global_flows_context = global_flows_context
+        self.global_context = global_context
         """
-        Global flows context which is shared across all flows.
-        Modifiable by user.
-        **Not** cleaned up after flow execution.
+        Updatable global context which is shared across all flows.
         """
 
-        self.flow_context = flow_context
+        self.dbus_object_context = dbus_object_context
         """
-        Flow context which contains flow specific context like 'subscription_bus_name'.
-        **Not** modifiable by user.
-        **Not** cleaned up after flow execution.
+        Updatable context bound to the lifecycle of the bus_name / dbus_object.
         """
 
         self.context: dict[str, Any] = {}
         """
-        Per flow execution context.
-        Modifiable by user.
-        Cleaned up after each flow execution
+        Updatable per flow execution context.
         """
 
     def get_aggregated_context(self) -> dict[str, Any]:
@@ -34,14 +28,14 @@ class FlowExecutionContext:
         Merges global flows context, flow context, and local context
         """
 
-        context = {}
-        if self.global_flows_context:
-            context.update(self.global_flows_context)
-        if self.flow_context:
-            context.update(self.flow_context)
+        aggregated_context = {}
+        if self.global_context:
+            aggregated_context.update(self.global_context)
+        if self.dbus_object_context:
+            aggregated_context.update(self.dbus_object_context)
         if self.context:
-            context.update(self.context)
-        return context
+            aggregated_context.update(self.context)
+        return aggregated_context
 
 class FlowAction(ABC):
 
