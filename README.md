@@ -76,7 +76,7 @@ The most complete one being [Mediaplayer integration with Home Assistant](https:
 
 ## Exposing dbus methods, properties and signals
 
-See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions.html) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
+See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions/index.html) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
 
 ```json
 {
