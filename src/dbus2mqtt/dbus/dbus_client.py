@@ -762,12 +762,15 @@ class DbusClient:
         3. a matching bus_name (if provided)
         4. a matching path (if provided)
         """
-
+        matching_configs = []
+        
         found_matching_topic = False
         for subscription_configs in self.config.subscriptions:
             for interface_config in subscription_configs.interfaces:
                 mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
-                found_matching_topic |= mqtt_topic == msg.topic
+                if mqtt_topic == msg.topic:
+                    found_matching_topic = True
+                    matching_configs.append((subscription_configs, interface_config))
 
         if not found_matching_topic:
             return
@@ -790,65 +793,59 @@ class DbusClient:
                 logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}")
             return
 
-        for [bus_name, bus_name_subscription] in self.subscriptions.items():
-            if fnmatch.fnmatchcase(bus_name, payload_bus_name):
-                for [path, proxy_object] in bus_name_subscription.path_objects.items():
-                    if fnmatch.fnmatchcase(path, payload_path):
-                        for subscription_configs in self.config.get_subscription_configs(bus_name=bus_name, path=path):
-                            for interface_config in subscription_configs.interfaces:
+        # Only process interfaces that have matching MQTT command topics
+        for subscription_config, interface_config in matching_configs:
+            for [bus_name, bus_name_subscription] in self.subscriptions.items():
+                if fnmatch.fnmatchcase(bus_name, subscription_config.bus_name) and fnmatch.fnmatchcase(bus_name, payload_bus_name):
+                    for [path, proxy_object] in bus_name_subscription.path_objects.items():
+                        if fnmatch.fnmatchcase(path, subscription_config.path) and fnmatch.fnmatchcase(path, payload_path):
 
-                                for method in interface_config.methods:
-                                    # filter configured method, configured topic, ...
-                                    if method.method == payload_method:
-                                        interface = proxy_object.get_interface(name=interface_config.interface)
-                                        matched_method = True
+                            for method in interface_config.methods:
 
-                                        result = None
-                                        error = None
-                                        try:
-                                            logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            result = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                # filter configured method, configured topic, ...
+                                if method.method == payload_method:
+                                    interface = proxy_object.get_interface(name=interface_config.interface)
+                                    matched_method = True
+                                    result = None
+                                    error = None
+                                    try:
+                                        logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                        result = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+                                        # Send response if configured
+                                        await self._send_mqtt_response(
+                                            interface_config, result, None, bus_name, path,
+                                            method=method.method, args=payload_method_args
+                                        )
+                                    except Exception as e:
+                                        error = e
+                                        logger.warning(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name} failed, exception={e}")
+                                        # Send error response if configured
+                                        await self._send_mqtt_response(
+                                            interface_config, None, error, bus_name, path,
+                                            method=method.method, args=payload_method_args
+                                        )
 
-                                            # Send response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, result, None, bus_name, path,
-                                                method=method.method, args=payload_method_args
-                                            )
+                            for property in interface_config.properties:
+                                # filter configured property, configured topic, ...
+                                if property.property == payload_property:
+                                    interface = proxy_object.get_interface(name=interface_config.interface)
+                                    matched_property = True
 
-                                        except Exception as e:
-                                            error = e
-                                            logger.warning(f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={bus_name}, exception={e}")
-
-                                            # Send error response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, None, error, bus_name, path,
-                                                method=method.method, args=payload_method_args
-                                            )
-
-                                for property in interface_config.properties:
-                                    # filter configured property, configured topic, ...
-                                    if property.property == payload_property:
-                                        interface = proxy_object.get_interface(name=interface_config.interface)
-                                        matched_property = True
-
-                                        try:
-                                            logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            await self.set_dbus_interface_property(interface, property.property, payload_value)
-
-                                            # Send property set response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, payload_value, None, bus_name, path,
-                                                property=property.property, value=[payload_value]
-                                            )
-
-                                        except Exception as e:
-                                            logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name} failed, exception={e}")
-
-                                            # Send property set error response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, None, e, bus_name, path,
-                                                property=property.property, value=[payload_value],
-                                            )
+                                    try:
+                                        logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
+                                        await self.set_dbus_interface_property(interface, property.property, payload_value)
+                                        # Send property set response if configured
+                                        await self._send_mqtt_response(
+                                            interface_config, payload_value, None, bus_name, path,
+                                            property=property.property, value=[payload_value]
+                                        )
+                                    except Exception as e:
+                                        logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name} failed, exception={e}")
+                                        # Send property set error response if configured
+                                        await self._send_mqtt_response(
+                                            interface_config, None, e, bus_name, path,
+                                            property=property.property, value=[payload_value],
+                                        )
 
         if not matched_method and not matched_property and hints.log_unmatched_message:
             if payload_method:
