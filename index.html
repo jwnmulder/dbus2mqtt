@@ -926,7 +926,7 @@ It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bu
 </ul>
 <h2 id="project-status">Project status</h2>
 <p><strong>dbus2mqtt</strong> is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.</p>
-<p>Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on <a href="examples/home_assistant_media_player.html">Mediaplayer integration with Home Assistant</a></p>
+<p>Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on <a href="examples/home_assistant_media_player/">Mediaplayer integration with Home Assistant</a></p>
 <h2 id="getting-started-with-dbus2mqtt">Getting started with dbus2mqtt</h2>
 <p>Create a <code>config.yaml</code> file with the contents shown below. This configuration will expose all bus properties from the <code>org.mpris.MediaPlayer2.Player</code> interface to MQTT on the <code>dbus2mqtt/org.mpris.MediaPlayer2/state</code> topic.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
@@ -965,19 +965,19 @@ It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bu
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>dbus2mqtt
 dbus2mqtt<span class="w"> </span>--config<span class="w"> </span>config.yaml
 </code></pre></div>
-<p>See <a href="setup.html">setup</a> for more installation options and configuration details.</p>
+<p>See <a href="setup/">setup</a> for more installation options and configuration details.</p>
 <h2 id="examples">Examples</h2>
-<p>More dbus2mqtt examples can be found in the <a href="examples/index.html">examples</a> section.
-The most complete one being <a href="examples/home_assistant_media_player.html">Mediaplayer integration with Home Assistant</a></p>
+<p>More dbus2mqtt examples can be found in the <a href="examples/">examples</a> section.
+The most complete one being <a href="examples/home_assistant_media_player/">Mediaplayer integration with Home Assistant</a></p>
 <h2 id="exposing-dbus-methods-properties-and-signals">Exposing dbus methods, properties and signals</h2>
-<p>See <a href="subscriptions.html">subscriptions</a> for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like</p>
+<p>See <a href="subscriptions/">subscriptions</a> for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Play&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
 <h2 id="flows-and-jinja-based-templating">Flows and Jinja based templating</h2>
-<p>For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on <a href="flows/index.html">flows</a></p>
-<p>Jinja templating documentation can be found here: <a href="templating/index.html">templating</a></p>
+<p>For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on <a href="flows/">flows</a></p>
+<p>Jinja templating documentation can be found here: <a href="templating/">templating</a></p>
 
 
 

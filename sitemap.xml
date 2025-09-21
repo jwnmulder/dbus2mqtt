@@ -2,62 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/setup/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/subscriptions/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/developer/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/developer/debugging_dbus/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/bluez/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/connman-config/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/dbus2mqtt_internal_state/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/examples/linux_desktop/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/flow_actions/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/flows/flow_triggers/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
     <url>
          <loc>https://jwnmulder.github.io/dbus2mqtt/templating/</loc>
-         <lastmod>2025-09-08</lastmod>
+         <lastmod>2025-09-21</lastmod>
     </url>
 </urlset>
