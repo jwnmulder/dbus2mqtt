@@ -686,7 +686,7 @@ class DbusClient:
             try:
                 await self._on_mqtt_msg(msg, hints)
             except Exception as e:
-                logger.warning(f"mqtt_receive_queue_processor_task: Exception {e}", exc_info=True)
+                logger.warning(f"mqtt_receive_queue_processor_task: Exception: {e}", exc_info=True)
             finally:
                 self.event_broker.mqtt_receive_queue.async_q.task_done()
 
@@ -735,7 +735,7 @@ class DbusClient:
 
                             await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
                     except Exception as e:
-                        logger.warning(f"dbus_signal_queue_processor_task: Exception {e}", exc_info=True)
+                        logger.warning(f"dbus_signal_queue_processor_task: Exception: {e}", exc_info=True)
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):
 

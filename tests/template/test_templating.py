@@ -1,3 +1,6 @@
+import pytest
+
+from jinja2 import TemplateError
 
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -143,3 +146,20 @@ def test_nested_list_values():
     res = templating.render_template(template, dict, context)
 
     assert res["res"]["plain_args"] == ["first-item", "second-item"]
+
+def test_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        templating.render_template(template, dict)
+
+@pytest.mark.asyncio
+async def test_async_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        await templating.async_render_template(template, dict)
