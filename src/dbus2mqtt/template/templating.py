@@ -1,6 +1,7 @@
 import urllib.parse
 
 from datetime import datetime
+from importlib.metadata import version
 from typing import Any, TypeVar
 
 from jinja2 import (
@@ -24,6 +25,9 @@ class TemplateEngine:
         engine_globals = {}
         engine_globals['now'] = datetime.now
         engine_globals['urldecode'] = urldecode
+        engine_globals['dbus2mqtt'] = {
+            'version': version('dbus2mqtt')
+        }
 
         engine_filters = {}
         engine_filters['urldecode'] = urldecode
