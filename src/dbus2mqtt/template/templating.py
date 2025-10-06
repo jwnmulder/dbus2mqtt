@@ -3,7 +3,13 @@ import urllib.parse
 from datetime import datetime
 from typing import Any, TypeVar
 
-from jinja2 import BaseLoader, StrictUndefined, TemplateError
+from jinja2 import (
+    BaseLoader,
+    StrictUndefined,
+    TemplateError,
+    TemplateRuntimeError,
+    UndefinedError,
+)
 from jinja2.nativetypes import NativeEnvironment
 from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
@@ -69,9 +75,16 @@ class TemplateEngine:
 
         if isinstance(templatable, str):
             try:
-                return self.jinja2_env.from_string(templatable).render(**context)
+                template = self.jinja2_env.from_string(templatable)
             except TemplateError as e:
                 raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
+
+            try:
+                res = template.render(**context)
+                str(res)  # access value to trigger jinja UndefinedError
+                return res
+            except UndefinedError as e:
+                raise TemplateRuntimeError(f"Error rendering template, template={templatable}: {e}") from e
 
         elif isinstance(templatable, dict):
             res = {}
@@ -95,9 +108,16 @@ class TemplateEngine:
 
         if isinstance(templatable, str):
             try:
-                return await self.jinja2_async_env.from_string(templatable).render_async(**context)
+                template = self.jinja2_async_env.from_string(templatable)
             except TemplateError as e:
                 raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
+
+            try:
+                res = await template.render_async(**context)
+                str(res)  # access value to trigger jinja UndefinedError
+                return res
+            except UndefinedError as e:
+                raise TemplateRuntimeError(f"Error rendering template, template={templatable}: {e}") from e
 
         elif isinstance(templatable, dict):
             res = {}
