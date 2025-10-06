@@ -187,7 +187,7 @@ class FlowProcessor:
                 if "was not provided by any .service files" in str(e):
                     log_level = logging.DEBUG
 
-                logger.log(log_level, f"flow_processor_task: Exception {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
+                logger.log(log_level, f"flow_processor_task: Exception: {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
             finally:
                 self.event_broker.flow_trigger_queue.async_q.task_done()
 
