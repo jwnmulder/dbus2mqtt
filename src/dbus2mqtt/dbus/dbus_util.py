@@ -145,11 +145,15 @@ def convert_mqtt_args_to_dbus(args: list[Any]) -> list[Any]:
     Returns:
         List of D-Bus compatible arguments with explicit Variants
     """
-    converted_args = []
+    if not args:
+        return args
+    
+    converted_args = [args[0]] # First arg as-is
 
-    for arg in args:
-        converted_arg = _convert_and_wrap_in_variant(arg)
-        converted_args.append(converted_arg)
+    if len(args) > 1:
+        for arg in args[1:]:
+            converted_arg = _convert_and_wrap_in_variant(arg)
+            converted_args.append(converted_arg)
 
     return converted_args
 
@@ -161,7 +165,9 @@ def _convert_and_wrap_in_variant(value: Any) -> Any:
         return value
     elif isinstance(value, bool | int | float | str):
         # Primitive types can be used as-is or wrapped in Variant if needed
-        return value
+        converted_value = _convert_value_to_dbus(value)
+        signature = _get_dbus_signature(converted_value)
+        return Variant(signature, converted_value)
     elif isinstance(value, dict):
         # Convert dict and wrap in Variant
         converted_dict = {}
