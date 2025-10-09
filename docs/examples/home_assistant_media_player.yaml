@@ -131,13 +131,13 @@ flows:
           components:
             player_state:
               platform: sensor
-              name: null
+              name: State
               unique_id: e8eb9686-f947-46e1-80d4-fc1e812e39a2
               state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               value_template: >-
                 {% raw %}
                 {% set status = value_json.PlaybackStatus %}
-                {{ {'Playing': 'playing', 'Paused': 'paused', 'Stopped': 'idle'}.get(status, 'off') }}
+                {{ {'Playing': 'Playing', 'Paused': 'Paused', 'Stopped': 'Idle'}.get(status, 'Off') }}
                 {% endraw %}
               json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               json_attributes_template: >
@@ -169,7 +169,7 @@ flows:
                     "MediaPosition": ((value_json.get('Position') or 0) / 1000000) | int,
                     "MediaTitle": title,
                     "MediaAlbum": metadata.get('xesam:album', ''),
-                    "MediaArtist": artists | join(', '),
+                    "MediaArtists": artists | join(', '),
                     "MediaImageUrl": media_image_url,
                     "VolumeMuted": value_json.get('Volume') == 0
                   }) | to_json
