@@ -19,7 +19,7 @@ media_player:
         # mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT
         media_image_url_template: >-
           {% set media_image_url = state_attr('sensor.mpris_media_player', 'MediaImageUrl') %}
-          {% if media_image_url.startswith('file://') %}
+          {% if media_image_url and media_image_url.startswith('file://') %}
             http://127.0.0.1:8123{{ state_attr('image.mpris_media_player_image', 'entity_picture') }}
           {% else %}
             {{ media_image_url }}
