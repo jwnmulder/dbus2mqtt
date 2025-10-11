@@ -21,7 +21,7 @@ media_player:
 
         current_volume_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') }}"
         current_is_muted_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') == 0 }}"
-        current_position_template: "{{ state_attr('sensor.mpris_media_player', 'Position') }}"
+        current_position_template: "{{ (state_attr('sensor.mpris_media_player', 'Position') / 1000000) | int }}"
 
         # title: 'xesam:title' or filename without extension from 'xesam:url'
         title_template: >-
@@ -33,7 +33,7 @@ media_player:
           {{ title }}
 
         media_content_type_template: music  # needed to show 'artist'
-        media_duration_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) }}"
+        media_duration_template: "{{ ((state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('mpris:length', 0) / 1000000) | int }}"
         album_template: "{{ (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:album', '') }}"
         artist_template: >-
           {% set artist = (state_attr('sensor.mpris_media_player', 'Metadata') or {}).get('xesam:artist', '') %}
@@ -102,7 +102,7 @@ media_player:
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
-              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player', 'Metadata')['mpris:trackid'] }}", {{ position | int }}] }
+              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player', 'Metadata')['mpris:trackid'] }}", {{ (position * 1000000) | int }}] }
         set_volume:
           service: mqtt.publish
           data:

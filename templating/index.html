@@ -730,16 +730,40 @@
 
 <h1 id="templating">Templating</h1>
 <p><strong>dbus2mqtt</strong> leverages Jinja to allow formatting MQTT messages, D-Bus responses or advanced configuration use-cases. If you are not familiar with Jinja based expressions, have a look at Jinjas own <a href="https://jinja.palletsprojects.com/en/stable/templates/">Template Designer Documentation</a>.</p>
-<p>Besides the filters and functions Jinja provides out of the box, the following extensions are available:</p>
-<ul>
-<li><a href="https://pypi.org/project/jinja2-ansible-filters/">jinja2-ansible-filters</a></li>
-</ul>
-<p>More documentation to be added, for now see the <a href="../examples/home_assistant_media_player/">Mediaplayer integration with Home Assistant</a> example for inspiration.</p>
 <p>Templating is used in these areas of dbus2mqtt:</p>
 <ul>
 <li><a href="../subscriptions/">subscriptions</a></li>
 <li><a href="../flows/flow_actions/">flow actions</a></li>
 </ul>
+<p>Besides the filters and functions Jinja provides out of the box, additional extensions are available.</p>
+<p>All filters from <a href="https://pypi.org/project/jinja2-ansible-filters/">jinja2-ansible-filters</a> are included as well as the following global functions, variables and filters:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>now</code></td>
+<td>function</td>
+<td>Returns the current date and time as a <code>datetime</code> object.</td>
+</tr>
+<tr>
+<td><code>urldecode</code></td>
+<td>function</td>
+<td>Decodes a URL-encoded string.</td>
+</tr>
+<tr>
+<td><code>dbus2mqtt.version</code></td>
+<td>string</td>
+<td>The current version of the <code>dbus2mqtt</code> package.</td>
+</tr>
+</tbody>
+</table>
+<p>More documentation to be added, for now see the <a href="../examples/home_assistant_media_player/">Mediaplayer integration with Home Assistant</a> example for inspiration.</p>
 
 
 
