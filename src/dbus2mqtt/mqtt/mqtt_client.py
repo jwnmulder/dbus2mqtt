@@ -70,14 +70,14 @@ class MqttClient:
 
             try:
                 payload: str | bytes | None = msg.payload
-                type = msg.payload_serialization_type
-                if type == "text":
+                payload_type = msg.payload_serialization_type
+                if payload_type == "text":
                     payload = str(msg.payload)
-                if isinstance(msg.payload, dict) and type == "json":
+                if isinstance(msg.payload, dict) and payload_type == "json":
                     payload = json.dumps(msg.payload)
-                elif isinstance(msg.payload, dict) and type == "yaml":
+                elif isinstance(msg.payload, dict) and payload_type == "yaml":
                     payload = yaml.dump(msg.payload)
-                elif isinstance(msg.payload, ParseResult) and type == "binary":
+                elif isinstance(msg.payload, ParseResult) and payload_type == "binary":
                     try:
                         with urlopen(msg.payload.geturl()) as response:
                             payload = response.read()

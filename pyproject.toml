@@ -105,6 +105,9 @@ extend-select = [
     "E",
     "W",
 
+    # flake8-builtins (A)
+    # "A",
+
     # isort
     "I",
 
