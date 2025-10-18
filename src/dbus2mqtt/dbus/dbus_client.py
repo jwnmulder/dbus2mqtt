@@ -767,9 +767,9 @@ class DbusClient:
 
     def _get_matching_subscribed_interfaces(self, bus_name_pattern: str, path_pattern: str):
         result: list[tuple[InterfaceConfig, dbus_aio.ProxyObject]] = []
-        for [bus_name, bus_name_subscription] in self.subscriptions.items():
+        for bus_name, bus_name_subscription in self.subscriptions.items():
             if fnmatch.fnmatchcase(bus_name, bus_name_pattern):
-                for [path, proxy_object] in bus_name_subscription.path_objects.items():
+                for path, proxy_object in bus_name_subscription.path_objects.items():
                     if fnmatch.fnmatchcase(path, path_pattern):
                         for subscription_configs in self.config.get_subscription_configs(bus_name=bus_name, path=path):
                             for interface_config in subscription_configs.interfaces:
