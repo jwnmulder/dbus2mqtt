@@ -24,7 +24,7 @@ Pre-requisites:
 ## Setup activities
 
 * Configure the MQTT Sensor and player configuration in Home Assistant with the configuration listed below
-* Config dbus2mqtt using the supplied [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml)
+* Configure dbus2mqtt using the supplied [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml)
 
 To run, execute the following commands
 
