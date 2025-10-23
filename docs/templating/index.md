@@ -16,5 +16,6 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 | `now`               | function  | Returns the current date and time as a `datetime` object.                   |
 | `urldecode`         | function  | Decodes a URL-encoded string.                                               |
 | `dbus2mqtt.version` | string    | The current version of the `dbus2mqtt` package.                             |
+| `dbus_list`         | function  | Returns a list of active subscribed dbus_names matching the given pattern. Examples:<br /> - `dbus_list('*')` -> `['org.mpris.MediaPlayer2.vlc', 'org.bluez']`<br /> - `dbus_list('org.mpris.MediaPlayer2.*')` -> `['org.mpris.MediaPlayer2.vlc']` |
 
 More documentation to be added, for now see the [Mediaplayer integration with Home Assistant](../examples/home_assistant_media_player.md) example for inspiration.
