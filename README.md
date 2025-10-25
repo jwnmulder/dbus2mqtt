@@ -1,7 +1,7 @@
 # dbus2mqtt
 
 **dbus2mqtt** is a Python application that bridges **DBus** with **MQTT**.
-It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages, and shape payloads using flexible **Jinja2 templating**.
+It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages and shape payloads using configurable **templates**.
 
 This makes it easy to integrate Linux desktop services or system signals into MQTT-based workflows - including **Home Assistant**.
 
@@ -84,8 +84,8 @@ See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions/) for do
 }
 ```
 
-## Flows and Jinja based templating
+## Flows
 
-For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/)
+dbus2mqtt lets you build flows to automate how D-Bus data is published or processed. Templates provide dynamic control over filtering, topics, payloads and other flow parameters.
 
-Jinja templating documentation can be found here: [templating](https://jwnmulder.github.io/dbus2mqtt/templating/)
+A reference of supported flow triggers and actions is available on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/) and templating details can be found at [templating](https://jwnmulder.github.io/dbus2mqtt/templating/)
