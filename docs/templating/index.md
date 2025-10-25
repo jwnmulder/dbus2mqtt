@@ -16,7 +16,46 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 | `now`               | function  | Returns the current date and time as a `datetime` object.                   |
 | `urldecode`         | function  | Decodes a URL-encoded string.                                               |
 | `dbus2mqtt.version` | string    | The current version of the `dbus2mqtt` package.                             |
-| `dbus_list`         | function  | Returns a list of active subscribed dbus_names matching the given pattern. Function arguments:<ul><li>bus_name_pattern</li></ul>Examples:<ul><li>`dbus_list('*')` -> `['org.mpris.MediaPlayer2.vlc', 'org.bluez']`</li><li>`dbus_list('org.mpris.MediaPlayer2.*')` -> `['org.mpris.MediaPlayer2.vlc']`</li></ul> |
-| `dbus_call`         | function  | D-Bus method invocation. Function arguments:<ul><li>bus_name</li><li>path</li><li>interface</li><li>method</li><li>method_args</li></ul>Examples:<ul><li>`dbus_call('org.mpris.MediaPlayer2.firefox', '/org/mpris/MediaPlayer2', 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player'])`</li></ul> |
+| `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
+| `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
 
-More documentation to be added, for now see the [Mediaplayer integration with Home Assistant](../examples/home_assistant_media_player.md) example for inspiration.
+## dbus_list()
+
+The `dbus_list` function is used in templates to access active bus_names which `dbus2mqtt` is subscribed to.
+
+It's signature is `dbus_list(bus_name_pattern)` -> `list[str]`
+
+| argument         | type | description  |
+|------------------|------|--------------|
+| bus_name_pattern | str  | Glob pattern to filter on, e.g. `*` or `org.mpris.MediaPlayer2.* |
+
+Examples
+
+```yaml
+all_subscibed_bus_names: "{{ dbus_list('*') }}"
+subscribed_mpris_bus_names: "{{ dbus_list('org.mpris.MediaPlayer2.*') }}"
+```
+
+## dbus_call()
+
+The `dbus_call` function is used to call D-Bus methods.
+
+It's signature is `dbus_call(bus_name_pattern)` -> `object`
+
+| argument         | type | description  |
+|------------------|------|--------------|
+| `bus_name`         | str  |  |
+| `path`             | str  |  |
+| `interface`        | str  |  |
+| `method`           | str  |  |
+| `method_args`      | list[Any] |  |
+
+Examples
+
+```yaml
+player_properties: |
+  {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+```
+
+!!! note
+    `dbus_call` can invoke any dbus method on any interface. It's a powerful function that is meant for retrieving state and property values. Although it can be used call methods that change state, it's a bad practice todo so from a template rendering perspective.
