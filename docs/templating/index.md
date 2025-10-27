@@ -23,7 +23,6 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 ::: dbus2mqtt.template.templating.now
     options:
-      show_source: false
       show_root_toc_entry: false
       show_docstring_raises: false
 
@@ -31,7 +30,6 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 ::: dbus2mqtt.template.templating.urldecode
     options:
-      show_source: false
       show_root_toc_entry: false
       show_docstring_raises: false
 
@@ -39,7 +37,6 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 ::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_list_fn
     options:
-      show_source: false
       show_root_toc_entry: false
       show_docstring_raises: false
 
@@ -47,6 +44,5 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 ::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_call_fn
     options:
-      show_source: false
       show_root_toc_entry: false
       show_docstring_raises: false
