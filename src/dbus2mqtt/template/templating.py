@@ -1,6 +1,6 @@
 import urllib.parse
 
-from datetime import datetime
+from datetime import datetime, tzinfo
 from importlib.metadata import version
 from typing import Any, TypeVar
 
@@ -16,14 +16,41 @@ from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
 TemplateResultType = TypeVar('TemplateResultType')
 
-def urldecode(string):
+def now(tz: tzinfo) -> datetime:
+    """Returns new datetime object representing current time local to tz.
+
+    Args:
+        tz (optional): If no tz is specified, uses local timezone.
+
+    Returns:
+        Current datetime object.
+    """
+    return datetime.now(tz)
+
+def urldecode(string: str) -> str:
+    """Decode a url-encoded URL string by replacing %xx escapes with their single-character equivalent.
+
+    Args:
+        string (str): The string to decode.
+
+    Returns:
+        A decoded URL string.
+
+    Example:
+        ```python
+        >>> urldecode('abc%20def')
+        'abc def'
+        >>> urldecode('El%20Ni%C3%B1o')
+        'El Niño'
+        ```
+    """
     return urllib.parse.unquote(string)
 
 class TemplateEngine:
     def __init__(self):
 
         engine_globals = {}
-        engine_globals['now'] = datetime.now
+        engine_globals['now'] = now
         engine_globals['urldecode'] = urldecode
         engine_globals['dbus2mqtt'] = {
             'version': version('dbus2mqtt')

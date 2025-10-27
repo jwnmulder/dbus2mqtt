@@ -13,8 +13,9 @@ from tests import mocked_app_context, mocked_dbus_client
 
 @pytest.mark.asyncio
 async def test_method_only():
-    """ Mock contains 3 bus objects, test with valid method.
-        Expect the method to be called 2 times, once for each bus object with matching subscription
+    """Mock contains 3 bus objects, test with valid method.
+
+    Expect the method to be called 2 times, once for each bus object with matching subscription
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -29,8 +30,9 @@ async def test_method_only():
 
 @pytest.mark.asyncio
 async def test_invalid_method():
-    """ Mock contains 3 bus objects, test with invalid method.
-        Expect the method to be called zero times
+    """Mock contains 3 bus objects, test with invalid method.
+
+    Expect the method to be called zero times
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -45,8 +47,9 @@ async def test_invalid_method():
 
 @pytest.mark.asyncio
 async def test_method_with_bus_name():
-    """ Mock contains 3 bus objects, test with valid method and valid bus_name.
-        Expect the method to be called 1 time, once for each matching bus name and subscription
+    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+
+    Expect the method to be called 1 time, once for each matching bus name and subscription
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -62,8 +65,9 @@ async def test_method_with_bus_name():
 
 @pytest.mark.asyncio
 async def test_method_with_bus_name_pattern():
-    """ Mock contains 3 bus objects, test with valid method and valid bus_name.
-        Expect the method to be called 1 time, once for each matching bus name and subscription
+    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+
+    Expect the method to be called 1 time, once for each matching bus name and subscription
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -79,8 +83,9 @@ async def test_method_with_bus_name_pattern():
 
 @pytest.mark.asyncio
 async def test_method_invalid_bus_name():
-    """ Mock contains 3 bus objects, test with valid method and valid bus_name.
-        Expect the method to be called zero times
+    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+
+    Expect the method to be called zero times
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -96,8 +101,9 @@ async def test_method_invalid_bus_name():
 
 @pytest.mark.asyncio
 async def test_method_with_path():
-    """ Mock contains 3 bus objects, test with valid method and path.
-        Expect the method to be called 2 times, once for each bus name with matching path and subscription
+    """Mock contains 3 bus objects, test with valid method and path.
+
+    Expect the method to be called 2 times, once for each bus name with matching path and subscription
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -113,8 +119,9 @@ async def test_method_with_path():
 
 @pytest.mark.asyncio
 async def test_method_with_path_pattern():
-    """ Mock contains 3 bus objects, test with valid method and path.
-        Expect the method to be called 2 times, once for each bus name with matching path and subscription
+    """Mock contains 3 bus objects, test with valid method and path.
+
+    Expect the method to be called 2 times, once for each bus name with matching path and subscription
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
@@ -130,8 +137,9 @@ async def test_method_with_path_pattern():
 
 @pytest.mark.asyncio
 async def test_method_invalid_path():
-    """ Mock contains 3 bus objects, test with valid method and invalid path.
-        Expect the method to be called zero times
+    """Mock contains 3 bus objects, test with valid method and invalid path.
+
+    Expect the method to be called zero times
     """
     mocked_proxy_interface = await _publish_msg(
         MqttMessage(
