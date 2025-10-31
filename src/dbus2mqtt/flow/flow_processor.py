@@ -156,7 +156,6 @@ class FlowProcessor:
 
     def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
         """Register flows with the flow processor."""
-
         for flow_config in flows:
             flow_action_context = FlowActionContext(
                 self.app_context,
@@ -168,7 +167,6 @@ class FlowProcessor:
 
     async def flow_processor_task(self):
         """Continuously processes messages from the async queue."""
-
         # logger.info(f"flow_processor_task: configuring flows={[f.name for f in self.app_context.config.flows]}")
 
         while True:

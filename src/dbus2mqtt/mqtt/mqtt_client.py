@@ -162,9 +162,7 @@ class MqttClient:
             logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")
 
     def _trigger_flows(self, topic: str, trigger_context: dict) -> list[FlowTriggerMessage]:
-        """Triggers all flows that have a mqtt_trigger defined that matches the given topic
-           and configured filters."""
-
+        """Triggers all flows that have a mqtt_trigger defined that matches the given topic and configured filters."""
         flow_trigger_messages = []
 
         all_flows: list[FlowConfig] = []

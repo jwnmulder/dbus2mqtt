@@ -29,11 +29,10 @@ class FlowExecutionContext:
         """
 
     def get_aggregated_context(self) -> dict[str, Any]:
-        """
-        Get the aggregated context for the flow execution.
-        Merges global flows context, flow context, and local context
-        """
+        """Get the aggregated context for the flow execution.
 
+        This includes global flows context, flow context, and local context.
+        """
         context = {}
         if self.global_flows_context:
             context.update(self.global_flows_context)

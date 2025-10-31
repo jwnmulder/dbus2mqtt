@@ -194,8 +194,7 @@ class DbusClient:
         return proxy_object, bus_name_subscriptions
 
     def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], *args):
-        """publish a dbus signal to the event broker, one for each subscription_config"""
-
+        """Publish a dbus signal to the event broker, one for each subscription_config."""
         unwrapped_args = unwrap_dbus_objects(args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
@@ -320,8 +319,7 @@ class DbusClient:
         return introspection
 
     async def _list_bus_name_paths(self, bus_name: str, path: str) -> list[str]:
-        """list all nested paths. Only paths that have interfaces are returned"""
-
+        """List all nested paths. Only paths that have interfaces are returned."""
         paths: list[str] = []
 
         try:
@@ -346,6 +344,7 @@ class DbusClient:
 
     async def _subscribe_dbus_object(self, bus_name: str, path: str) -> list[SubscribedInterface]:
         """Subscribes to a dbus object at the given bus_name and path.
+
         For each matching subscription config, subscribe to all configured interfaces,
         start listening to signals and start/register flows if configured.
         """
@@ -458,8 +457,7 @@ class DbusClient:
             del self.subscriptions[bus_name]
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
-        """
-        Handles the addition of new D-Bus interfaces for a given bus name and object path.
+        """Handles the addition of new D-Bus interfaces for a given bus name and object path.
 
         This method checks if there are subscription configurations for the specified bus name and path.
         If so, it subscribes to the D-Bus object and starts the necessary subscription flows for any new interfaces.
@@ -468,7 +466,6 @@ class DbusClient:
             bus_name (str): The well-known name of the D-Bus service where the interface was added.
             path (str): The object path on the D-Bus where the interface was added.
         """
-
         logger.debug(f"_handle_interfaces_added: bus_name={bus_name}, path={path}")
 
         if not self.config.get_subscription_configs(bus_name=bus_name, path=path):
@@ -524,12 +521,12 @@ class DbusClient:
 
     async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface]):
         """Start all flows for the new subscriptions.
-        For each matching bus_name-path subscription_config, the following is done:
-        1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
-        2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
-        3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
-        """
 
+        For each matching bus_name-path subscription_config, the following is done:
+          1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
+          2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
+          3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
+        """
         bus_name_object_paths = {}
         bus_name_object_path_interfaces = {}
         for si in subscribed_interfaces:
@@ -636,7 +633,7 @@ class DbusClient:
             "path": path
         })
 
-    async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]):
+    async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]) -> object:
 
         converted_args = convert_mqtt_args_to_dbus(method_args)
         call_method_name = "call_" + camel_to_snake(method)
@@ -756,13 +753,14 @@ class DbusClient:
                 await self._handle_interfaces_removed(bus_name, path)
 
     async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
-        """Executes dbus method calls or property updates on objects when messages have
-        1. a matching subscription configured
-        2. a matching method
-        3. a matching bus_name (if provided)
-        4. a matching path (if provided)
-        """
+        """Executes dbus method calls or property updates on objects.
 
+        Only for messages which have:
+          1. a matching subscription configured
+          2. a matching method
+          3. a matching bus_name (if provided)
+          4. a matching path (if provided)
+        """
         found_matching_topic = False
         for subscription_configs in self.config.subscriptions:
             for interface_config in subscription_configs.interfaces:
@@ -857,7 +855,7 @@ class DbusClient:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
 
     async def _send_mqtt_response(self, interface_config, result: Any, error: Exception | None, bus_name: str, path: str, *args, **kwargs):
-        """Send MQTT response for a method call if response topic is configured
+        """Send MQTT response for a method call if response topic is configured.
 
         Args:
             method (str, optional): The method to execute
@@ -865,7 +863,6 @@ class DbusClient:
             property (str, optional): The property to set
             value (any, optional): The value to set for the property
         """
-
         if not interface_config.mqtt_response_topic:
             return
 

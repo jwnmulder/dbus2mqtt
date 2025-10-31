@@ -66,6 +66,7 @@ dev = [
     "mkdocs-material>=9.6.15",
     "mkdocs-open-in-new-tab>=1.0.8",
     "deptry>=0.23.0",
+    "mkdocstrings-python>=1.18.2",
 ]
 
 [project.urls]
@@ -115,12 +116,23 @@ extend-select = [
     "N",
 
     # pyupgrade
-    "UP"
+    "UP",
+
+    # # Enable all `pydocstyle` rules, limiting to those that adhere to the
+    # # Google convention via `convention = "google"`, below.
+    "D"
 ]
 ignore = [
     # line-too-long
-    "E501"
+    "E501",
+
+    # # On top of the Google convention, disable `D417`, which requires
+    # # documentation for every function parameter.
+    "D417", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"
 ]
 
 [tool.ruff.lint.isort]
 lines-between-types = 1
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

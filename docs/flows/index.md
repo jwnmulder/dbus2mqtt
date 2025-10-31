@@ -45,6 +45,6 @@ dbus:
               msg: hello from example flow
 ```
 
-Some action parameters allow the use of Jinja templating. dbus2mqtt supports both builtin jinja filters and comes with additional filters. See [templating](../templating/index.md) for details. When supported, it is documented for each individual trigger and action.
+Some action parameters allow the use of templating. When supported, it is documented for each individual trigger and action. See [templating](../templating/index.md) for further templating details.
 
 Next: [flow actions](flow_actions.md) & [flow triggers](flow_triggers.md)

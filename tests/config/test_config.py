@@ -30,7 +30,8 @@ def test_off_string_value():
     }
 
 def test_cron_trigger_string_value():
-    """Test that the cron trigger is parsed correctly from a string value
+    """Test that the cron trigger is parsed correctly from a string value.
+
     More specifically, the value '*/5' will fail jsonargparse for some weird reason
     """
     dotenv.load_dotenv(".env.example")
@@ -48,8 +49,11 @@ def test_cron_trigger_string_value():
     assert trigger.cron == {"minute": "*/5"}
 
 def test_jsonargparse_jinja_expressions():
-    """values starting with {{ are not parsed correctly
-       values containing {{ are not parsed correctly
+    """Test proper parsing of Jinja2 expressions in configuration values.
+
+    This test verifies that
+      1. values starting with {{ are parsed correctly
+      2. values containing {{ are parsed correctly
     """
     dotenv.load_dotenv(".env.example")
 
