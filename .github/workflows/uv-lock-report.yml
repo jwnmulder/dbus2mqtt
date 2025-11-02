@@ -20,4 +20,4 @@ jobs:
         uses: mw-root/uv-lock-report@v0.11.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          output-format: markdown
+          output-format: table
