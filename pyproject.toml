@@ -64,7 +64,7 @@ dev = [
     "pyright==1.1.407",
     "deptry==0.23.1",
     "mkdocs==1.6.1",
-    "mkdocs-material==9.6.15",
+    "mkdocs-material==9.6.23",
     "mkdocs-open-in-new-tab==1.0.8",
     "mkdocstrings-python==1.18.2",
 ]
