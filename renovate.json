@@ -17,6 +17,13 @@
     },
     {
       "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
+      "matchManagers": ["pep621"],
       "matchDepTypes": ["dependency-groups"],
       "matchJsonata": [
         "managerData.depGroup = 'dev'"
