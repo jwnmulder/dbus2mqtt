@@ -40,7 +40,7 @@ classifiers = [
 requires-python = ">=3.10"
 
 dependencies = [
-    "apscheduler==3.11.0",
+    "apscheduler==3.11.1",
     "dbus-fast==2.44.5",
     "jsonargparse==4.38.0",
     "paho-mqtt==2.1.0",
