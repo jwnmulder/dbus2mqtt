@@ -1,9 +1,11 @@
-name: uv-lock-review
+name: uv-lock-report
 
 "on":
   pull_request:
     paths:
-      - "uv.lock"
+      - uv.lock
+    branches:
+      - renovate/lock-file-maintenance
 
 jobs:
   report:
