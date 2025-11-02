@@ -16,6 +16,12 @@
       "addLabels": ["automerge"]
     },
     {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
       "description": "Disable Renovate for .python-version",
       "matchFileNames": [".python-version"],
       "enabled": false
