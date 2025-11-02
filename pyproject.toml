@@ -61,7 +61,7 @@ dev = [
     "pre-commit>=4.2.0",
     "pip>=25.0.1",
     "ruff==0.11.2",
-    "pyright==1.1.396",
+    "pyright==1.1.407",
     "deptry==0.23.1",
     "mkdocs==1.6.1",
     "mkdocs-material==9.6.15",
