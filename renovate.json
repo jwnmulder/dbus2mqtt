@@ -1,6 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>jwnmulder/renovate-config"],
+  "extends": [
+    "local>jwnmulder/renovate-config",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
 
   "labels": ["dependencies"],
 
