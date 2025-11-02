@@ -16,7 +16,11 @@
       "addLabels": ["automerge"]
     },
     {
-      "matchDepTypes": ["devDependencies"],
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["dependency-groups"],
+      "matchJsonata": [
+        "managerData.depGroup = 'dev'"
+      ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
       "addLabels": ["automerge"]
