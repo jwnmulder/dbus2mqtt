@@ -41,7 +41,7 @@ requires-python = ">=3.10"
 
 dependencies = [
     "apscheduler==3.11.1",
-    "dbus-fast==2.44.6",
+    "dbus-fast==2.45.0",
     "jsonargparse==4.42.0",
     "paho-mqtt==2.1.0",
     "jinja2==3.1.6",
