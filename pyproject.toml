@@ -58,7 +58,7 @@ dev = [
     "pyright==1.1.407",
     "deptry==0.24.0",
     "mkdocs==1.6.1",
-    "mkdocs-material==9.6.23",
+    "mkdocs-material==9.7.0",
     "mkdocs-open-in-new-tab==1.0.8",
     "mkdocstrings-python==1.19.0",
     "pytest>=8.3.5",
