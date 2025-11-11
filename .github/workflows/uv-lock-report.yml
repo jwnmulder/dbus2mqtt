@@ -5,10 +5,10 @@ name: uv-lock-report
     paths:
       - uv.lock
     branches:
-      - renovate/lock-file-maintenance
-
+      - main
 jobs:
   report:
+    if: github.head_ref == 'renovate/lock-file-maintenance'
     permissions:
       contents: read
       pull-requests: write
