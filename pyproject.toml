@@ -60,7 +60,7 @@ dev = [
     "mkdocs==1.6.1",
     "mkdocs-material==9.6.23",
     "mkdocs-open-in-new-tab==1.0.8",
-    "mkdocstrings-python==1.18.2",
+    "mkdocstrings-python==1.19.0",
     "pytest>=8.3.5",
     "pytest-asyncio>=1.0.0",
     "types-pyyaml>=6.0.12.20241230",
