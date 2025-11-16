@@ -21,6 +21,11 @@
     },
     {
       "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies", "dependency-groups"],
+      "rangeStrategy": "update-lockfile"
+    },
+    {
+      "matchManagers": ["pep621"],
       "matchDepTypes": ["project.dependencies"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
