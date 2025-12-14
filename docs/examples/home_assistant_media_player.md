@@ -23,8 +23,8 @@ Pre-requisites:
 
 ## Setup activities
 
-* Configure the MQTT Sensor and player configuration in Home Assistant with the configuration listed below
 * Configure dbus2mqtt using the supplied [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml)
+* Configure the MQTT Sensor and player configuration in Home Assistant as described below
 
 To run, execute the following commands
 
@@ -69,11 +69,12 @@ For an overview of MPRIS commands have a look at <https://mpris2.readthedocs.io/
 
 ## Home Assistant configuration
 
-Besides setting up `dbus2mqtt`, Home Assistant needs to be configured as well. The configuration shown below creates the necessary components in Home Assistant for controlling MPRIS Media Players. Three components will be setup.
+Besides setting up `dbus2mqtt`, Home Assistant needs to be configured as well. The [mqtt_mediaplayer.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player/mqtt_mediaplayer.yaml) example will publish a MQTT discovery payload for your Home Assistant installation, automatically creation the following sensors:
 
 * MQTT sensor listening on topic `dbus2mqtt/org.mpris.MediaPlayer2/state`
 * MQTT image listening on topic `dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage`
-* Media Player
+
+The last part has to be configured by hand. Use the configuration below to create the Media Player component in Home Assistant.
 
 ```yaml+jinja title='config/packages/mqtt_mediaplayer.yaml'
 --8<-- "docs/examples/home_assistant_media_player/mqtt_mediaplayer.yaml"
