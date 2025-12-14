@@ -14,7 +14,12 @@ import janus
 from dbus_fast import SignatureTree
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import SubscriptionConfig
+from dbus2mqtt.config import (
+    InterfaceConfig,
+    MethodConfig,
+    PropertyConfig,
+    SubscriptionConfig,
+)
 from dbus2mqtt.dbus.dbus_types import (
     BusNameSubscriptions,
     DbusSignalWithState,
@@ -194,8 +199,7 @@ class DbusClient:
         return proxy_object, bus_name_subscriptions
 
     def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], *args):
-        """publish a dbus signal to the event broker, one for each subscription_config"""
-
+        """Publish a dbus signal to the event broker, one for each subscription_config."""
         unwrapped_args = unwrap_dbus_objects(args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
@@ -320,8 +324,7 @@ class DbusClient:
         return introspection
 
     async def _list_bus_name_paths(self, bus_name: str, path: str) -> list[str]:
-        """list all nested paths. Only paths that have interfaces are returned"""
-
+        """List all nested paths. Only paths that have interfaces are returned."""
         paths: list[str] = []
 
         try:
@@ -346,6 +349,7 @@ class DbusClient:
 
     async def _subscribe_dbus_object(self, bus_name: str, path: str) -> list[SubscribedInterface]:
         """Subscribes to a dbus object at the given bus_name and path.
+
         For each matching subscription config, subscribe to all configured interfaces,
         start listening to signals and start/register flows if configured.
         """
@@ -458,8 +462,7 @@ class DbusClient:
             del self.subscriptions[bus_name]
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
-        """
-        Handles the addition of new D-Bus interfaces for a given bus name and object path.
+        """Handles the addition of new D-Bus interfaces for a given bus name and object path.
 
         This method checks if there are subscription configurations for the specified bus name and path.
         If so, it subscribes to the D-Bus object and starts the necessary subscription flows for any new interfaces.
@@ -468,7 +471,6 @@ class DbusClient:
             bus_name (str): The well-known name of the D-Bus service where the interface was added.
             path (str): The object path on the D-Bus where the interface was added.
         """
-
         logger.debug(f"_handle_interfaces_added: bus_name={bus_name}, path={path}")
 
         if not self.config.get_subscription_configs(bus_name=bus_name, path=path):
@@ -524,12 +526,12 @@ class DbusClient:
 
     async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface]):
         """Start all flows for the new subscriptions.
-        For each matching bus_name-path subscription_config, the following is done:
-        1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
-        2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
-        3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
-        """
 
+        For each matching bus_name-path subscription_config, the following is done:
+          1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
+          2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
+          3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
+        """
         bus_name_object_paths = {}
         bus_name_object_path_interfaces = {}
         for si in subscribed_interfaces:
@@ -636,7 +638,7 @@ class DbusClient:
             "path": path
         })
 
-    async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]):
+    async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]) -> object:
 
         converted_args = convert_mqtt_args_to_dbus(method_args)
         call_method_name = "call_" + camel_to_snake(method)
@@ -755,26 +757,52 @@ class DbusClient:
                 path = message.body[0]
                 await self._handle_interfaces_removed(bus_name, path)
 
-    async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
-        """Executes dbus method calls or property updates on objects when messages have
-        1. a matching subscription configured
-        2. a matching method
-        3. a matching bus_name (if provided)
-        4. a matching path (if provided)
-        """
-
-        found_matching_topic = False
+    def _has_subscription_configs_for_topic(self, topic: str):
         for subscription_configs in self.config.subscriptions:
             for interface_config in subscription_configs.interfaces:
                 mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
-                found_matching_topic |= mqtt_topic == msg.topic
+                if mqtt_topic == topic:
+                    return True
+        return False
 
-        if not found_matching_topic:
+    def _get_matching_subscribed_interfaces(self, topic: str, bus_name_pattern: str, path_pattern: str):
+        result: list[tuple[InterfaceConfig, dbus_aio.ProxyObject]] = []
+
+        for bus_name_subscription in self.subscriptions.values():
+            bus_name_matches = fnmatch.fnmatchcase(bus_name_subscription.bus_name, bus_name_pattern)
+            if not bus_name_matches:
+                continue
+
+            for path, proxy_object in bus_name_subscription.path_objects.items():
+                path_matches = fnmatch.fnmatchcase(path, path_pattern)
+                if not path_matches:
+                    continue
+
+                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name_subscription.bus_name, path=path)
+                for subscription_configs in subscription_configs:
+                    for interface_config in subscription_configs.interfaces:
+                        mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
+                        topic_matches = mqtt_topic == topic
+
+                        if topic_matches:
+                            result.append((interface_config, proxy_object))
+        return result
+
+    async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
+        """Executes dbus method calls or property updates on objects.
+
+        Only for messages which have:
+          1. a matching subscription configured
+          2. a matching method or property in the msg payload
+          3. a matching bus_name (if provided)
+          4. a matching path (if provided)
+        """
+        # Don't proceed or log any message if no matching configuration is found
+        # where mqtt_command_topic matches the MQTT message topic. The MQTT msg is not intended for here
+        if not self._has_subscription_configs_for_topic(msg.topic):
             return
 
         logger.debug(f"on_mqtt_msg: topic={msg.topic}, payload={json.dumps(msg.payload)}")
-        matched_method = False
-        matched_property = False
 
         payload_bus_name = msg.payload.get("bus_name") or "*"
         payload_path = msg.payload.get("path") or "*"
@@ -785,79 +813,79 @@ class DbusClient:
         payload_property = msg.payload.get("property")
         payload_value = msg.payload.get("value")
 
+        # Must have either method or property/value in payload
+        # If missing, it's likely a user error that should be logged
         if payload_method is None and (payload_property is None or payload_value is None):
             if msg.payload and hints.log_unmatched_message:
                 logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}")
             return
 
-        for [bus_name, bus_name_subscription] in self.subscriptions.items():
-            if fnmatch.fnmatchcase(bus_name, payload_bus_name):
-                for [path, proxy_object] in bus_name_subscription.path_objects.items():
-                    if fnmatch.fnmatchcase(path, payload_path):
-                        for subscription_configs in self.config.get_subscription_configs(bus_name=bus_name, path=path):
-                            for interface_config in subscription_configs.interfaces:
+        matched_methods: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, MethodConfig]] = []
+        matched_properties: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, PropertyConfig]] = []
 
-                                for method in interface_config.methods:
-                                    # filter configured method, configured topic, ...
-                                    if method.method == payload_method:
-                                        interface = proxy_object.get_interface(name=interface_config.interface)
-                                        matched_method = True
+        matching_interfaces = self._get_matching_subscribed_interfaces(msg.topic, payload_bus_name, payload_path)
+        for interface_config, proxy_object in matching_interfaces:
+            for method in interface_config.methods:
+                # filter configured method, configured topic, ...
+                if method.method == payload_method:
+                    interface = proxy_object.get_interface(name=interface_config.interface)
+                    matched_methods.append((interface, interface_config, method))
 
-                                        result = None
-                                        error = None
-                                        try:
-                                            logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            result = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+            for property in interface_config.properties:
+                # filter configured property, configured topic, ...
+                if property.property == payload_property:
+                    interface = proxy_object.get_interface(name=interface_config.interface)
+                    matched_properties.append((interface, interface_config, property))
 
-                                            # Send response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, result, None, bus_name, path,
-                                                method=method.method, args=payload_method_args
-                                            )
-
-                                        except Exception as e:
-                                            error = e
-                                            logger.warning(f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={bus_name}, exception={e}")
-
-                                            # Send error response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, None, error, bus_name, path,
-                                                method=method.method, args=payload_method_args
-                                            )
-
-                                for property in interface_config.properties:
-                                    # filter configured property, configured topic, ...
-                                    if property.property == payload_property:
-                                        interface = proxy_object.get_interface(name=interface_config.interface)
-                                        matched_property = True
-
-                                        try:
-                                            logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name}, path={path}, interface={interface_config.interface}")
-                                            await self.set_dbus_interface_property(interface, property.property, payload_value)
-
-                                            # Send property set response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, payload_value, None, bus_name, path,
-                                                property=property.property, value=[payload_value]
-                                            )
-
-                                        except Exception as e:
-                                            logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={bus_name} failed, exception={e}")
-
-                                            # Send property set error response if configured
-                                            await self._send_mqtt_response(
-                                                interface_config, None, e, bus_name, path,
-                                                property=property.property, value=[payload_value],
-                                            )
-
-        if not matched_method and not matched_property and hints.log_unmatched_message:
+        # Log if no method or property matched on any of the targeted interfaces
+        if not matched_methods and not matched_properties and hints.log_unmatched_message:
             if payload_method:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
             if payload_property:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
+            return
+
+        # Call the requested method on each matched D-Bus interface and publish responses if configured
+        for interface, interface_config, method in matched_methods:
+
+            logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}")
+
+            result = None
+            error = None
+
+            try:
+                result = await self.call_dbus_interface_method(interface, method.method, payload_method_args)
+            except Exception as e:
+                error = e
+                logger.warning(f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={interface.bus_name}, exception={e}")
+
+            # Send success (or error) response if configured
+            await self._send_mqtt_response(
+                interface_config, result, error, interface.bus_name, interface.path,
+                method=method.method, args=payload_method_args
+            )
+
+        # Set property values on each matched D-Bus interface and publish responses if configured
+        for interface, interface_config, property in matched_properties:
+
+            logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}")
+
+            error = None
+
+            try:
+                await self.set_dbus_interface_property(interface, property.property, payload_value)
+            except Exception as e:
+                error = e
+                logger.warning(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={interface.bus_name} failed, exception={e}")
+
+            # Send success (or error) response if configured
+            await self._send_mqtt_response(
+                interface_config, payload_value, error, interface.bus_name, interface.path,
+                property=property.property, value=[payload_value]
+            )
 
     async def _send_mqtt_response(self, interface_config, result: Any, error: Exception | None, bus_name: str, path: str, *args, **kwargs):
-        """Send MQTT response for a method call if response topic is configured
+        """Send MQTT response for a method call if response topic is configured.
 
         Args:
             method (str, optional): The method to execute
@@ -865,7 +893,6 @@ class DbusClient:
             property (str, optional): The property to set
             value (any, optional): The value to set for the property
         """
-
         if not interface_config.mqtt_response_topic:
             return
 

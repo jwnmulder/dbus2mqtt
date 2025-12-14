@@ -72,7 +72,7 @@ MQTT connection details can be configured via a mix of environment variables and
 
 ### dbus2mqtt **flow** config
 
-Flows allow for additional actions to be executed on pre-defined triggers. Details in flow action and flow triggers can be found on: [flows](flows/index.md)
+Flows allow for additional actions to be executed on pre-defined triggers. Details can be found on: [flows](flows/index.md)
 
 | YAML config key              | Description              |
 | ---------------------------- | ------------------------ |

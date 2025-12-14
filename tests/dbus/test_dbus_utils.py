@@ -9,15 +9,15 @@ from dbus2mqtt.dbus.dbus_util import (
 
 
 class TestConvertMqttArgsToDbus:
-    """Test suite for convert_mqtt_args_to_dbus function"""
+    """Test suite for convert_mqtt_args_to_dbus function."""
 
     def test_empty_args_list(self):
-        """Test conversion of empty arguments list"""
+        """Test conversion of empty arguments list."""
         result = convert_mqtt_args_to_dbus([])
         assert result == []
 
     def test_primitive_types_passthrough(self):
-        """Test that primitive types (bool, int, float, str) pass through unchanged"""
+        """Test that primitive types (bool, int, float, str) pass through unchanged."""
         args = [True, 42, 3.14, "hello", None]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -28,7 +28,7 @@ class TestConvertMqttArgsToDbus:
         assert result[4] is None
 
     def test_simple_dict_conversion(self):
-        """Test conversion of simple dictionary to D-Bus format"""
+        """Test conversion of simple dictionary to D-Bus format."""
         args = [{"key1": "value1", "key2": 42}]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -40,7 +40,7 @@ class TestConvertMqttArgsToDbus:
         assert dict_value["key2"].value == 42
 
     def test_nested_dict_conversion(self):
-        """Test conversion of nested dictionary structures"""
+        """Test conversion of nested dictionary structures."""
         args = [{"outer": {"inner": "value", "number": 123}}]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -56,7 +56,7 @@ class TestConvertMqttArgsToDbus:
         assert inner_dict["number"].value == 123
 
     def test_simple_list_conversion(self):
-        """Test conversion of simple lists"""
+        """Test conversion of simple lists."""
         args = [[1, 2, 3], ["a", "b", "c"]]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -65,7 +65,7 @@ class TestConvertMqttArgsToDbus:
         assert result[1] == ["a", "b", "c"]
 
     def test_list_with_complex_items(self):
-        """Test conversion of lists containing dictionaries"""
+        """Test conversion of lists containing dictionaries."""
         args = [[{"key": "value"}, {"another": "item"}]]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -78,7 +78,7 @@ class TestConvertMqttArgsToDbus:
         assert result[0][1] == {"another": Variant("s", "item")}
 
     def test_mixed_argument_types(self):
-        """Test conversion of mixed argument types in a single call"""
+        """Test conversion of mixed argument types in a single call."""
         args = [
             "string_arg",
             42,
@@ -98,7 +98,7 @@ class TestConvertMqttArgsToDbus:
         assert result[5] is None            # None passthrough
 
     def test_boolean_values(self):
-        """Test specific boolean value handling"""
+        """Test specific boolean value handling."""
         args = [True, False]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -106,7 +106,7 @@ class TestConvertMqttArgsToDbus:
         assert result[1] is False
 
     def test_numeric_values(self):
-        """Test various numeric value types"""
+        """Test various numeric value types."""
         args = [0, -1, 42, 3.14159, -2.5, 0.0]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -118,7 +118,7 @@ class TestConvertMqttArgsToDbus:
         assert result[5] == 0.0
 
     def test_string_values(self):
-        """Test string value handling including special cases"""
+        """Test string value handling including special cases."""
         args = ["", "hello", "with spaces", "with\nnewlines"]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -128,7 +128,7 @@ class TestConvertMqttArgsToDbus:
         assert result[3] == "with\nnewlines"
 
     def test_empty_dict_conversion(self):
-        """Test conversion of empty dictionary"""
+        """Test conversion of empty dictionary."""
         args = [{}]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -136,7 +136,7 @@ class TestConvertMqttArgsToDbus:
         assert result[0] == {}
 
     def test_empty_list_conversion(self):
-        """Test conversion of empty list"""
+        """Test conversion of empty list."""
         args = [[]]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -146,24 +146,23 @@ class TestConvertMqttArgsToDbus:
     def test_desktop_notification_structure(self):
         """Test conversion of desktop notification payload.
 
-            Reference PR: https://github.com/jwnmulder/dbus2mqtt/pull/126
+        Reference PR: https://github.com/jwnmulder/dbus2mqtt/pull/126
 
-            - bus_name=org.freedesktop.Notifications
-            - interface=org.freedesktop.Notifications
-            - method=Notify
-            - signature:
-            .. code-block:: xml
-                <arg type="s" name="app_name" direction="in"/>
-                <arg type="u" name="replaces_id" direction="in"/>
-                <arg type="s" name="app_icon" direction="in"/>
-                <arg type="s" name="summary" direction="in"/>
-                <arg type="s" name="body" direction="in"/>
-                <arg type="as" name="actions" direction="in"/>
-                <arg type="a{sv}" name="hints" direction="in"/>
-                <arg type="i" name="expire_timeout" direction="in"/>
-                <arg type="u" name="id" direction="out"/>
+        - bus_name=org.freedesktop.Notifications
+        - interface=org.freedesktop.Notifications
+        - method=Notify
+        - signature:
+        .. code-block:: xml
+            <arg type="s" name="app_name" direction="in"/>
+            <arg type="u" name="replaces_id" direction="in"/>
+            <arg type="s" name="app_icon" direction="in"/>
+            <arg type="s" name="summary" direction="in"/>
+            <arg type="s" name="body" direction="in"/>
+            <arg type="as" name="actions" direction="in"/>
+            <arg type="a{sv}" name="hints" direction="in"/>
+            <arg type="i" name="expire_timeout" direction="in"/>
+            <arg type="u" name="id" direction="out"/>
         """
-
         signature_tree = SignatureTree("susssasa{sv}i")
         args=[
             "dbus2mqtt",
@@ -193,22 +192,22 @@ class TestConvertMqttArgsToDbus:
 
 
 class TestConvertAndWrapInVariant:
-    """Test suite for _convert_and_wrap_in_variant helper function"""
+    """Test suite for _convert_and_wrap_in_variant helper function."""
 
     def test_none_value(self):
-        """Test None value handling"""
+        """Test None value handling."""
         result = _convert_and_wrap_in_variant(None)
         assert result is None
 
     def test_primitive_types(self):
-        """Test primitive types pass through unchanged"""
+        """Test primitive types pass through unchanged."""
         assert _convert_and_wrap_in_variant(True) is True
         assert _convert_and_wrap_in_variant(42) == 42
         assert _convert_and_wrap_in_variant(3.14) == 3.14
         assert _convert_and_wrap_in_variant("hello") == "hello"
 
     def test_dict_wrapping(self):
-        """Test dictionary gets wrapped in Variant"""
+        """Test dictionary gets wrapped in Variant."""
         test_dict = {"key": "value", "number": 42}
         result = _convert_and_wrap_in_variant(test_dict)
 
@@ -218,7 +217,7 @@ class TestConvertAndWrapInVariant:
         assert result["number"].value == 42
 
     def test_list_with_primitives(self):
-        """Test list with primitive values"""
+        """Test list with primitive values."""
         test_list = [1, 2, 3]
         result = _convert_and_wrap_in_variant(test_list)
 
@@ -226,7 +225,7 @@ class TestConvertAndWrapInVariant:
         assert result == [1, 2, 3]
 
     def test_list_with_dicts(self):
-        """Test list containing dictionaries"""
+        """Test list containing dictionaries."""
         test_list = [{"a": 1}, {"b": 2}]
         result = _convert_and_wrap_in_variant(test_list)
 
@@ -239,11 +238,10 @@ class TestConvertAndWrapInVariant:
 
 
 class TestIntegrationScenarios:
-    """Integration tests for real-world usage scenarios"""
+    """Integration tests for real-world usage scenarios."""
 
     def test_mpris_metadata_structure(self):
-        """Test conversion of MPRIS-like metadata structure"""
-
+        """Test conversion of MPRIS-like metadata structure."""
         signature_tree = SignatureTree("a{sv}")
         args = [{
             "xesam:title": "Song Title",
@@ -267,8 +265,7 @@ class TestIntegrationScenarios:
         assert metadata["mpris:trackid"].value == "/org/mpris/MediaPlayer2/Track/1"
 
     def test_method_call_with_multiple_args(self):
-        """Test method call with multiple different argument types"""
-
+        """Test method call with multiple different argument types."""
         signature_tree = SignatureTree("oxa{sv}")
         args = [
             "/org/mpris/MediaPlayer2/Track/1",  # object path
@@ -285,8 +282,7 @@ class TestIntegrationScenarios:
         assert isinstance(result[2], dict)                     # dict wrapped
 
     def test_property_set_with_complex_value(self):
-        """Test setting a property with a complex value"""
-
+        """Test setting a property with a complex value."""
         signature_tree = SignatureTree("a{sv}")
         args = [{
             "Volume": 0.8,
@@ -313,7 +309,7 @@ class TestIntegrationScenarios:
         assert metadata["xesam:artist"].value == ["Test Artist"]
 
     def test_list_of_mixed_types(self):
-        """Test list containing mixed primitive and complex types"""
+        """Test list containing mixed primitive and complex types."""
         args = [[
             "string",
             42,
@@ -336,7 +332,7 @@ class TestIntegrationScenarios:
         assert list_items[4] == [1, 2, 3]       # list passthrough
 
     def test_edge_case_empty_structures(self):
-        """Test edge cases with empty structures"""
+        """Test edge cases with empty structures."""
         args = [{}, [], ""]
         result = convert_mqtt_args_to_dbus(args)
 
@@ -347,7 +343,7 @@ class TestIntegrationScenarios:
         assert result[2] == ""                 # empty string passthrough
 
     def test_large_numbers(self):
-        """Test handling of large numbers that might affect D-Bus signature selection"""
+        """Test handling of large numbers that might affect D-Bus signature selection."""
         args = [
             65535,      # UINT16_MAX
             65536,      # > UINT16_MAX
@@ -364,7 +360,7 @@ class TestIntegrationScenarios:
             assert result[i] == expected
 
     def test_deeply_nested_lists_and_dicts(self):
-        """Test deeply nested structures"""
+        """Test deeply nested structures."""
         args = [[
             {
                 "level1": [
@@ -394,10 +390,9 @@ class TestIntegrationScenarios:
 
 
 class TestErrorHandling:
-    """Test error handling and edge cases"""
-
+    """Test error handling and edge cases."""
     def test_conversion_with_circular_reference(self):
-        """Test handling of circular references in data structures"""
+        """Test handling of circular references in data structures."""
         circular_dict: dict[str, object] = {"key": "value"}
         circular_dict["self"] = circular_dict
 

@@ -42,7 +42,7 @@ When triggered, the following context parameters are available
 | bus_name  | string | bus_name of the object that was registered on dbus |
 | path      | string | path of the object that was registered on dbus |
 | interface | string | name of interface for which the signal was triggered |
-| signal    | string | name of the signal, e.g. 'Seeked'
+| signal    | string | name of the signal, e.g. 'Seeked' |
 | args      | list   | signal arguments, list of objects |
 
 ## object_added

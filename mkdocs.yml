@@ -142,4 +142,12 @@ hooks:
 plugins:
   - open-in-new-tab:
       add_icon: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: false
 #   - git-revision-date-localized: {}
