@@ -829,6 +829,7 @@ class DbusClient:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
             return
 
+        # Call the requested method on each matched D-Bus interface and publish responses if configured
         for interface, interface_config, method in matched_methods:
 
             logger.info(f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}")
@@ -848,6 +849,7 @@ class DbusClient:
                 method=method.method, args=payload_method_args
             )
 
+        # Set property values on each matched D-Bus interface and publish responses if configured
         for interface, interface_config, property in matched_properties:
 
             logger.info(f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}")
