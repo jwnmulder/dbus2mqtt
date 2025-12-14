@@ -13,7 +13,7 @@ from tests import mocked_app_context, mocked_dbus_client
 
 @pytest.mark.asyncio
 async def test_method_only():
-    """Mock contains 4 bus objects, test with valid topic and method.
+    """Mock contains 4 bus objects, test with specific topic and method.
 
     Expect the method to be called 2 times, once for each bus object with matching subscription
     """
@@ -200,7 +200,8 @@ def _mocked_app_context() -> AppContext:
                         interface="org.freedesktop.Notifications",
                         mqtt_command_topic="dbus2mqtt/test/Notifications/command",
                         methods=[
-                            config.MethodConfig(method="Notify")
+                            config.MethodConfig(method="Notify"),
+                            config.MethodConfig(method="TestMethod2")
                         ]
                     )
                 ]

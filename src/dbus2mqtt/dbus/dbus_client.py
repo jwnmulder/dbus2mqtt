@@ -765,15 +765,27 @@ class DbusClient:
                     return True
         return False
 
-    def _get_matching_subscribed_interfaces(self, bus_name_pattern: str, path_pattern: str):
+    def _get_matching_subscribed_interfaces(self, topic: str, bus_name_pattern: str, path_pattern: str):
         result: list[tuple[InterfaceConfig, dbus_aio.ProxyObject]] = []
-        for bus_name, bus_name_subscription in self.subscriptions.items():
-            if fnmatch.fnmatchcase(bus_name, bus_name_pattern):
-                for path, proxy_object in bus_name_subscription.path_objects.items():
-                    if fnmatch.fnmatchcase(path, path_pattern):
-                        for subscription_configs in self.config.get_subscription_configs(bus_name=bus_name, path=path):
-                            for interface_config in subscription_configs.interfaces:
-                                result.append((interface_config, proxy_object))
+
+        for bus_name_subscription in self.subscriptions.values():
+            bus_name_matches = fnmatch.fnmatchcase(bus_name_subscription.bus_name, bus_name_pattern)
+            if not bus_name_matches:
+                continue
+
+            for path, proxy_object in bus_name_subscription.path_objects.items():
+                path_matches = fnmatch.fnmatchcase(path, path_pattern)
+                if not path_matches:
+                    continue
+
+                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name_subscription.bus_name, path=path)
+                for subscription_configs in subscription_configs:
+                    for interface_config in subscription_configs.interfaces:
+                        mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
+                        topic_matches = mqtt_topic == topic
+
+                        if topic_matches:
+                            result.append((interface_config, proxy_object))
         return result
 
     async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
@@ -800,6 +812,8 @@ class DbusClient:
         payload_property = msg.payload.get("property")
         payload_value = msg.payload.get("value")
 
+        # Must have either method or property/value in payload
+        # If missing, it's likely a user error that should be logged
         if payload_method is None and (payload_property is None or payload_value is None):
             if msg.payload and hints.log_unmatched_message:
                 logger.info(f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}")
@@ -808,7 +822,7 @@ class DbusClient:
         matched_methods: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, MethodConfig]] = []
         matched_properties: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, PropertyConfig]] = []
 
-        matching_interfaces = self._get_matching_subscribed_interfaces(payload_bus_name, payload_path)
+        matching_interfaces = self._get_matching_subscribed_interfaces(msg.topic, payload_bus_name, payload_path)
         for interface_config, proxy_object in matching_interfaces:
             for method in interface_config.methods:
                 # filter configured method, configured topic, ...
@@ -822,6 +836,7 @@ class DbusClient:
                     interface = proxy_object.get_interface(name=interface_config.interface)
                     matched_properties.append((interface, interface_config, property))
 
+        # Log if no method or property matched on any of the targeted interfaces
         if not matched_methods and not matched_properties and hints.log_unmatched_message:
             if payload_method:
                 logger.info(f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self.subscriptions.keys())}")
