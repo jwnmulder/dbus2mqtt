@@ -789,12 +789,13 @@ class DbusClient:
         return result
 
     async def _on_mqtt_msg(self, msg: MqttMessage, hints: MqttReceiveHints):
-        """Start all flows for the new subscriptions.
+        """Executes dbus method calls or property updates on objects.
 
-        For each matching bus_name-path subscription_config, the following is done:
-          1. Ensure the scheduler is started, at most one scheduler will be active for a subscription_config
-          2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
-          3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
+        Only for messages which have:
+          1. a matching subscription configured
+          2. a matching method or property in the msg payload
+          3. a matching bus_name (if provided)
+          4. a matching path (if provided)
         """
         # Don't proceed or log any message if no matching configuration is found
         # where mqtt_command_topic matches the MQTT message topic. The MQTT msg is not intended for here
