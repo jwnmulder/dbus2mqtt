@@ -4,7 +4,9 @@ media_player:
       mpris_media_player:
         device_class: receiver
         friendly_name: MPRIS Media Player
-        value_template: "{{ states('sensor.mpris_media_player') }}"
+        value_template: >
+          {% set s = states('sensor.mpris_media_player') %}
+          {{ s if s not in ['unavailable', 'unknown'] else None }}
 
         current_volume_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') }}"
         current_is_muted_template: "{{ state_attr('sensor.mpris_media_player', 'VolumeMuted') }}"
