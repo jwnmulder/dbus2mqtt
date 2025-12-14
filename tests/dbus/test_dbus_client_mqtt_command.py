@@ -13,7 +13,7 @@ from tests import mocked_app_context, mocked_dbus_client
 
 @pytest.mark.asyncio
 async def test_method_only():
-    """Mock contains 3 bus objects, test with valid method.
+    """Mock contains 4 bus objects, test with specific topic and method.
 
     Expect the method to be called 2 times, once for each bus object with matching subscription
     """
@@ -30,7 +30,7 @@ async def test_method_only():
 
 @pytest.mark.asyncio
 async def test_invalid_method():
-    """Mock contains 3 bus objects, test with invalid method.
+    """Mock contains 4 bus objects, test with valid topic and invalid method.
 
     Expect the method to be called zero times
     """
@@ -46,8 +46,25 @@ async def test_invalid_method():
     assert mocked_proxy_interface.call_invalid_test_method.call_count == 0
 
 @pytest.mark.asyncio
+async def test_valid_method_on_wrong_topic():
+    """Mock contains 4 bus objects, test with valid method and wrong topic.
+
+    Expect the method to be called zero times
+    """
+    mocked_proxy_interface = await _publish_msg(
+        MqttMessage(
+            topic="dbus2mqtt/test/command",
+            payload={
+                "method": "Notify",
+            }
+        )
+    )
+
+    assert mocked_proxy_interface.call_notify.call_count == 0
+
+@pytest.mark.asyncio
 async def test_method_with_bus_name():
-    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+    """Mock contains 4 bus objects, test with valid topic, method and bus_name.
 
     Expect the method to be called 1 time, once for each matching bus name and subscription
     """
@@ -65,7 +82,7 @@ async def test_method_with_bus_name():
 
 @pytest.mark.asyncio
 async def test_method_with_bus_name_pattern():
-    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+    """Mock contains 4 bus objects, test with valid topic, method and bus_name.
 
     Expect the method to be called 1 time, once for each matching bus name and subscription
     """
@@ -83,7 +100,7 @@ async def test_method_with_bus_name_pattern():
 
 @pytest.mark.asyncio
 async def test_method_invalid_bus_name():
-    """Mock contains 3 bus objects, test with valid method and valid bus_name.
+    """Mock contains 4 bus objects, test with valid topic, method and invalid bus_name.
 
     Expect the method to be called zero times
     """
@@ -101,7 +118,7 @@ async def test_method_invalid_bus_name():
 
 @pytest.mark.asyncio
 async def test_method_with_path():
-    """Mock contains 3 bus objects, test with valid method and path.
+    """Mock contains 4 bus objects, test with valid topic, method and path.
 
     Expect the method to be called 2 times, once for each bus name with matching path and subscription
     """
@@ -119,7 +136,7 @@ async def test_method_with_path():
 
 @pytest.mark.asyncio
 async def test_method_with_path_pattern():
-    """Mock contains 3 bus objects, test with valid method and path.
+    """Mock contains 4 bus objects, test with valid topic, method and path.
 
     Expect the method to be called 2 times, once for each bus name with matching path and subscription
     """
@@ -137,7 +154,7 @@ async def test_method_with_path_pattern():
 
 @pytest.mark.asyncio
 async def test_method_invalid_path():
-    """Mock contains 3 bus objects, test with valid method and invalid path.
+    """Mock contains 4 bus objects, test with valid method and invalid path.
 
     Expect the method to be called zero times
     """
@@ -178,6 +195,14 @@ def _mocked_app_context() -> AppContext:
                             config.MethodConfig(method="TestMethod1"),
                             config.MethodConfig(method="TestMethod2")
                         ]
+                    ),
+                    config.InterfaceConfig(
+                        interface="org.freedesktop.Notifications",
+                        mqtt_command_topic="dbus2mqtt/test/Notifications/command",
+                        methods=[
+                            config.MethodConfig(method="Notify"),
+                            config.MethodConfig(method="TestMethod2")
+                        ]
                     )
                 ]
 
@@ -191,6 +216,7 @@ def _mocked_dbus_client(app_context: AppContext) -> tuple[DbusClient, MagicMock]
         ("org.mpris.MediaPlayer2.vlc", "/org/mpris/MediaPlayer2"),
         ("org.mpris.MediaPlayer2.firefox", "/org/mpris/MediaPlayer2"),
         ("org.mpris.MediaPlayer2.kodi", "/another/path/to/object"),
+        ("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
     ]
 
     dbus_client = mocked_dbus_client(app_context)
@@ -199,6 +225,7 @@ def _mocked_dbus_client(app_context: AppContext) -> tuple[DbusClient, MagicMock]
     mocked_proxy_interface.call_test_method1 = AsyncMock()
     mocked_proxy_interface.call_test_method2 = AsyncMock()
     mocked_proxy_interface.call_invalid_test_method = AsyncMock()
+    mocked_proxy_interface.call_notify = AsyncMock()
 
     index = 1
     for bus_name, path in dbus_objects:
