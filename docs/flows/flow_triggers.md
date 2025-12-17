@@ -16,9 +16,9 @@ Schedule based triggers can be configured by setting either a cron or interval p
 
 When triggered, the following context parameters are available
 
-| name | description |
-|------|-------------|
-| N/A  | N/A         |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'schedule'       |
 
 ## dbus_signal
 
@@ -37,13 +37,14 @@ DBus signals triggers must be configured with an anterface and path. Note that o
 
 When triggered, the following context parameters are available
 
-| name | type | description |
-|------|------|-------------|
-| bus_name  | string | bus_name of the object that was registered on dbus |
-| path      | string | path of the object that was registered on dbus |
-| interface | string | name of interface for which the signal was triggered |
-| signal    | string | name of the signal, e.g. 'Seeked' |
-| args      | list   | signal arguments, list of objects |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'dbus_signal'    |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
+| interface    | string | name of interface for which the signal was triggered |
+| signal       | string | name of the signal, e.g. 'Seeked' |
+| args         | list   | signal arguments, list of objects |
 
 ## object_added
 
@@ -55,10 +56,11 @@ This trigger is fired during startup or when a new object appears on D-Bus that 
 
 When triggered, the following context parameters are available
 
-| name | description |
-|------|-------------|
-| bus_name | bus_name of the object that was registered on dbus |
-| path     | path of the object that was registered on dbus |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_added'   |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
 
 ## object_removed
 
@@ -68,10 +70,11 @@ When triggered, the following context parameters are available
 
 When triggered, the following context parameters are available
 
-| name | description |
-|------|-------------|
-| bus_name | bus_name of the object that was registered on dbus |
-| path     | path of the object that was registered on dbus |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_removed' |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
 
 ## mqtt_message
 
@@ -90,10 +93,11 @@ Listens for MQTT messages on the configured topic. The message payload is expect
 
 When triggered, the following context parameters are available
 
-| name | type | description |
-|------|------|-------------|
-| topic     | string | mqtt topic |
-| payload   | any | json deserialized MQTT message payload  |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'mqtt_message'   |
+| topic        | string | mqtt topic |
+| payload      | any    | json deserialized MQTT message payload  |
 
 Example flow
 
