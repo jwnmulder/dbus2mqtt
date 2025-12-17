@@ -51,7 +51,7 @@ dbus:
           actions:
             - type: context_set
               context:
-                mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
                 mpris_path: /org/mpris/MediaPlayer2
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
@@ -60,6 +60,8 @@ dbus:
               context:
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
+                available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
@@ -67,7 +69,11 @@ dbus:
                 {% set metadata = player_properties.get('Metadata') or {} %}
                 {% set metadata_xesam_url = metadata.get('xesam:url', '') | urldecode %}
                 {{
-                    { 'bus_name': mpris_bus_name }
+                    {
+                      'current_bus_name': mpris_bus_name,
+                      'current_player': current_player,
+                      'available_players': available_players
+                    }
                     | combine(player_properties)
                     | combine({ 'Position': seeked_position } if seeked_position else {})
                     | combine({ 'Metadata': { 'xesam:url': metadata_xesam_url } }, recursive=True)
@@ -101,6 +107,29 @@ dbus:
               payload_type: json
               payload_template:
                 PlaybackStatus: "Off"
+
+        - name: Set current player
+          triggers:
+            - type: mqtt_message
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/custom_command
+              filter: "{{ payload.get('action') == 'set_current_player' }}"
+            - type: object_removed
+            # TODO: When second player is removed the scheduler stops triggering flows. Needs to be fixed
+          actions:
+            - type: context_set
+              context:
+                preferred_player: >-
+                  {% set preferred_player = current_player_bus_name | default(None) -%}
+                  {% if trigger_type == 'mqtt_message' -%}
+                  {%   set preferred_player = 'org.mpris.MediaPlayer2.' + payload.get('player') -%}
+                  {% endif -%}
+                  {{ preferred_player }}
+            - type: context_set
+              global_context:
+                current_player_bus_name: >-
+                  {{ preferred_player if preferred_player in dbus_list('org.mpris.MediaPlayer2.*') else None }}
+            - type: log
+              msg: Changed current player to '{{ current_player_bus_name }}', preferred '{{ preferred_player }}'
 
         - name: Home Assistant Discovery
           triggers:

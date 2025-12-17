@@ -87,7 +87,10 @@ class FlowScheduler:
             for trigger in flow.triggers:
                 if trigger.type == "schedule":
                     logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
-                    self.scheduler.remove_job(trigger.id)
+                    try:
+                        self.scheduler.remove_job(trigger.id)
+                    except Exception as e:
+                        logger.error(f"Error removing scheduled job {trigger.id}: {e}")
 
 class FlowActionContext:
 
