@@ -48,6 +48,7 @@ dbus:
             - type: dbus_signal
               interface: org.mpris.MediaPlayer2.Player
               signal: Seeked
+            - type: context_changed
           actions:
             - type: context_set
               context:
@@ -87,10 +88,15 @@ dbus:
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
+            - type: context_changed
           actions:
             - type: context_set
               context:
-                artUrl: "{{ (dbus_property_get(bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') }}"
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
+                mpris_path: /org/mpris/MediaPlayer2
+            - type: context_set
+              context:
+                artUrl: "{{ (dbus_property_get(mpris_bus_name, mpris_path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
               payload_type: binary

@@ -98,6 +98,11 @@ class FlowTriggerMqttMessageConfig:
             return template_engine.render_template(self.filter, bool, trigger_context)
         return True
 
+@dataclass
+class FlowTriggerContextChangedConfig:
+    type: Literal["context_changed"] = "context_changed"
+    scope: Literal["global"] = "global"
+
 FlowTriggerConfig = (
     FlowTriggerScheduleConfig
     | FlowTriggerDbusSignalConfig
@@ -106,6 +111,7 @@ FlowTriggerConfig = (
     | FlowTriggerObjectAddedConfig
     | FlowTriggerObjectRemovedConfig
     | FlowTriggerMqttMessageConfig
+    | FlowTriggerContextChangedConfig
 )
 
 @dataclass
