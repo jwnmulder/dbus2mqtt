@@ -434,6 +434,9 @@ class DbusClient:
                 for subscription_config in subscription_configs:
                     self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
+                # Wait for completion of any pending / in-progress triggers
+                await self.event_broker.flow_trigger_queue.async_q.join()
+
                 # clean up all dbus matchrules
                 for interface in proxy_object._interfaces.values():
                     proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
@@ -458,9 +461,6 @@ class DbusClient:
 
                     # Trigger flows that have an object_removed trigger configured
                     await self._trigger_object_removed(subscription_config, bus_name, path)
-
-            # Wait for completion
-            await self.event_broker.flow_trigger_queue.async_q.join()
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
         """Handles the addition of new D-Bus interfaces for a given bus name and object path.
@@ -494,11 +494,11 @@ class DbusClient:
         for subscription_config in subscription_configs:
             self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
+        # Wait for completion of any pending / in-progress triggers
+        await self.event_broker.flow_trigger_queue.async_q.join()
+
         proxy_object = self.get_subscribed_proxy_object(bus_name, path)
         if proxy_object is not None:
-
-            # Wait for completion
-            await self.event_broker.flow_trigger_queue.async_q.join()
 
             # clean up all dbus matchrules
             for interface in proxy_object._interfaces.values():

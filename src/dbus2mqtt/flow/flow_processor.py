@@ -90,7 +90,7 @@ class FlowScheduler:
                     try:
                         self.scheduler.remove_job(trigger.id)
                     except Exception as e:
-                        logger.error(f"Error removing scheduled job {trigger.id}: {e}")
+                        logger.error(f"Error removing scheduled job {trigger.id}, job likely removed before: {e}")
 
 class FlowActionContext:
 
