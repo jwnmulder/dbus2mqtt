@@ -148,6 +148,14 @@ class DbusClient:
         if message.interface in ['org.freedesktop.DBus', 'org.freedesktop.DBus.ObjectManager']:
             self._dbus_object_lifecycle_signal_queue.sync_q.put(message)
 
+    def get_subscribed_dbus_objects(self) -> list[tuple[str, str]]:
+        """Return a list of all subscribed (bus_name, path) tuples."""
+        res: list[tuple[str, str]] = []
+        for bus_name_subscriptions in self.subscriptions.values():
+            for path in bus_name_subscriptions.path_objects.keys():
+                res.append((bus_name_subscriptions.bus_name, path))
+        return res
+
     def get_bus_name_subscriptions(self, bus_name: str) -> BusNameSubscriptions | None:
 
         return self.subscriptions.get(bus_name)
@@ -428,19 +436,21 @@ class DbusClient:
         # Check which flow sets are in scope for the given dbus object
         subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
 
-        # For each subscription_config, check if there are other subscriptions still active
+        # For each subscription_config, check if there are other subscriptions still active,
         # meaning all dbus objects not matching this functions bus_name and path arguments
         subscription_config_in_use_count: dict[str, int] = {}
 
         # Count all active subscriptions for the subscription_configs
-        for subscription_config in subscription_configs:
-            count = subscription_config_in_use_count.get(subscription_config.id, 0)
-            if subscription_config.matches_dbus_object(bus_name, path):
-                subscription_config_in_use_count[subscription_config.id] = count + 1
+        for subscribed_bus_name, subscribed_path in self.get_subscribed_dbus_objects():
+            for subscription_config in subscription_configs:
+                count = subscription_config_in_use_count.get(subscription_config.id, 0)
+                if subscription_config.matches_dbus_object(subscribed_bus_name, subscribed_path):
+                    subscription_config_in_use_count[subscription_config.id] = count + 1
+
+        logger.debug(f"subscription_config_in_use_count: {subscription_config_in_use_count}")
 
         for subscription_config in subscription_configs:
             count = subscription_config_in_use_count.get(subscription_config.id, 0)
-            print(f"subscription_config: {subscription_config.id}, count: {count}")
             if count <= 1:
                 self.flow_scheduler.stop_flow_set(subscription_config.flows)
 
