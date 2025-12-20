@@ -84,7 +84,7 @@ class FlowScheduler:
                                 **trigger_args
                             )
 
-    def stop_flow_set(self, flows):
+    def stop_flow_set(self, flows: list[FlowConfig]):
         for flow in flows:
             for trigger in flow.triggers:
                 if trigger.type == "schedule":
