@@ -85,7 +85,6 @@ class FlowTriggerDbusObjectAddedConfig:
             warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
             self.type = FlowTriggerDbusObjectAddedConfig.type
 
-
 @dataclass
 class FlowTriggerDbusObjectRemovedConfig:
     type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
