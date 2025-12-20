@@ -50,7 +50,7 @@ Some action parameters allow the use of templating. When supported, it is docume
 ## Contional flows
 
 Flow actions can be conditionally executed. The `conditions` parameter accepts either a templated string or list of strings.
-When using a list of templated strings, all expressions must evaluate to `True` for the actions to be executed.
+When using a list of templated strings, all expressions must evaluate to `True` for actions to be executed.
 
 ```yaml title="Subscription based flows"
 dbus:

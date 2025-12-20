@@ -13,6 +13,7 @@ from dbus2mqtt.config import (
     FlowActionMqttPublishConfig,
     FlowConfig,
     FlowTriggerConfig,
+    FlowTriggerContextChangedConfig,
     FlowTriggerDbusSignalConfig,
     FlowTriggerObjectAddedConfig,
     FlowTriggerObjectRemovedConfig,
@@ -196,6 +197,10 @@ class FlowProcessor:
             path = msg.trigger_context.get('path') if msg.trigger_context else None
             if path:
                 return f"{config.type}({path})"
+        elif isinstance(config, FlowTriggerContextChangedConfig):
+            scope = msg.trigger_context.get('scope') if msg.trigger_context else None
+            if scope:
+                return f"{config.type}({scope})"
         return config.type
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
@@ -225,6 +230,10 @@ class FlowProcessor:
         if should_execute_actions:
             await flow.execute_actions(flow_execution_context)
 
+        # Check if global context was updated during flow execution to trigger context_changed flows
+        if flow_execution_context.global_context_updated:
+            await self._trigger_context_changed({"scope": "global"})
+
     def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:
         """Per flow execution context allows for updates during flow execution without affecting other executions.
 
@@ -236,10 +245,12 @@ class FlowProcessor:
             flow_context=flow.flow_context)
 
         trigger_type = flow_trigger_message.flow_trigger_config.type
-        flow_execution_context.context["trigger_type"] = trigger_type
+        flow_execution_context.update_context({
+            "trigger_type": trigger_type
+        })
 
         if flow_trigger_message.trigger_context:
-            flow_execution_context.context.update(flow_trigger_message.trigger_context)
+            flow_execution_context.update_context(flow_trigger_message.trigger_context)
 
         return flow_execution_context
 
@@ -256,3 +267,25 @@ class FlowProcessor:
                 return False
 
         return True
+
+    async def _trigger_context_changed(self, trigger_context: dict):
+        """Trigger all flows that have a context_changed defined.
+
+        Global scope changes are triggered to all global and subscription specific flows
+        """
+        all_flows: list[FlowConfig] = []
+        all_flows.extend(self.app_context.config.flows)
+        for subscription in self.app_context.config.dbus.subscriptions:
+            all_flows.extend(subscription.flows)
+
+        for flow in all_flows:
+            for trigger in flow.triggers:
+                if trigger.type == FlowTriggerContextChangedConfig.type:
+                    trigger_message = FlowTriggerMessage(
+                        flow,
+                        trigger,
+                        datetime.now(),
+                        trigger_context=trigger_context,
+                    )
+
+                    self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
