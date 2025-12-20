@@ -14,9 +14,9 @@ from dbus2mqtt.config import (
     FlowConfig,
     FlowTriggerConfig,
     FlowTriggerContextChangedConfig,
+    FlowTriggerDbusObjectAddedConfig,
+    FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
-    FlowTriggerObjectAddedConfig,
-    FlowTriggerObjectRemovedConfig,
 )
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
@@ -193,7 +193,7 @@ class FlowProcessor:
         config = msg.flow_trigger_config
         if isinstance(config, FlowTriggerDbusSignalConfig):
             return f"{config.type}({config.signal})"
-        elif isinstance(config, FlowTriggerObjectAddedConfig) or isinstance(config, FlowTriggerObjectRemovedConfig):
+        elif isinstance(config, FlowTriggerDbusObjectAddedConfig) or isinstance(config, FlowTriggerDbusObjectRemovedConfig):
             path = msg.trigger_context.get('path') if msg.trigger_context else None
             if path:
                 return f"{config.type}({path})"

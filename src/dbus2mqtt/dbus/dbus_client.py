@@ -40,9 +40,6 @@ from dbus2mqtt.flow.flow_processor import FlowScheduler, FlowTriggerMessage
 
 logger = logging.getLogger(__name__)
 
-# TODO: Redo flow registration in _handle_bus_name_added, might want to move that to a separate file
-# TODO: deregister signal watcher on shutdown
-
 class DbusClient:
 
     def __init__(self, app_context: AppContext, bus: dbus_aio.message_bus.MessageBus, flow_scheduler: FlowScheduler):
@@ -661,7 +658,7 @@ class DbusClient:
     async def _trigger_object_added(self, subscription_config: SubscriptionConfig, bus_name: str, object_path: str, object_interfaces: list[str]):
 
         # Trigger flows that have a object_added trigger configured
-        await self._trigger_flows(subscription_config, "object_added", {
+        await self._trigger_flows(subscription_config, "dbus_object_added", {
             "bus_name": bus_name,
             "path": object_path
             # "interfaces": object_interfaces
@@ -670,7 +667,7 @@ class DbusClient:
     async def _trigger_object_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
 
         # Trigger flows that have a object_removed trigger configured
-        await self._trigger_flows(subscription_config, "object_removed", {
+        await self._trigger_flows(subscription_config, "dbus_object_removed", {
             "bus_name": bus_name,
             "path": path
         })

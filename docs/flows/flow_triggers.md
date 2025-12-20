@@ -20,6 +20,36 @@ When triggered, the following context parameters are available
 |--------------|--------|------------------|
 | trigger_type | string | 'schedule'       |
 
+## dbus_object_added
+
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+
+```yaml
+- type: dbus_object_added
+```
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_added'   |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
+
+## dbus_object_removed
+
+```yaml
+- type: dbus_object_removed
+```
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_removed' |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
+
 ## dbus_signal
 
 ```yaml
@@ -45,36 +75,6 @@ When triggered, the following context parameters are available
 | interface    | string | name of interface for which the signal was triggered |
 | signal       | string | name of the signal, e.g. 'Seeked' |
 | args         | list   | signal arguments, list of objects |
-
-## object_added
-
-This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
-
-```yaml
-- type: object_added
-```
-
-When triggered, the following context parameters are available
-
-| name         | type   | description      |
-|--------------|--------|------------------|
-| trigger_type | string | 'object_added'   |
-| bus_name     | string | bus_name of the object that was registered on dbus |
-| path         | string | path of the object that was registered on dbus |
-
-## object_removed
-
-```yaml
-- type: object_removed
-```
-
-When triggered, the following context parameters are available
-
-| name         | type   | description      |
-|--------------|--------|------------------|
-| trigger_type | string | 'object_removed' |
-| bus_name     | string | bus_name of the object that was registered on dbus |
-| path         | string | path of the object that was registered on dbus |
 
 ## mqtt_message
 

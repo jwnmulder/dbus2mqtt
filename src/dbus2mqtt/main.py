@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import warnings
 
 from typing import cast
 
@@ -88,6 +89,29 @@ async def run(config: Config):
     except asyncio.CancelledError:
         pass
 
+def setup_logging(verbose: bool):
+
+    handler = colorlog.StreamHandler(stream=sys.stdout)
+    handler.addFilter(NamePartsFilter())
+    handler.setFormatter(colorlog.ColoredFormatter(
+        '%(log_color)s%(levelname)s:%(name_last)s:%(message)s',
+        log_colors={
+            "DEBUG": "light_black",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "bold_red",
+        }
+    ))
+
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    else:
+        logging.basicConfig(level=logging.INFO, handlers=[handler])
+        apscheduler_logger = logging.getLogger("apscheduler")
+        apscheduler_logger.setLevel(logging.WARNING)
+
+    logging.captureWarnings(capture=True)
+    warnings.filterwarnings("default", category=DeprecationWarning)
 
 def main():
 
@@ -105,35 +129,9 @@ def main():
 
     cfg = parser.parse_args()
 
+    setup_logging(cfg.verbose)
+
     config: Config = cast(Config, parser.instantiate_classes(cfg))
-
-    class NamePartsFilter(logging.Filter):
-        def filter(self, record):
-            record.name_last = record.name.rsplit('.', 1)[-1]
-            # record.name_first = record.name.split('.', 1)[0]
-            # record.name_short = record.name
-            # if record.name.startswith("dbus2mqtt"):
-            #     record.name_short = record.name.split('.', 1)[-1]
-            return True
-
-    handler = colorlog.StreamHandler(stream=sys.stdout)
-    handler.addFilter(NamePartsFilter())
-    handler.setFormatter(colorlog.ColoredFormatter(
-        '%(log_color)s%(levelname)s:%(name_last)s:%(message)s',
-        log_colors={
-            "DEBUG": "light_black",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "bold_red",
-        }
-    ))
-
-    if cfg.verbose:
-        logging.basicConfig(level=logging.DEBUG, handlers=[handler])
-    else:
-        logging.basicConfig(level=logging.INFO, handlers=[handler])
-        apscheduler_logger = logging.getLogger("apscheduler")
-        apscheduler_logger.setLevel(logging.WARNING)
 
     logger.debug(f"config: {config}")
 
@@ -141,3 +139,12 @@ def main():
         asyncio.run(run(config))
     except KeyboardInterrupt:
         return 0
+
+class NamePartsFilter(logging.Filter):
+    def filter(self, record):
+        record.name_last = record.name.rsplit('.', 1)[-1]
+        # record.name_first = record.name.split('.', 1)[0]
+        # record.name_short = record.name
+        # if record.name.startswith("dbus2mqtt"):
+        #     record.name_short = record.name.split('.', 1)[-1]
+        return True

@@ -36,7 +36,7 @@ dbus:
       flows:
         - name: "Publish MPRIS state"
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: schedule
               interval: {seconds: 5}
           actions:

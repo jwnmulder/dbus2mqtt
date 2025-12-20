@@ -4,9 +4,9 @@ from dbus2mqtt.config import (
     FlowActionContextSetConfig,
     FlowTriggerBusNameAddedConfig,
     FlowTriggerBusNameRemovedConfig,
+    FlowTriggerDbusObjectAddedConfig,
+    FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
-    FlowTriggerObjectAddedConfig,
-    FlowTriggerObjectRemovedConfig,
     SignalConfig,
 )
 from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState
@@ -90,7 +90,7 @@ async def test_object_added_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectAddedConfig()
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
     processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
@@ -116,7 +116,7 @@ async def test_object_added_trigger():
 
     # expected context from _trigger_object_added
     assert processor._global_context["res"] == {
-        "trigger_type": "object_added",
+        "trigger_type": "dbus_object_added",
         "bus_name": "test-bus-name",
         "path": "/some/test/path",
     }
@@ -126,7 +126,7 @@ async def test_object_removed_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectRemovedConfig()
+    trigger_config = FlowTriggerDbusObjectRemovedConfig()
     processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
@@ -152,7 +152,7 @@ async def test_object_removed_trigger():
 
     # expected context from _trigger_object_removed
     assert processor._global_context["res"] == {
-        "trigger_type": "object_removed",
+        "trigger_type": "dbus_object_removed",
         "bus_name": "test-bus-name",
         "path": "/some/test/path",
     }
