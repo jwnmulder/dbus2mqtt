@@ -216,7 +216,7 @@ class FlowProcessor:
         flow_execution_context = self._flow_execution_context(flow, flow_trigger_message)
 
         # Check if any actions should run based on flow conditions
-        should_execute_actions = await self._evaluate_flow_conditions(flow, flow_execution_context, self.app_context.templating)
+        should_execute_actions = self._evaluate_flow_conditions(flow, flow_execution_context, self.app_context.templating)
 
         log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
         if not should_execute_actions:
@@ -248,7 +248,7 @@ class FlowProcessor:
 
         return flow_execution_context
 
-    async def _evaluate_flow_conditions(self, flow: FlowActionContext, context: FlowExecutionContext, template_engine: TemplateEngine) -> bool:
+    def _evaluate_flow_conditions(self, flow: FlowActionContext, context: FlowExecutionContext, template_engine: TemplateEngine) -> bool:
 
         if len(flow.flow_conditions) == 0:
             return True
