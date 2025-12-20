@@ -22,7 +22,7 @@ async def test_schedule_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "scheduler"
@@ -42,7 +42,7 @@ async def test_bus_name_added_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameAddedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "added"
@@ -62,7 +62,7 @@ async def test_bus_name_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameRemovedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "removed"
@@ -82,7 +82,7 @@ async def test_object_added_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerObjectAddedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "added"
@@ -102,7 +102,7 @@ async def test_object_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerObjectRemovedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "removed"
@@ -125,7 +125,7 @@ async def test_dbus_signal_trigger():
         interface="org.freedesktop.DBus.Properties",
         signal="PropertiesChanged"
     )
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": {
@@ -155,7 +155,7 @@ async def test_context_changed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerContextChangedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "triggered_by_context_changed"
@@ -175,8 +175,7 @@ async def test_flow_conditions_should_execute():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerObjectAddedConfig()
-    processor, flow_config = mocked_flow_processor(
-        app_context, trigger_config,
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
         actions=[
             FlowActionContextSetConfig(
                 global_context={
@@ -199,8 +198,7 @@ async def test_flow_conditions_should_not_execute():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerObjectAddedConfig()
-    processor, flow_config = mocked_flow_processor(
-        app_context, trigger_config,
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
         actions=[
             FlowActionContextSetConfig(
                 global_context={

@@ -17,7 +17,7 @@ async def test_context():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             context={
                 "var1": "{{ subscription_bus_name }}"
@@ -45,7 +45,7 @@ async def test_global_context():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "var1": "{{ subscription_bus_name }}"
