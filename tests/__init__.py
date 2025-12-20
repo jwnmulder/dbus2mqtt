@@ -49,9 +49,9 @@ def mocked_app_context():
 
     return app_context
 
-def mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerConfig, actions: list[FlowActionConfig]):
+def mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerConfig, actions: list[FlowActionConfig], conditions: list[str] = []):
 
-    flow_config = FlowConfig(triggers=[trigger_config], actions=actions)
+    flow_config = FlowConfig(triggers=[trigger_config], actions=actions, conditions=conditions)
 
     app_context.config.dbus.subscriptions[0].flows = [flow_config]
 

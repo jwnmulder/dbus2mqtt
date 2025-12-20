@@ -169,6 +169,54 @@ async def test_context_changed_trigger():
 
     assert processor._global_context["res"] == "triggered_by_context_changed"
 
+@pytest.mark.asyncio
+async def test_flow_conditions_should_execute():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerContextChangedConfig()
+    processor, flow_config = mocked_flow_processor(
+        app_context, trigger_config,
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": "triggered_by_context_changed"
+                }
+            )
+        ],
+        conditions=["{{ True }}"]
+    )
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert "res" in processor._global_context
+
+@pytest.mark.asyncio
+async def test_flow_conditions_should_not_execute():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerContextChangedConfig()
+    processor, flow_config = mocked_flow_processor(
+        app_context, trigger_config,
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": "triggered_by_context_changed"
+                }
+            )
+        ],
+        conditions=["{{ False }}"]
+    )
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert "res" not in processor._global_context
+
 # @pytest.mark.asyncio
 # async def test_mqtt_trigger():
 

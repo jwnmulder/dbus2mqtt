@@ -145,7 +145,7 @@ dbus:
                 current_player_bus_name: >-
                   {{ preferred_player if preferred_player in dbus_list('org.mpris.MediaPlayer2.*') else None }}
             - type: log
-              msg: Changed current player to '{{ current_player_bus_name }}', preferred '{{ preferred_player }}'
+              msg: Changed preferred player to '{{ current_player_bus_name }}', requested '{{ preferred_player }}'
 
         - name: Home Assistant Discovery
           triggers:
