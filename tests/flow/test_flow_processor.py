@@ -6,6 +6,7 @@ from dbus2mqtt.config import (
     FlowActionContextSetConfig,
     FlowTriggerBusNameAddedConfig,
     FlowTriggerBusNameRemovedConfig,
+    FlowTriggerContextChangedConfig,
     FlowTriggerDbusSignalConfig,
     FlowTriggerObjectAddedConfig,
     FlowTriggerObjectRemovedConfig,
@@ -147,6 +148,26 @@ async def test_dbus_signal_trigger():
         "subscription_path": "/",
         "subscription_interfaces": ["test-interface-name"]
     }
+
+@pytest.mark.asyncio
+async def test_context_changed_trigger():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerContextChangedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+        FlowActionContextSetConfig(
+            global_context={
+                "res": "triggered_by_context_changed"
+            }
+        )
+    ])
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert processor._global_context["res"] == "triggered_by_context_changed"
 
 @pytest.mark.asyncio
 async def test_flow_conditions_should_execute():

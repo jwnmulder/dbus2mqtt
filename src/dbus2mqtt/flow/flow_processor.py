@@ -13,6 +13,7 @@ from dbus2mqtt.config import (
     FlowActionMqttPublishConfig,
     FlowConfig,
     FlowTriggerConfig,
+    FlowTriggerContextChangedConfig,
     FlowTriggerDbusSignalConfig,
     FlowTriggerObjectAddedConfig,
     FlowTriggerObjectRemovedConfig,
@@ -196,6 +197,10 @@ class FlowProcessor:
             path = msg.trigger_context.get('path') if msg.trigger_context else None
             if path:
                 return f"{config.type}({path})"
+        elif isinstance(config, FlowTriggerContextChangedConfig):
+            scope = msg.trigger_context.get('scope') if msg.trigger_context else None
+            if scope:
+                return f"{config.type}({scope})"
         return config.type
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
