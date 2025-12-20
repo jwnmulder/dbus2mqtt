@@ -22,6 +22,7 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.template.templating import TemplateEngine
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +101,12 @@ class FlowActionContext:
         self.flow_context = flow_context
         self.flow_config = flow_config
 
+        self.flow_conditions: list[str] = []
+        if isinstance(flow_config.conditions, str):
+            self.flow_conditions.append(flow_config.conditions)
+        elif isinstance(flow_config.conditions, list):
+            self.flow_conditions.extend(flow_config.conditions)
+
         self.flow_actions = self._setup_flow_actions()
 
     def _setup_flow_actions(self) -> list[FlowAction]:
@@ -119,21 +126,10 @@ class FlowActionContext:
 
         return res
 
-    async def execute_actions(self, trigger_type: str, trigger_context: dict[str, Any] | None):
-
-        # per flow execution context
-        context = FlowExecutionContext(
-            self.flow_config.name,
-            global_flows_context=self.global_flows_context,
-            flow_context=self.flow_context)
-
-        context.context["trigger_type"] = trigger_type
-
-        if trigger_context:
-            context.context.update(trigger_context)
+    async def execute_actions(self, flow_execution_context: FlowExecutionContext):
 
         for action in self.flow_actions:
-            await action.execute(context)
+            await action.execute(flow_execution_context)
 
 class FlowProcessor:
 
@@ -204,18 +200,59 @@ class FlowProcessor:
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
 
-        trigger_type = flow_trigger_message.flow_trigger_config.type
         trigger_str = self._trigger_config_to_str(flow_trigger_message)
         flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
-
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
-
-        if flow_trigger_message.flow_trigger_config.type != "schedule":
-            logger.info(log_message)
-        else:
-            logger.debug(log_message)
 
         flow_id = flow_trigger_message.flow_config.id
 
         flow = self._flows[flow_id]
-        await flow.execute_actions(trigger_type, trigger_context=flow_trigger_message.trigger_context)
+
+        # Each flow executed gets its own execution context
+        flow_execution_context = self._flow_execution_context(flow, flow_trigger_message)
+
+        # Check if any actions should run based on flow conditions
+        should_execute_actions = self._evaluate_flow_conditions(flow, flow_execution_context, self.app_context.templating)
+
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        if not should_execute_actions:
+            log_message = f"{log_message} - conditions not met, skipping actions"
+
+        if should_execute_actions and flow_trigger_message.flow_trigger_config.type != "schedule":
+            logger.info(log_message)
+        else:
+            logger.debug(log_message)
+
+        if should_execute_actions:
+            await flow.execute_actions(flow_execution_context)
+
+    def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:
+        """Per flow execution context allows for updates during flow execution without affecting other executions.
+
+        Initialized with global and flow context
+        """
+        flow_execution_context = FlowExecutionContext(
+            flow.flow_config.name,
+            global_flows_context=flow.global_flows_context,
+            flow_context=flow.flow_context)
+
+        trigger_type = flow_trigger_message.flow_trigger_config.type
+        flow_execution_context.context["trigger_type"] = trigger_type
+
+        if flow_trigger_message.trigger_context:
+            flow_execution_context.context.update(flow_trigger_message.trigger_context)
+
+        return flow_execution_context
+
+    def _evaluate_flow_conditions(self, flow: FlowActionContext, context: FlowExecutionContext, template_engine: TemplateEngine) -> bool:
+
+        if len(flow.flow_conditions) == 0:
+            return True
+
+        render_context = context.get_aggregated_context()
+
+        for condition in flow.flow_conditions:
+            res = template_engine.render_template(condition, bool, render_context)
+            if not res:
+                return False
+
+        return True

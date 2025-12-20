@@ -28,7 +28,7 @@ flows:
         msg: hello from example flow
 ```
 
-Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the amount of dbus objects subscribed, there is at most one flow instance running.
+Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the number of dbus objects subscribed, there is at most one flow instance running.
 
 ```yaml title="Subscription based flows"
 dbus:
@@ -46,5 +46,26 @@ dbus:
 ```
 
 Some action parameters allow the use of templating. When supported, it is documented for each individual trigger and action. See [templating](../templating/index.md) for further templating details.
+
+## Contional flows
+
+Flow actions can be conditionally executed. The `conditions` parameter accepts either a templated string or list of strings.
+When using a list of templated strings, all expressions must evaluate to `True` for the actions to be executed.
+
+```yaml title="Subscription based flows"
+dbus:
+  subscriptions:
+    - bus_name: org.mpris.MediaPlayer2.*
+      path: /org/mpris/MediaPlayer2
+      flows:
+        - name: Example conditional flow
+          triggers:
+            - type: object_added
+          conditions:
+            - "{{ 'vlc' in bus_name }}"
+          actions:
+            - type: log
+              msg: VLC player registered
+```
 
 Next: [flow actions](flow_actions.md) & [flow triggers](flow_triggers.md)
