@@ -38,7 +38,7 @@ dbus:
       flows:
         - name: publish player state
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: schedule
               interval: {seconds: 5}
             - type: dbus_signal
@@ -77,7 +77,7 @@ dbus:
           # mpris:artUrl can have a file:// or http:// schema
           # Home Assistant is unable to access file:// so we use MQTT for that
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -93,7 +93,7 @@ dbus:
 
         - name: player removed
           triggers:
-            - type: object_removed
+            - type: dbus_object_removed
             # filter: # TODO: Check if this is the last or inactive one #
           actions:
             - type: mqtt_publish
@@ -104,7 +104,7 @@ dbus:
 
         - name: Home Assistant Discovery
           triggers:
-            - type: object_added
+            - type: dbus_object_added
           actions:
             - type: mqtt_publish
               topic: homeassistant/device/mpris-E8EB9686/config

@@ -61,7 +61,6 @@ class FlowTriggerDbusSignalConfig:
     type: Literal["dbus_signal"] = "dbus_signal"
     bus_name: str | None = None
     path: str | None = None
-    # filter: str | None = None
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
@@ -78,14 +77,23 @@ class FlowTriggerBusNameRemovedConfig:
         warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
 
 @dataclass
-class FlowTriggerObjectAddedConfig:
-    type: Literal["object_added"] = "object_added"
-    # filter: str | None = None
+class FlowTriggerDbusObjectAddedConfig:
+    type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
+
+    def __post_init__(self):
+        if self.type != FlowTriggerDbusObjectAddedConfig.type:
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            self.type = FlowTriggerDbusObjectAddedConfig.type
+
 
 @dataclass
-class FlowTriggerObjectRemovedConfig:
-    type: Literal["object_removed"] = "object_removed"
-    # filter: str | None = None
+class FlowTriggerDbusObjectRemovedConfig:
+    type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
+
+    def __post_init__(self):
+        if self.type != FlowTriggerDbusObjectRemovedConfig.type:
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            self.type = FlowTriggerDbusObjectRemovedConfig.type
 
 @dataclass
 class FlowTriggerMqttMessageConfig:
@@ -104,14 +112,14 @@ class FlowTriggerContextChangedConfig:
     scope: Literal["global"] = "global"
 
 FlowTriggerConfig = (
-    FlowTriggerScheduleConfig
-    | FlowTriggerDbusSignalConfig
+    FlowTriggerContextChangedConfig
     | FlowTriggerBusNameAddedConfig
     | FlowTriggerBusNameRemovedConfig
-    | FlowTriggerObjectAddedConfig
-    | FlowTriggerObjectRemovedConfig
+    | FlowTriggerDbusObjectAddedConfig
+    | FlowTriggerDbusObjectRemovedConfig
+    | FlowTriggerDbusSignalConfig
     | FlowTriggerMqttMessageConfig
-    | FlowTriggerContextChangedConfig
+    | FlowTriggerScheduleConfig
 )
 
 @dataclass

@@ -21,7 +21,7 @@ dbus:
       flows:
         - name: "publish adapter state"
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -59,7 +59,7 @@ dbus:
       flows:
         - name: "publish device state"
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -78,7 +78,7 @@ dbus:
                 }}
         - name: "device removed"
           triggers:
-            - type: object_removed
+            - type: dbus_object_removed
           actions:
             - type: mqtt_publish
               topic: dbus2mqtt/bluez/{{ path | replace('/org/bluez/', '') }}

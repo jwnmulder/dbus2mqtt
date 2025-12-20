@@ -21,7 +21,7 @@ dbus:
       flows:
         - name: "publish state at startup and schedule"
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: schedule
               interval: {seconds: 5}
           actions:
