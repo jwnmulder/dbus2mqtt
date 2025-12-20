@@ -145,7 +145,7 @@ FlowActionConfig = (
 class FlowConfig:
     triggers: list[FlowTriggerConfig]
     actions: list[FlowActionConfig]
-    conditions: str | list[str] | None = None
+    conditions: str | list[str] = field(default_factory=list)
     name: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
