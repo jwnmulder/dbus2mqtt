@@ -86,7 +86,7 @@ async def test_mqtt_message_trigger_filter_false():
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
 
 def _mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig) -> FlowProcessor:
-    processor, _ = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": {

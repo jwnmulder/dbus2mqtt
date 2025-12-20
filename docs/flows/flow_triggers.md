@@ -86,6 +86,8 @@ When triggered, the following context parameters are available
 
 Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted
 
+Trigger configuration:
+
 | key | description  |
 |------|-------------|
 | topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
@@ -116,3 +118,23 @@ flows:
 
 !!! note
     If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
+
+## context_changed
+
+```yaml
+- type: context_changed
+```
+
+Triggered when the dbus2mqtt context was updated by a `context_set` action. For now only `global_context` updates result in a `context_changed` trigger.
+
+Trigger configuration:
+
+| key | description  |
+|------|-------------|
+| scope     | `global` |
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| scope        | string | Scope of the context that changed, for now this can only be `global` |
