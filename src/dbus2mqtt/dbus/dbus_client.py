@@ -419,23 +419,47 @@ class DbusClient:
 
         return new_subscribed_interfaces
 
+    def _stop_flow_set_if_needed(self, bus_name: str, path: str|None) -> None:
+        """Stop flow sets for subscription_configs that are no longer in use.
+
+        If path is None, all subscription_configs for the given bus_name are considered.
+        This method should be called before removing any subscriptions for the given bus_name and path.
+        """
+        # Check which flow sets are in scope for the given dbus object
+        subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
+
+        # For each subscription_config, check if there are other subscriptions still active
+        # meaning all dbus objects not matching this functions bus_name and path arguments
+        subscription_config_in_use_count: dict[str, int] = {}
+
+        # Count all active subscriptions for the subscription_configs
+        for subscription_config in subscription_configs:
+            count = subscription_config_in_use_count.get(subscription_config.id, 0)
+            if subscription_config.matches_dbus_object(bus_name, path):
+                subscription_config_in_use_count[subscription_config.id] = count + 1
+
+        for subscription_config in subscription_configs:
+            count = subscription_config_in_use_count.get(subscription_config.id, 0)
+            print(f"subscription_config: {subscription_config.id}, count: {count}")
+            if count <= 1:
+                self.flow_scheduler.stop_flow_set(subscription_config.flows)
+
+
     async def _handle_bus_name_removed(self, bus_name: str):
 
         logger.debug(f"_handle_bus_name_removed: bus_name={bus_name}")
 
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
-
         if bus_name_subscriptions:
+
+            # Stop flow set if needed
+            self._stop_flow_set_if_needed(bus_name, None)
+
+            # Wait for completion of any pending / in-progress triggers
+            await self.event_broker.flow_trigger_queue.async_q.join()
+
+            # Cleanup dbus_fast message handlers and matchrules
             for path, proxy_object in bus_name_subscriptions.path_objects.items():
-
-                # Stop schedule triggers. Only done once per subscription_config
-                # TODO: Dont stop when other bus_names are using the same flowset
-                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
-                for subscription_config in subscription_configs:
-                    self.flow_scheduler.stop_flow_set(subscription_config.flows)
-
-                # Wait for completion of any pending / in-progress triggers
-                await self.event_broker.flow_trigger_queue.async_q.join()
 
                 # clean up all dbus matchrules
                 for interface in proxy_object._interfaces.values():
@@ -451,9 +475,12 @@ class DbusClient:
                     # clean lingering interface messgage handler from bus
                     self.bus.remove_message_handler(proxy_interface._message_handler)
 
+            # Cleanup all dbus2mqtt subscriptions for this bus_name
             del self.subscriptions[bus_name]
 
+            # Fire object_removed triggers for all flows
             for path in bus_name_subscriptions.path_objects.keys():
+                subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
                 for subscription_config in subscription_configs:
 
                     # Trigger flows that have a bus_name_removed trigger configured
@@ -487,16 +514,13 @@ class DbusClient:
 
         logger.debug(f"_handle_interfaces_removed: bus_name={bus_name}, path={path}")
 
-        subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
-
-        # Stop schedule triggers. Only done once per subscription_config and not per path
-        # TODO, only stop if this subscription is not used for any other objects / paths
-        for subscription_config in subscription_configs:
-            self.flow_scheduler.stop_flow_set(subscription_config.flows)
+        # Stop flow set if needed
+        self._stop_flow_set_if_needed(bus_name, path)
 
         # Wait for completion of any pending / in-progress triggers
         await self.event_broker.flow_trigger_queue.async_q.join()
 
+        # Cleanup dbus_fast message handlers and matchrules
         proxy_object = self.get_subscribed_proxy_object(bus_name, path)
         if proxy_object is not None:
 
@@ -517,12 +541,13 @@ class DbusClient:
             # For now that InterfacesRemoved signal means the entire object is removed from D-Bus
             del self.subscriptions[bus_name].path_objects[path]
 
-        # cleanup the entire BusNameSubscriptions if no more objects are subscribed
+        # Cleanup the entire BusNameSubscriptions if no more objects are subscribed
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
         if bus_name_subscriptions and len(bus_name_subscriptions.path_objects) == 0:
             del self.subscriptions[bus_name]
 
         # Trigger flows that have an object_removed trigger configured
+        subscription_configs = self.config.get_subscription_configs(bus_name=bus_name, path=path)
         for subscription_config in subscription_configs:
             await self._trigger_object_removed(subscription_config, bus_name, path)
 

@@ -159,6 +159,14 @@ class SubscriptionConfig:
     flows: list[FlowConfig] = field(default_factory=list)
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
+    def matches_dbus_object(self, bus_name: str, path: str|None = None) -> bool:
+        if fnmatch.fnmatchcase(bus_name, self.bus_name):
+            if not path or path == self.path:
+                return True
+            elif fnmatch.fnmatchcase(path, self.path):
+                return True
+        return False
+
 @dataclass
 class DbusConfig:
     subscriptions: list[SubscriptionConfig]
@@ -174,11 +182,8 @@ class DbusConfig:
     def get_subscription_configs(self, bus_name: str, path: str|None = None) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name):
-                if not path or path == subscription.path:
-                    res.append(subscription)
-                elif fnmatch.fnmatchcase(path, subscription.path):
-                    res.append(subscription)
+            if subscription.matches_dbus_object(bus_name, path):
+                res.append(subscription)
         return res
 
 @dataclass
