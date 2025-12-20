@@ -56,15 +56,15 @@ dbus:
               context:
                 mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
                 mpris_path: /org/mpris/MediaPlayer2
+                available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
                 seeked_position: '{{ args[0] if trigger_type == "dbus_signal" and signal == "Seeked" else None }}'
             - type: context_set
               context:
+                current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
-                current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
-                available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
@@ -82,19 +82,21 @@ dbus:
                     | combine({ 'Metadata': { 'xesam:url': metadata_xesam_url } }, recursive=True)
                 }}
 
+        # mpris:artUrl can have a file:// or http:// schema
+        # Home Assistant is unable to access file:// so we use MQTT for that
         - name: publish local art image
-          # mpris:artUrl can have a file:// or http:// schema
-          # Home Assistant is unable to access file:// so we use MQTT for that
           triggers:
             - type: object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
             - type: context_changed
+          conditions:
+            - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
               context:
-                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) | default(None) }}'
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
                 mpris_path: /org/mpris/MediaPlayer2
             - type: context_set
               context:
@@ -105,6 +107,7 @@ dbus:
               payload_template: |
                 {{ artUrl if artUrl and artUrl.startswith('file://') else None }}
 
+        # When the last MPRIS player is gone, publish off state and reset image
         - name: player removed
           triggers:
             - type: object_removed
@@ -116,6 +119,10 @@ dbus:
               payload_type: json
               payload_template:
                 PlaybackStatus: "Off"
+            - type: mqtt_publish
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+              payload_type: binary
+              payload_template: "{{ None }}"
 
         - name: Set current player
           triggers:

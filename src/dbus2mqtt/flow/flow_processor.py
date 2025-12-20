@@ -208,28 +208,33 @@ class FlowProcessor:
         trigger_str = self._trigger_config_to_str(flow_trigger_message)
         flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
-
-        if flow_trigger_message.flow_trigger_config.type != "schedule":
-            logger.info(log_message)
-        else:
-            logger.debug(log_message)
-
         flow_id = flow_trigger_message.flow_config.id
 
         flow = self._flows[flow_id]
 
-        # each flow executed via a trigger gets its own execution context
+        # Each flow executed gets its own execution context
         flow_execution_context = self._flow_execution_context(flow, flow_trigger_message)
 
         # Check if any actions should run based on flow conditions
-        res = await self._evaluate_flow_conditions(flow, flow_execution_context, self.app_context.templating)
-        if res:
+        should_execute_actions = await self._evaluate_flow_conditions(flow, flow_execution_context, self.app_context.templating)
+
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        if not should_execute_actions:
+            log_message = f"{log_message} - conditions not met, skipping actions"
+
+        if should_execute_actions and flow_trigger_message.flow_trigger_config.type != "schedule":
+            logger.info(log_message)
+        else:
+            logger.debug(log_message)
+
+        if should_execute_actions:
             await flow.execute_actions(flow_execution_context)
 
     def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:
+        """Per flow execution context allows for updates during flow execution without affecting other executions.
 
-        # per flow execution context
+        Initialized with global and flow context
+        """
         flow_execution_context = FlowExecutionContext(
             flow.flow_config.name,
             global_flows_context=flow.global_flows_context,
@@ -248,14 +253,11 @@ class FlowProcessor:
         if len(flow.flow_conditions) == 0:
             return True
 
-        print(f"Flow conditions: {flow.flow_conditions}")
-
         render_context = context.get_aggregated_context()
 
         for condition in flow.flow_conditions:
             res = template_engine.render_template(condition, bool, render_context)
             if not res:
-                logger.debug(f"Flow '{flow.flow_config.name}' condition '{condition}' evaluated to False, skipping actions")
                 return False
 
         return True
