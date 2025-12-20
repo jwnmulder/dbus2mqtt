@@ -125,7 +125,7 @@ flows:
 - type: context_changed
 ```
 
-Triggered when the context was updated by a `context_set` action. For now only `global_context` updates result in a `context_changed` trigger.
+Triggered when the dbus2mqtt context was updated by a `context_set` action. For now only `global_context` updates result in a `context_changed` trigger.
 
 Trigger configuration:
 
