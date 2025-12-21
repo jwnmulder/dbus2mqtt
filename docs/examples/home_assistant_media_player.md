@@ -42,6 +42,7 @@ The following MPRIS players are known to work with Home Assistant.
 | `VLC`        | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    |  |
 | `Chromium`   | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✔️ | Images not working when Chromium is running as snap |
 | `Kodi`       | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | Requires Kodi plugin [MediaPlayerRemoteInterface](https://github.com/wastis/MediaPlayerRemoteInterface) |
+| `Spotify`    | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |
 
 !!! note
     More players that support MPRIS (but have not been tested) can be found here: <https://wiki.archlinux.org/title/MPRIS>
