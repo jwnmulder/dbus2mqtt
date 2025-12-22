@@ -77,3 +77,17 @@ def test_jsonargparse_jinja_expressions():
     action = config.flows[2].actions[0]
     assert action.type == "log"
     assert action.msg == """jinja value {{ "testvalue" }} in the middle of a string"""
+
+def test_backwards_compat_check_264():
+
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(f"{FILE_DIR}/fixtures/backwards_compat_check_264.yaml")
+    config: Config = cast(Config, parser.instantiate_classes(cfg))
+
+    assert config is not None
+    assert config.flows[0].triggers[0].type == "dbus_object_added"
+    assert config.flows[0].triggers[1].type == "dbus_object_removed"

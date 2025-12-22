@@ -109,7 +109,7 @@ Example, setting `Volume` to 1.0 for Firefox MPRIS player only
 
 ### Command responses
 
-If set, D-Bus responses to commands will be published the configured `mqtt_response_topic` MQTT topic.
+If set, D-Bus responses to commands will be published on the configured `mqtt_response_topic` MQTT topic.
 
 !!! note
     `dbus2mqtt` publishes one response per targeted dbus object.

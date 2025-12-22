@@ -7,9 +7,9 @@ from dbus2mqtt.config import (
     FlowTriggerBusNameAddedConfig,
     FlowTriggerBusNameRemovedConfig,
     FlowTriggerContextChangedConfig,
+    FlowTriggerDbusObjectAddedConfig,
+    FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
-    FlowTriggerObjectAddedConfig,
-    FlowTriggerObjectRemovedConfig,
     FlowTriggerScheduleConfig,
 )
 from dbus2mqtt.flow.flow_processor import FlowTriggerMessage
@@ -81,7 +81,7 @@ async def test_object_added_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectAddedConfig()
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
     processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
@@ -101,7 +101,7 @@ async def test_object_removed_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectRemovedConfig()
+    trigger_config = FlowTriggerDbusObjectRemovedConfig()
     processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
@@ -174,7 +174,7 @@ async def test_flow_conditions_should_execute():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectAddedConfig()
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
     processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
         actions=[
             FlowActionContextSetConfig(
@@ -197,7 +197,7 @@ async def test_flow_conditions_should_not_execute():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectAddedConfig()
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
     processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
         actions=[
             FlowActionContextSetConfig(

@@ -38,7 +38,7 @@ dbus:
       flows:
         - name: publish player state
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: schedule
               interval: {seconds: 5}
             - type: dbus_signal
@@ -86,7 +86,7 @@ dbus:
         # Home Assistant is unable to access file:// so we use MQTT for that
         - name: publish local art image
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: dbus_signal
               interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
@@ -110,7 +110,7 @@ dbus:
         # When the last MPRIS player is gone, publish off state and reset image
         - name: player removed
           triggers:
-            - type: object_removed
+            - type: dbus_object_removed
           conditions:
             - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length == 0 }}"
           actions:
@@ -149,7 +149,7 @@ dbus:
 
         - name: Home Assistant Discovery
           triggers:
-            - type: object_added
+            - type: dbus_object_added
           actions:
             - type: mqtt_publish
               topic: homeassistant/device/mpris-E8EB9686/config

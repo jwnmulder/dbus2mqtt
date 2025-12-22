@@ -60,7 +60,7 @@ dbus:
       flows:
         - name: Example conditional flow
           triggers:
-            - type: object_added
+            - type: dbus_object_added
           conditions:
             - "{{ 'vlc' in bus_name }}"
           actions:
