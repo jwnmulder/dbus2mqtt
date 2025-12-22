@@ -129,7 +129,7 @@ dbus:
             - type: mqtt_message
               topic: dbus2mqtt/org.mpris.MediaPlayer2/custom_command
               filter: "{{ payload.get('action') == 'set_current_player' }}"
-            - type: object_removed
+            - type: dbus_object_removed
             # TODO: When second player is removed the scheduler stops triggering flows. Needs to be fixed
           actions:
             - type: context_set
