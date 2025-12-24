@@ -98,6 +98,7 @@ class FlowTriggerDbusObjectRemovedConfig:
 class FlowTriggerMqttMessageConfig:
     topic: str
     type: Literal["mqtt_message"] = "mqtt_message"
+    content_type: Literal["json", "text"] = "json"
     filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:

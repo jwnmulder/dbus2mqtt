@@ -1,3 +1,7 @@
+mqtt:
+  subscription_topics:
+    - dbus2mqtt/#
+    - homeassistant/status
 dbus:
   subscriptions:
 
@@ -65,6 +69,7 @@ dbus:
                 current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                updated_at: "{{ now().isoformat() }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
@@ -75,7 +80,8 @@ dbus:
                     {
                       'current_bus_name': mpris_bus_name,
                       'current_player': current_player,
-                      'available_players': available_players
+                      'available_players': available_players,
+                      'updated_at': updated_at
                     }
                     | combine(player_properties)
                     | combine({ 'Position': seeked_position } if seeked_position else {})
@@ -149,6 +155,10 @@ dbus:
         - name: Home Assistant Discovery
           triggers:
             - type: dbus_object_added
+            - type: mqtt_message
+              topic: homeassistant/status
+              content_type: text
+              filter: "{{ payload == 'online' }}"
           actions:
             - type: mqtt_publish
               topic: homeassistant/device/mpris-E8EB9686/config
@@ -167,7 +177,7 @@ dbus:
                   player_state:
                     platform: sensor
                     name: State
-                    unique_id: e8eb9686-f947-46e1-80d4-fc1e812e39a2
+                    unique_id: 94b97e45-251a-4741-b479-6b48576f2f53
                     state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     value_template: >-
                       {% raw %}
@@ -199,19 +209,54 @@ dbus:
                       {% endif %}
 
                       {{
-                        value_json | combine({
-                          "MediaDuration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
-                          "MediaPosition": ((value_json.get('Position') or 0) / 1000000) | int,
-                          "MediaTitle": title,
-                          "MediaAlbum": metadata.get('xesam:album', ''),
-                          "MediaArtists": artists | join(', '),
-                          "MediaImageUrl": media_image_url,
-                          "VolumeMuted": value_json.get('Volume') == 0
-                        }) | to_json
+                        {
+                          "media_content_type": "music",
+                          "media_duration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
+                          "media_position": ((value_json.get('Position') or 0) / 1000000) | int,
+                          "media_position_updated_at": value_json.get('updated_at'),
+                          "media_title": title,
+                          "media_album_name": metadata.get('xesam:album', ''),
+                          "media_artist": artists | join(', '),
+                          "media_image_url": media_image_url,
+                          "volume_level": value_json.get('Volume'),
+                          "is_volume_muted": value_json.get('Volume') == 0,
+                          "source_list": value_json.get('available_players'),
+                          "source": value_json.get('current_player'),
+                          "mqtt_data": value_json
+                        } | to_json
                       }}
                       {% endraw %}
-                  image:
+                  image_mqtt:
                     platform: image
-                    name: Image
+                    name: Image MQTT
                     unique_id: 22c9206e-4af3-47d8-ac01-c23d62e43177
                     image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+                    availability_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+                  image_url:
+                    platform: sensor
+                    name: Image Url
+                    unique_id: 6e06850b-3209-443c-bec7-2c47021ba607
+                    state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+                    value_template: >-
+                      {% raw %}
+                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% if media_image_url.startswith('file://') %}
+                        mqtt
+                      {% elif media_image_url.startswith('https://') or media_image_url.startswith('http://') %}
+                        remote
+                      {% else %}
+                        {{ None }}
+                      {% endif %}
+                      {%  endraw %}
+                    json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+                    json_attributes_template: >
+                      {% raw %}
+                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% if media_image_url.startswith('file://') %}
+                      {%   set media_image_url = state_attr('image.mpris_media_player_image_mqtt', 'entity_picture') %}
+                      {% endif %}
+                        {{ {
+                          "media_image_url": media_image_url
+                        } | to_json }}
+                      {% endraw %}
+

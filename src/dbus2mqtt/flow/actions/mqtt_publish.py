@@ -39,7 +39,7 @@ class MqttPublishAction(FlowAction):
             if isinstance(payload, str) and self.config.payload_type == "binary":
                 uri = payload
                 payload = urlparse(uri)
-                if not payload.scheme == "file":
+                if payload.scheme not in ["file", "http", "https"]:
                     raise ValueError(f"Expected readable file, got: '{uri}'")
 
 
