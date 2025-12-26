@@ -259,4 +259,3 @@ dbus:
                           "media_image_url": media_image_url
                         } | to_json }}
                       {% endraw %}
-
