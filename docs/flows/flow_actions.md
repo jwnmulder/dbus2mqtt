@@ -38,5 +38,5 @@
 | key              | type             | description  |
 |------------------|------------------|--------------|
 | topic            | string | mqtt topic the messaage is published to |
-| payload_type     | string | Message format for MQTT: `json` (default), `yaml`, or `text` |
+| payload_type     | string | Message format for MQTT: `json` (default), `yaml`, `text` or `binary`. When set to `binary`, payload_template is expected to return a url formatted string where scheme is either `file`,`http` or `https` |
 | payload_template | string, dict | value can be a `string`, a `dict of strings`, a `templated string` or a nested `dict of templated strings` |
