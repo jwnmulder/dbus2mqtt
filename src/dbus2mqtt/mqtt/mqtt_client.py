@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import logging
@@ -160,8 +159,6 @@ class MqttClient:
             if client_id and client_id.startswith(self.client_id_prefix):
                 return
 
-        # For now assume content_type is either application/json or application/text
-        # content_type = getattr(msg.properties, "ContentType", None) if msg.properties else None
         payload = msg.payload.decode()
 
         # Skip retained messages

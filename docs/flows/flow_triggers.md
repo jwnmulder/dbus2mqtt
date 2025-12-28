@@ -88,10 +88,11 @@ Listens for MQTT messages on the configured topic. The message payload is expect
 
 Trigger configuration:
 
-| key | description  |
-|------|-------------|
-| topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
-| filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
+| key          | description  |
+|--------------|--------------|
+| topic        | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
+| content_type | One of `json` or `text`, defaults to `json` |
+| filter       | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 When triggered, the following context parameters are available
 
@@ -99,7 +100,7 @@ When triggered, the following context parameters are available
 |--------------|--------|------------------|
 | trigger_type | string | 'mqtt_message'   |
 | topic        | string | mqtt topic |
-| payload      | any    | json deserialized MQTT message payload  |
+| payload      | any    | text or json deserialized MQTT message payload |
 
 Example flow
 
