@@ -51,8 +51,6 @@ class DbusClient:
         self.flow_scheduler = flow_scheduler
         self.subscriptions: dict[str, BusNameSubscriptions] = {}
 
-        self.reconnected = False
-
         self._dbus_signal_queue = janus.Queue[DbusSignalWithState]()
         self._dbus_object_lifecycle_signal_queue = janus.Queue[dbus_message.Message]()
 
@@ -91,8 +89,12 @@ class DbusClient:
             connected_bus_names = await self._dbus_interface_call(dbus_interface, "call_list_names")
 
             new_subscribed_interfaces: list[SubscribedInterface] = []
+
+            # Triggering flows is only done at startup and must not
+            # be done after a reconnect
+            trigger_flows = not reconnect
             for bus_name in connected_bus_names:
-                new_subscribed_interfaces.extend(await self._handle_bus_name_added(bus_name))
+                new_subscribed_interfaces.extend(await self._handle_bus_name_added(bus_name, trigger_flows))
 
             if not reconnect:
                 logger.info(f"subscriptions on startup: {list(set([si.bus_name for si in new_subscribed_interfaces]))}")
@@ -105,7 +107,9 @@ class DbusClient:
             res = await method_fn(*call_args)
             return res
         except Exception as e:
-            logger.debug(f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}", exc_info=True)
+
+            log_level = logging.WARNING if not self.bus.connected else logging.DEBUG
+            logger.log(log_level, f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}", exc_info=True)
 
             if not self.bus.connected:
                 logger.fatal(f"Got disconnected from dbus due to previous error, dbus.connected={self.bus.connected}. Reconnecting now")
@@ -419,7 +423,7 @@ class DbusClient:
 
         return new_subscriptions
 
-    async def _handle_bus_name_added(self, bus_name: str) -> list[SubscribedInterface]:
+    async def _handle_bus_name_added(self, bus_name: str, trigger_flows: bool = True) -> list[SubscribedInterface]:
 
         logger.debug(f"_handle_bus_name_added: bus_name={bus_name}")
 
@@ -454,7 +458,7 @@ class DbusClient:
 
         # start all flows for the new subscriptions
         if len(new_subscribed_interfaces) > 0:
-            await self._start_subscription_flows(bus_name, new_subscribed_interfaces)
+            await self._start_subscription_flows(bus_name, new_subscribed_interfaces, trigger_flows)
 
         return new_subscribed_interfaces
 
@@ -592,7 +596,7 @@ class DbusClient:
         for subscription_config in subscription_configs:
             await self._trigger_object_removed(subscription_config, bus_name, path)
 
-    async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface]):
+    async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface], trigger_flows: bool = True):
         """Start all flows for the new subscriptions.
 
         For each matching bus_name-path subscription_config, the following is done:
@@ -656,15 +660,15 @@ class DbusClient:
 
                         # Trigger flows that have a bus_name_added trigger configured
 
-                        # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
-                        # leaving it now for backwards compatibility
-                        if not self.reconnected:
+                        if trigger_flows:
+                            # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
+                            # leaving it now for backwards compatibility
                             await self._trigger_bus_name_added(subscription_config, bus_name, object_path)
 
                         processed_new_subscriptions.add(subscription_config.id)
 
-                    # Trigger flows that have a object_added trigger configured
-                    if not self.reconnected:
+                    if trigger_flows:
+                        # Trigger flows that have a object_added trigger configured
                         await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
 
     async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
@@ -697,7 +701,6 @@ class DbusClient:
         await self._trigger_flows(subscription_config, "dbus_object_added", {
             "bus_name": bus_name,
             "path": object_path
-            # "interfaces": object_interfaces
         })
 
     async def _trigger_object_removed(self, subscription_config: SubscriptionConfig, bus_name: str, path: str):
