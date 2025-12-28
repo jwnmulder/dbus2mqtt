@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import logging
@@ -6,7 +5,7 @@ import random
 import string
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import ParseResult
 from urllib.request import urlopen
 
@@ -52,6 +51,8 @@ class MqttClient:
         self.loop = loop
         self.connected_event = asyncio.Event()
 
+        self.topic_content_types: dict[str, Literal["json", "text"]] = self._init_topic_content_types(app_context)
+
     def connect(self):
 
         self.client.connect_async(
@@ -59,6 +60,30 @@ class MqttClient:
             port=self.config.port,
             clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY
         )
+
+    def _init_topic_content_types(self, app_context: AppContext) -> dict[str, Literal["json", "text"]]:
+
+        topic_content_types: dict[str, Literal["json", "text"]] = {}
+
+        # First we check the expected content types from all configured mqtt_message triggers
+        all_flows: list[FlowConfig] = []
+        all_flows.extend(self.app_context.config.flows)
+        for subscription in self.app_context.config.dbus.subscriptions:
+            all_flows.extend(subscription.flows)
+
+        for flow in all_flows:
+            for trigger in flow.triggers:
+                if trigger.type == FlowTriggerMqttMessageConfig.type:
+                    topic_content_types[trigger.topic] = trigger.content_type
+
+        # Next we check all command topics, these are always json
+        for subscription in app_context.config.dbus.subscriptions:
+            for interface in subscription.interfaces:
+                topic = interface.render_mqtt_command_topic(app_context.templating, {})
+                if topic:
+                    topic_content_types[topic] = "json"
+
+        return topic_content_types
 
     async def mqtt_publish_queue_processor_task(self):
 
@@ -134,23 +159,32 @@ class MqttClient:
             if client_id and client_id.startswith(self.client_id_prefix):
                 return
 
-        # Skip retained messages
         payload = msg.payload.decode()
+
+        # Skip retained messages
         if msg.retain:
             logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")
             return
 
-        try:
-            json_payload = json.loads(payload) if payload else {}
-            logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={json.dumps(json_payload)}")
+        json_payload: Any = None
+        log_payload = payload
+        if self.topic_content_types.get(msg.topic) == "json":
+            try:
+                json_payload = json.loads(payload) if payload else {}
+                log_payload = json.dumps(json_payload)
+            except json.JSONDecodeError as e:
+                logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, properties={msg.properties}, error={e}")
+                return
 
-            # publish to flow trigger queue for any configured mqtt_message triggers
-            flow_trigger_messages = self._trigger_flows(msg.topic, {
-                "topic": msg.topic,
-                "payload": json_payload
-            })
+        logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={log_payload}")
 
-            # publish on a queue that is being processed by dbus_client
+        # Publish to flow trigger queue for any configured mqtt_message triggers
+        flow_trigger_messages = self._trigger_flows(msg.topic, payload, json_payload)
+
+        # Publish on a queue that is being processed by dbus_client
+        # Messages on the mqtt_receive_queue are all expected to have json payloads
+        # as these messages are picked up by dbus_client for command handling
+        if json_payload:
             self.event_broker.on_mqtt_receive(
                 MqttMessage(msg.topic, json_payload),
                 MqttReceiveHints(
@@ -158,10 +192,7 @@ class MqttClient:
                 )
             )
 
-        except json.JSONDecodeError as e:
-            logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, error={e}")
-
-    def _trigger_flows(self, topic: str, trigger_context: dict) -> list[FlowTriggerMessage]:
+    def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> list[FlowTriggerMessage]:
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic and configured filters."""
         flow_trigger_messages = []
 
@@ -173,6 +204,17 @@ class MqttClient:
         for flow in all_flows:
             for trigger in flow.triggers:
                 if trigger.type == FlowTriggerMqttMessageConfig.type:
+
+                    # Use the correct payload type which is configured for the trigger
+                    trigger_context_payload: Any = payload
+                    if trigger.content_type == "json":
+                        trigger_context_payload = json_payload
+
+                    trigger_context: dict[str, Any] = {
+                        "topic": topic,
+                        "payload": trigger_context_payload,
+                    }
+
                     matches_filter = trigger.topic == topic
                     if matches_filter and trigger.filter is not None:
                         matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
