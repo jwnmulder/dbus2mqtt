@@ -584,7 +584,7 @@ class DbusClient:
         #     for bus_name in new_subscribed_bus_names
         # }
 
-        logger.debug(f"_start_subscription_flows: ew_subscriptions: {list(bus_name_object_paths.keys())}")
+        logger.debug(f"_start_subscription_flows: new_subscriptions: {list(bus_name_object_paths.keys())}")
         logger.debug(f"_start_subscription_flows: new_bus_name_object_paths: {bus_name_object_paths}")
 
         # setup and process triggers for each flow in each subscription
