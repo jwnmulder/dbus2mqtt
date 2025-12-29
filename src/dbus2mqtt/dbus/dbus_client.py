@@ -50,14 +50,14 @@ def _init_bus(app_context: AppContext):
 
 class DbusClient:
 
-    def __init__(self, app_context: AppContext, flow_scheduler: FlowScheduler):
+    def __init__(self, app_context: AppContext, flow_scheduler: FlowScheduler, bus: MessageBus | None = None):
         self.app_context = app_context
         self.config = app_context.config.dbus
         self.event_broker = app_context.event_broker
         self.templating = app_context.templating
         self.flow_scheduler = flow_scheduler
 
-        self._bus: MessageBus = _init_bus(app_context)
+        self._bus: MessageBus = bus or _init_bus(app_context)
         self._dbus_signal_queue = janus.Queue[DbusSignalWithState]()
         self._dbus_object_lifecycle_signal_queue = janus.Queue[dbus_message.Message]()
         self._subscriptions: dict[str, BusNameSubscriptions] = {}
@@ -498,7 +498,7 @@ class DbusClient:
 
         return new_subscribed_interfaces
 
-    def _stop_flow_set_if_needed(self, bus_name: str, path: str|None) -> None:
+    def _stop_flow_set_if_needed(self, bus_name: str, path: str | None) -> None:
         """Stop flow sets for subscription_configs that are no longer in use.
 
         If path is None, all subscription_configs for the given bus_name are considered.
