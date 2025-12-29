@@ -187,7 +187,7 @@ async def test_dbus_signal_trigger():
     dbus_client = mocked_dbus_client(app_context)
 
     bus_name = "test.bus_name.testapp"
-    dbus_client.subscriptions[bus_name] = BusNameSubscriptions(bus_name, ":1.1")
+    dbus_client._subscriptions[bus_name] = BusNameSubscriptions(bus_name, ":1.1")
 
     signal = DbusSignalWithState(
         bus_name=bus_name,

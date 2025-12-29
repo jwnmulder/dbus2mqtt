@@ -38,9 +38,7 @@ class DbusContext:
             ```
         """
         res = []
-
-        self.dbus_client.subscriptions
-        for bus_name in self.dbus_client.subscriptions.keys():
+        for bus_name in self.dbus_client.get_subscribed_bus_names():
             if fnmatch.fnmatchcase(bus_name, bus_name_pattern):
                 res.append(bus_name)
 

@@ -62,10 +62,12 @@ def mocked_dbus_client(app_context: AppContext):
 
     with patch("socket.socket", autospec=True):
 
-        bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
         flow_scheduler = FlowScheduler(app_context)
 
-        dbus_client = DbusClient(app_context, bus, flow_scheduler)
+        bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
+        bus.unique_name = "FAKE-CONNECTION-NAME"
+
+        dbus_client = DbusClient(app_context, flow_scheduler, bus)
         return dbus_client
 
 def mocked_mqtt_client(app_context: AppContext):

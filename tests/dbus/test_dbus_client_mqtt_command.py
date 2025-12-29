@@ -230,12 +230,12 @@ def _mocked_dbus_client(app_context: AppContext) -> tuple[DbusClient, MagicMock]
     index = 1
     for bus_name, path in dbus_objects:
 
-        dbus_client.subscriptions[bus_name] = BusNameSubscriptions(bus_name, f":1:{index}")
+        dbus_client._subscriptions[bus_name] = BusNameSubscriptions(bus_name, f":1:{index}")
 
         mocked_proxy_object = MagicMock()
         mocked_proxy_object.get_interface.return_value = mocked_proxy_interface
 
-        dbus_client.subscriptions[bus_name].path_objects[path] = mocked_proxy_object
+        dbus_client._subscriptions[bus_name].path_objects[path] = mocked_proxy_object
 
         index += 1
 
