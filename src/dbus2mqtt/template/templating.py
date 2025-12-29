@@ -16,7 +16,7 @@ from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
 TemplateResultType = TypeVar('TemplateResultType')
 
-def now(tz: tzinfo|None = None) -> datetime:
+def now(tz: tzinfo | None = None) -> datetime:
     """Returns new datetime object representing current time.
 
     Args:
