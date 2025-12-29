@@ -6,10 +6,7 @@ import warnings
 from typing import cast
 
 import colorlog
-import dbus_fast.aio as dbus_aio
 import dotenv
-
-from dbus_fast import BusType
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config
@@ -26,10 +23,7 @@ logger = logging.getLogger(__name__)
 
 async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowScheduler):
 
-    bus_type = BusType.SYSTEM if app_context.config.dbus.bus_type == "SYSTEM" else BusType.SESSION
-    bus = dbus_aio.message_bus.MessageBus(bus_type=bus_type)
-
-    dbus_client = DbusClient(app_context, bus, flow_scheduler)
+    dbus_client = DbusClient(app_context, flow_scheduler)
     app_context.templating.add_functions(jinja_custom_dbus_functions(dbus_client))
 
     await dbus_client.connect()
