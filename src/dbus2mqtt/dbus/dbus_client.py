@@ -1,3 +1,4 @@
+import asyncio
 import fnmatch
 import json
 import logging
@@ -61,16 +62,45 @@ class DbusClient:
         self._dbus_object_lifecycle_signal_queue = janus.Queue[dbus_message.Message]()
         self._subscriptions: dict[str, BusNameSubscriptions] = {}
 
+        self._bus_init_lock = asyncio.Lock()
+
         self._name_owner_match_rule = "sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',path='/org/freedesktop/DBus',member='NameOwnerChanged'"
         self._interfaces_added_match_rule = "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesAdded'"
         self._interfaces_removed_match_rule = "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
 
-    async def reconnect(self):
+    async def _reconnect(self):
         """Initializes a new MessageBus, clears all subscriptions and re-connects to DBus."""
-        self._bus = _init_bus(self.app_context)
-        self._subscriptions = {}
+        async with self._bus_init_lock:
+            self._bus = _init_bus(self.app_context)
+            self._subscriptions = {}
+            await self.connect(reconnect=True)
 
-        await self.connect(reconnect=True)
+    async def dbus_connection_monitor(self):
+
+        assert self._bus.connected
+
+        reconnect_counter = 0
+
+        while True:
+            disconnect_err = "DBus disconnected"
+            try:
+                await self._bus.wait_for_disconnect()
+            except Exception as e:
+                disconnect_err = f"DBus disconnected, connection terminated unexpectedly: {type(e)}"
+
+            logger.warning(f"wait_for_disconnect: {disconnect_err}, reconnecting...")
+
+            # Calculate reconnect delay
+            reconnect_counter += 1
+            delay = max(1, min(reconnect_counter * 5, 60))
+            try:
+                await self._reconnect()
+                delay = 0
+                reconnect_counter = 0
+            except Exception as e:
+                logger.warning(f"Error reconnecting due to {e}, sleeping {delay} seconds", exc_info=True)
+
+            await asyncio.sleep(delay)
 
     async def connect(self, reconnect: bool = False):
         """Authententicates and connects to DBus.
@@ -86,29 +116,30 @@ class DbusClient:
         await self._bus.connect()
 
         if self._bus.connected:
-            if not reconnect:
-                logger.info(f"Connected to {self._bus._bus_address}")
-            else:
-                logger.info(f"Re-connected to {self._bus._bus_address}")
+            logger.info(f"Connected to {self._bus._bus_address} (reconnected={reconnect})")
         else:
             logger.warning(f"Failed connecting to {self._bus._bus_address}")
             return
 
         # Setup signal handler and match rules
-        self._bus.add_message_handler(self.object_lifecycle_signal_handler)
-        await self._add_match_rule(self._name_owner_match_rule)
-        await self._add_match_rule(self._interfaces_added_match_rule)
-        await self._add_match_rule(self._interfaces_removed_match_rule)
+        try:
+            self._bus.add_message_handler(self.object_lifecycle_signal_handler)
+            await self._add_match_rule(self._name_owner_match_rule)
+            await self._add_match_rule(self._interfaces_added_match_rule)
+            await self._add_match_rule(self._interfaces_removed_match_rule)
+        except Exception as e:
+            # Disconnect if setup of listeners didn't succeed
+            self._bus.disconnect()
+            raise e
 
         await self._subscribe_on_connect(reconnect)
 
     async def _subscribe_on_connect(self, reconnect: bool):
-
+        """Subscribe to existing registered bus_names that are matching any of the configured subscriptions."""
         introspection = await self._bus.introspect('org.freedesktop.DBus', '/org/freedesktop/DBus')
         obj = self._bus.get_proxy_object('org.freedesktop.DBus', '/org/freedesktop/DBus', introspection)
         dbus_interface = obj.get_interface('org.freedesktop.DBus')
 
-        # subscribe to existing registered bus_names we are interested in
         connected_bus_names = await self._dbus_interface_call(dbus_interface, "call_list_names")
 
         new_subscribed_interfaces: list[SubscribedInterface] = []
@@ -124,19 +155,14 @@ class DbusClient:
 
     async def _dbus_interface_call(self, interface: dbus_aio.proxy_object.ProxyInterface, call_method: str, *call_args) -> Any:
 
+        if not self._bus.connected:
+            raise RuntimeError(f"Unable to invoke dbus object, not connected to dbus, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}")
+
         try:
             method_fn = interface.__getattribute__(call_method)
             res = await method_fn(*call_args)
             return res
         except Exception as e:
-
-            log_level = logging.WARNING if not self._bus.connected else logging.DEBUG
-            logger.log(log_level, f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}", exc_info=True)
-
-            if not self._bus.connected:
-                logger.fatal(f"Got disconnected from dbus due to previous error, dbus.connected={self._bus.connected}. Reconnecting now")
-                await self.reconnect()
-
             raise e
 
     async def _add_match_rule(self, match_rule: str):
