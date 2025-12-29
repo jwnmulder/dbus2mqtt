@@ -64,9 +64,10 @@ def mocked_dbus_client(app_context: AppContext):
 
         flow_scheduler = FlowScheduler(app_context)
 
-        dbus_client = DbusClient(app_context, flow_scheduler)
-        dbus_client._bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
-        dbus_client._bus.unique_name = "FAKE-CONNECTION-NAME"
+        bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
+        bus.unique_name = "FAKE-CONNECTION-NAME"
+
+        dbus_client = DbusClient(app_context, flow_scheduler, bus)
         return dbus_client
 
 def mocked_mqtt_client(app_context: AppContext):
