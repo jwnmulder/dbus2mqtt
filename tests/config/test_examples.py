@@ -30,3 +30,25 @@ def test_linux_desktop_example():
     config = parser.instantiate_classes(cfg)
 
     assert config is not None
+
+def test_bluez_example():
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(f"{FILE_DIR}/../../docs/examples/bluez.yaml")
+    config = parser.instantiate_classes(cfg)
+
+    assert config is not None
+
+def test_connman_example():
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(f"{FILE_DIR}/../../docs/examples/connman-config.yaml")
+    config = parser.instantiate_classes(cfg)
+
+    assert config is not None
