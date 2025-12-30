@@ -3,10 +3,12 @@ import logging
 import sys
 import warnings
 
-from typing import cast
+from dataclasses import fields
 
 import colorlog
 import dotenv
+
+from jsonargparse import Namespace
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config
@@ -126,7 +128,8 @@ def main():
 
     setup_logging(cfg.verbose)
 
-    config: Config = cast(Config, parser.instantiate_classes(cfg))
+    cfg = parser.instantiate_classes(cfg)
+    config = ns_to_cls(Config, cfg)
 
     logger.debug(f"config: {config}")
 
@@ -138,8 +141,10 @@ def main():
 class NamePartsFilter(logging.Filter):
     def filter(self, record):
         record.name_last = record.name.rsplit('.', 1)[-1]
-        # record.name_first = record.name.split('.', 1)[0]
-        # record.name_short = record.name
-        # if record.name.startswith("dbus2mqtt"):
-        #     record.name_short = record.name.split('.', 1)[-1]
         return True
+
+def ns_to_cls(cls, ns: Namespace) :
+    ns_dict = vars(ns)
+    allowed_keys = {f.name for f in fields(cls)}
+    filtered = {k: v for k, v in ns_dict.items() if k in allowed_keys}
+    return cls(**filtered)

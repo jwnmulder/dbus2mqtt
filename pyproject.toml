@@ -67,6 +67,7 @@ dev = [
     "taskipy>=1.14.1",
     "pre-commit>=4.2.0",
     "pip>=25.0.1",
+    "pytest-cov>=7.0.0",
 ]
 
 [project.urls]
@@ -76,6 +77,11 @@ Issues = "https://github.com/jwnmulder/dbus2mqtt/issues"
 
 [project.scripts]
 dbus2mqtt = "dbus2mqtt.main:main"
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+omit = ["tests/*"]
 
 [tool.deptry.per_rule_ignores]
 DEP003 = ["dbus2mqtt"]
