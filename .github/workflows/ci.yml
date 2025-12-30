@@ -35,7 +35,6 @@ jobs:
         run: uv run pytest
 
   coverage:
-    name: Test coverage
     runs-on: ubuntu-latest
     permissions:
       # Gives the action the necessary permissions for publishing new
