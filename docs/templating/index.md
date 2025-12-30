@@ -1,14 +1,48 @@
 # Templating
 
-**dbus2mqtt** leverages Jinja to allow formatting MQTT messages, D-Bus responses or advanced configuration use-cases. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/).
-
-Besides the filters and functions Jinja provides out of the box, the following extensions are available:
-
-* [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/)
-
-More documentation to be added, for now see the [Mediaplayer integration with Home Assistant](../examples/home_assistant_media_player.md) example for inspiration.
+**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/).
 
 Templating is used in these areas of dbus2mqtt:
 
 * [subscriptions](../subscriptions.md)
 * [flow actions](../flows/flow_actions.md)
+
+Besides the filters and functions that Jinja provides out of the box, additional extensions are available.
+
+All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/) are included as well as the following global functions, variables and filters:
+
+| Name                | Type      | Description                                                                 |
+|---------------------|-----------|-----------------------------------------------------------------------------|
+| `dbus2mqtt.version` | string    | The current version of the `dbus2mqtt` package.                             |
+| `now`               | function  | Returns the current date and time as a `datetime` object.                   |
+| `urldecode`         | function  | Decodes a URL-encoded string.                                               |
+| `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
+| `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
+
+## now()
+
+::: dbus2mqtt.template.templating.now
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## urldecode()
+
+::: dbus2mqtt.template.templating.urldecode
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_list()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_list_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_call()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_call_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false

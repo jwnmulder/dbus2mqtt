@@ -11,6 +11,16 @@ site/
 .env
 .venv
 
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.py.cover
+.pytest_cache/
+cover/
+
 # Ruff stuff:
 .ruff_cache/
 

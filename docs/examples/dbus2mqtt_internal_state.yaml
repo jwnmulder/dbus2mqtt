@@ -30,7 +30,7 @@ dbus:
 flows:
   - name: "publish internal state"
     triggers:
-      - type: object_added
+      - type: dbus_object_added
       - type: schedule
         interval: {seconds: 5}
     actions:
@@ -39,6 +39,7 @@ flows:
         payload_type: json
         payload_template:
           now: "{{ now().isoformat() }}"
+          dbus2mqtt: " {{ dbus2mqtt }}"
           dbus_list_res: "{{ dbus_list('*') }}"
       - type: log
         level: INFO

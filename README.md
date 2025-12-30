@@ -1,7 +1,7 @@
 # dbus2mqtt
 
 **dbus2mqtt** is a Python application that bridges **DBus** with **MQTT**.
-It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages, and shape payloads using flexible **Jinja2 templating**.
+It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages and shape payloads using configurable **templates**.
 
 This makes it easy to integrate Linux desktop services or system signals into MQTT-based workflows - including **Home Assistant**.
 
@@ -17,7 +17,7 @@ This makes it easy to integrate Linux desktop services or system signals into MQ
 
 **dbus2mqtt** is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.
 
-Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player.html)
+Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
 ## Getting started with dbus2mqtt
 
@@ -36,7 +36,7 @@ dbus:
       flows:
         - name: "Publish MPRIS state"
           triggers:
-            - type: object_added
+            - type: dbus_object_added
             - type: schedule
               interval: {seconds: 5}
           actions:
@@ -67,16 +67,16 @@ python -m pip install dbus2mqtt
 dbus2mqtt --config config.yaml
 ```
 
-See [setup](https://jwnmulder.github.io/dbus2mqtt/setup.html) for more installation options and configuration details.
+See [setup](https://jwnmulder.github.io/dbus2mqtt/setup/) for more installation options and configuration details.
 
 ## Examples
 
-More dbus2mqtt examples can be found in the [examples](https://jwnmulder.github.io/dbus2mqtt/examples/index.html) section.
-The most complete one being [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player.html)
+More dbus2mqtt examples can be found in the [examples](https://jwnmulder.github.io/dbus2mqtt/examples/) section.
+The most complete one being [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
 ## Exposing dbus methods, properties and signals
 
-See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions.html) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
+See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions/) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
 
 ```json
 {
@@ -84,8 +84,8 @@ See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions.html) fo
 }
 ```
 
-## Flows and Jinja based templating
+## Flows
 
-For more advanced use-cases, dbus2mqtt has support for flows and Jinja2 based templates. A reference of all supported flow triggers and actions can be found on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/index.html)
+dbus2mqtt lets you build flows to automate how D-Bus data is published or processed. Templates provide dynamic control over filtering, topics, payloads and other flow parameters.
 
-Jinja templating documentation can be found here: [templating](https://jwnmulder.github.io/dbus2mqtt/templating/index.html)
+A reference of supported flow triggers and actions is available on [flows](https://jwnmulder.github.io/dbus2mqtt/flows/) and templating details can be found at [templating](https://jwnmulder.github.io/dbus2mqtt/templating/)

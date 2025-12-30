@@ -16,9 +16,39 @@ Schedule based triggers can be configured by setting either a cron or interval p
 
 When triggered, the following context parameters are available
 
-| name | description |
-|------|-------------|
-| N/A  | N/A         |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'schedule'       |
+
+## dbus_object_added
+
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+
+```yaml
+- type: dbus_object_added
+```
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_added'   |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
+
+## dbus_object_removed
+
+```yaml
+- type: dbus_object_removed
+```
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'object_removed' |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
 
 ## dbus_signal
 
@@ -37,41 +67,14 @@ DBus signals triggers must be configured with an anterface and path. Note that o
 
 When triggered, the following context parameters are available
 
-| name | type | description |
-|------|------|-------------|
-| bus_name  | string | bus_name of the object that was registered on dbus |
-| path      | string | path of the object that was registered on dbus |
-| interface | string | name of interface for which the signal was triggered |
-| signal    | string | name of the signal, e.g. 'Seeked'
-| args      | list   | signal arguments, list of objects |
-
-## object_added
-
-This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
-
-```yaml
-- type: object_added
-```
-
-When triggered, the following context parameters are available
-
-| name | description |
-|------|-------------|
-| bus_name | bus_name of the object that was registered on dbus |
-| path     | path of the object that was registered on dbus |
-
-## object_removed
-
-```yaml
-- type: object_removed
-```
-
-When triggered, the following context parameters are available
-
-| name | description |
-|------|-------------|
-| bus_name | bus_name of the object that was registered on dbus |
-| path     | path of the object that was registered on dbus |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'dbus_signal'    |
+| bus_name     | string | bus_name of the object that was registered on dbus |
+| path         | string | path of the object that was registered on dbus |
+| interface    | string | name of interface for which the signal was triggered |
+| signal       | string | name of the signal, e.g. 'Seeked' |
+| args         | list   | signal arguments, list of objects |
 
 ## mqtt_message
 
@@ -83,17 +86,21 @@ When triggered, the following context parameters are available
 
 Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted
 
-| key | description  |
-|------|-------------|
-| topic     | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
-| filter    | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
+Trigger configuration:
+
+| key          | description  |
+|--------------|--------------|
+| topic        | topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger' |
+| content_type | One of `json` or `text`, defaults to `json` |
+| filter       | A templated string that must evaluate to a boolean result. When False, the flow is not triggered |
 
 When triggered, the following context parameters are available
 
-| name | type | description |
-|------|------|-------------|
-| topic     | string | mqtt topic |
-| payload   | any | json deserialized MQTT message payload  |
+| name         | type   | description      |
+|--------------|--------|------------------|
+| trigger_type | string | 'mqtt_message'   |
+| topic        | string | mqtt topic |
+| payload      | any    | text or json deserialized MQTT message payload |
 
 Example flow
 
@@ -112,3 +119,23 @@ flows:
 
 !!! note
     If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
+
+## context_changed
+
+```yaml
+- type: context_changed
+```
+
+Triggered when the dbus2mqtt context was updated by a `context_set` action. For now only `global_context` updates result in a `context_changed` trigger.
+
+Trigger configuration:
+
+| key | description  |
+|------|-------------|
+| scope     | `global` |
+
+When triggered, the following context parameters are available
+
+| name         | type   | description      |
+|--------------|--------|------------------|
+| scope        | string | Scope of the context that changed, for now this can only be `global` |

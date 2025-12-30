@@ -1,3 +1,6 @@
+import pytest
+
+from jinja2 import TemplateError
 
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -99,10 +102,11 @@ def test_nested_dict_templates():
     assert res["nested_template"]["b"]["c"] == "TestValueC"
 
 def test_dict_template_with_quotes_and_newline():
-    """
-        Test that:
-          1. a dict template with quotes and an ending newline is rendered correctly,
-          2. dbus_call result with a nested dict is rendered correctly and convertible to a dict
+    """Test rendering of a dict template that includes quotes and a trailing newline.
+
+    This test verifies that:
+      1. a dict template with quotes and an ending newline is rendered correctly,
+      2. dbus_call result with a nested dict is rendered correctly and convertible to a dict
     """
     custom_functions = {
         "dbus_list": lambda bus_name_pattern: ["org.mpris.MediaPlayer2.vlc", "org.mpris.MediaPlayer2.firefox"],
@@ -143,3 +147,20 @@ def test_nested_list_values():
     res = templating.render_template(template, dict, context)
 
     assert res["res"]["plain_args"] == ["first-item", "second-item"]
+
+def test_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        templating.render_template(template, dict)
+
+@pytest.mark.asyncio
+async def test_async_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        await templating.async_render_template(template, dict)

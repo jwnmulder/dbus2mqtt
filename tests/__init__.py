@@ -1,9 +1,8 @@
-
 from unittest.mock import patch
 
 import dbus_fast.aio as dbus_aio
 
-from pydantic import SecretStr
+from jsonargparse.typing import SecretStr
 
 from dbus2mqtt import AppContext, config
 from dbus2mqtt.config import (
@@ -50,9 +49,9 @@ def mocked_app_context():
 
     return app_context
 
-def mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerConfig, actions: list[FlowActionConfig]):
+def mocked_flow_processor(app_context: AppContext, triggers: list[FlowTriggerConfig], actions: list[FlowActionConfig], conditions: list[str] = []):
 
-    flow_config = FlowConfig(triggers=[trigger_config], actions=actions)
+    flow_config = FlowConfig(triggers=triggers, actions=actions, conditions=conditions)
 
     app_context.config.dbus.subscriptions[0].flows = [flow_config]
 
@@ -63,10 +62,12 @@ def mocked_dbus_client(app_context: AppContext):
 
     with patch("socket.socket", autospec=True):
 
-        bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
         flow_scheduler = FlowScheduler(app_context)
 
-        dbus_client = DbusClient(app_context, bus, flow_scheduler)
+        bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
+        bus.unique_name = "FAKE-CONNECTION-NAME"
+
+        dbus_client = DbusClient(app_context, flow_scheduler, bus)
         return dbus_client
 
 def mocked_mqtt_client(app_context: AppContext):

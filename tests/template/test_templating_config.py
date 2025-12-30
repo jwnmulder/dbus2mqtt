@@ -38,9 +38,10 @@ async def test_signal_filter_bool_result():
 
 @pytest.mark.asyncio
 async def test_str_template_with_dict_result():
-    """Test a more complex example where functions are returning dicts
-    and everything must be bcomined in a nice single structure that can be converted to json"""
+    """Test a more complex example where functions are returning dicts.
 
+    Everything must be bcomined in a nice single structure that can be converted to json
+    """
     config = yaml.safe_load("""
         actions:
           - type: mqtt_publish

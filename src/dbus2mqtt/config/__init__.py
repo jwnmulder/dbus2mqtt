@@ -3,9 +3,9 @@ import uuid
 import warnings
 
 from dataclasses import dataclass, field
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import Field, SecretStr
+from jsonargparse.typing import SecretStr
 
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -61,7 +61,6 @@ class FlowTriggerDbusSignalConfig:
     type: Literal["dbus_signal"] = "dbus_signal"
     bus_name: str | None = None
     path: str | None = None
-    # filter: str | None = None
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
@@ -78,19 +77,28 @@ class FlowTriggerBusNameRemovedConfig:
         warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
 
 @dataclass
-class FlowTriggerObjectAddedConfig:
-    type: Literal["object_added"] = "object_added"
-    # filter: str | None = None
+class FlowTriggerDbusObjectAddedConfig:
+    type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
+
+    def __post_init__(self):
+        if self.type != FlowTriggerDbusObjectAddedConfig.type:
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            self.type = FlowTriggerDbusObjectAddedConfig.type
 
 @dataclass
-class FlowTriggerObjectRemovedConfig:
-    type: Literal["object_removed"] = "object_removed"
-    # filter: str | None = None
+class FlowTriggerDbusObjectRemovedConfig:
+    type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
+
+    def __post_init__(self):
+        if self.type != FlowTriggerDbusObjectRemovedConfig.type:
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            self.type = FlowTriggerDbusObjectRemovedConfig.type
 
 @dataclass
 class FlowTriggerMqttMessageConfig:
     topic: str
     type: Literal["mqtt_message"] = "mqtt_message"
+    content_type: Literal["json", "text"] = "json"
     filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
@@ -98,10 +106,21 @@ class FlowTriggerMqttMessageConfig:
             return template_engine.render_template(self.filter, bool, trigger_context)
         return True
 
-FlowTriggerConfig = Annotated[
-    FlowTriggerScheduleConfig | FlowTriggerDbusSignalConfig | FlowTriggerBusNameAddedConfig | FlowTriggerBusNameRemovedConfig | FlowTriggerObjectAddedConfig | FlowTriggerObjectRemovedConfig | FlowTriggerMqttMessageConfig,
-    Field(discriminator="type")
-]
+@dataclass
+class FlowTriggerContextChangedConfig:
+    type: Literal["context_changed"] = "context_changed"
+    scope: Literal["global"] = "global"
+
+FlowTriggerConfig = (
+    FlowTriggerContextChangedConfig
+    | FlowTriggerBusNameAddedConfig
+    | FlowTriggerBusNameRemovedConfig
+    | FlowTriggerDbusObjectAddedConfig
+    | FlowTriggerDbusObjectRemovedConfig
+    | FlowTriggerDbusSignalConfig
+    | FlowTriggerMqttMessageConfig
+    | FlowTriggerScheduleConfig
+)
 
 @dataclass
 class FlowActionContextSetConfig:
@@ -126,9 +145,10 @@ class FlowActionLogConfig:
 
 @dataclass
 class FlowActionDbusCallConfig:
-    """ Calls a method on a dbus object.
-        When any of the arguments contains a * wildcard, only subscribed objects interfaces are matched.
-        The given method is called on all matching objects and interfaces
+    """Calls a method on a dbus object.
+
+    When any of the arguments contains a * wildcard, only subscribed objects interfaces are matched.
+    The given method is called on all matching objects and interfaces.
     """
     bus_name: str
     """bus_name pattern, supporting * wildcards"""
@@ -156,15 +176,18 @@ class FlowActionDbusCallConfig:
 #     value: object
 #     type: Literal["dbus_set_property"] = "dbus_set_property"
 
-FlowActionConfig = Annotated[
-    FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig | FlowActionDbusCallConfig,
-    Field(discriminator="type")
-]
+FlowActionConfig = (
+    FlowActionMqttPublishConfig
+    | FlowActionContextSetConfig
+    | FlowActionLogConfig
+    | FlowActionDbusCallConfig
+)
 
 @dataclass
 class FlowConfig:
     triggers: list[FlowTriggerConfig]
     actions: list[FlowActionConfig]
+    conditions: str | list[str] = field(default_factory=list)
     name: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
@@ -178,6 +201,14 @@ class SubscriptionConfig:
     flows: list[FlowConfig] = field(default_factory=list)
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
+    def matches_dbus_object(self, bus_name: str, path: str | None = None) -> bool:
+        if fnmatch.fnmatchcase(bus_name, self.bus_name):
+            if not path or path == self.path:
+                return True
+            elif fnmatch.fnmatchcase(path, self.path):
+                return True
+        return False
+
 @dataclass
 class DbusConfig:
     subscriptions: list[SubscriptionConfig]
@@ -190,14 +221,11 @@ class DbusConfig:
                 return True
         return False
 
-    def get_subscription_configs(self, bus_name: str, path: str|None = None) -> list[SubscriptionConfig]:
+    def get_subscription_configs(self, bus_name: str, path: str | None = None) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
-            if fnmatch.fnmatchcase(bus_name, subscription.bus_name):
-                if not path or path == subscription.path:
-                    res.append(subscription)
-                elif fnmatch.fnmatchcase(path, subscription.path):
-                    res.append(subscription)
+            if subscription.matches_dbus_object(bus_name, path):
+                res.append(subscription)
         return res
 
 @dataclass

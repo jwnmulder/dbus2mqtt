@@ -40,4 +40,5 @@ Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/
 
 ## References
 
-* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez>
+* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Adapter.5.html>
+* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Device.5.html>

@@ -1,23 +1,60 @@
 import urllib.parse
 
-from datetime import datetime
+from datetime import datetime, tzinfo
+from importlib.metadata import version
 from typing import Any, TypeVar
 
-from jinja2 import BaseLoader, StrictUndefined, TemplateError
+from jinja2 import (
+    BaseLoader,
+    StrictUndefined,
+    TemplateError,
+    TemplateRuntimeError,
+    UndefinedError,
+)
 from jinja2.nativetypes import NativeEnvironment
 from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
 TemplateResultType = TypeVar('TemplateResultType')
 
-def urldecode(string):
+def now(tz: tzinfo | None = None) -> datetime:
+    """Returns new datetime object representing current time.
+
+    Args:
+        tz (optional): If no tz is specified, uses local timezone.
+
+    Returns:
+        Current datetime object.
+    """
+    return datetime.now(tz)
+
+def urldecode(string: str) -> str:
+    """Decode a url-encoded URL string by replacing %xx escapes with their single-character equivalent.
+
+    Args:
+        string (str): The string to decode.
+
+    Returns:
+        A decoded URL string.
+
+    Example:
+        ```python
+        >>> urldecode('abc%20def')
+        'abc def'
+        >>> urldecode('El%20Ni%C3%B1o')
+        'El Niño'
+        ```
+    """
     return urllib.parse.unquote(string)
 
 class TemplateEngine:
     def __init__(self):
 
         engine_globals = {}
-        engine_globals['now'] = datetime.now
+        engine_globals['now'] = now
         engine_globals['urldecode'] = urldecode
+        engine_globals['dbus2mqtt'] = {
+            'version': version('dbus2mqtt')
+        }
 
         engine_filters = {}
         engine_filters['urldecode'] = urldecode
@@ -69,9 +106,16 @@ class TemplateEngine:
 
         if isinstance(templatable, str):
             try:
-                return self.jinja2_env.from_string(templatable).render(**context)
+                template = self.jinja2_env.from_string(templatable)
             except TemplateError as e:
                 raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
+
+            try:
+                res = template.render(**context)
+                str(res)  # access value to trigger jinja UndefinedError
+                return res
+            except UndefinedError as e:
+                raise TemplateRuntimeError(f"Error rendering template, template={templatable}: {e}") from e
 
         elif isinstance(templatable, dict):
             res = {}
@@ -104,9 +148,16 @@ class TemplateEngine:
 
         if isinstance(templatable, str):
             try:
-                return await self.jinja2_async_env.from_string(templatable).render_async(**context)
+                template = self.jinja2_async_env.from_string(templatable)
             except TemplateError as e:
                 raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
+
+            try:
+                res = await template.render_async(**context)
+                str(res)  # access value to trigger jinja UndefinedError
+                return res
+            except UndefinedError as e:
+                raise TemplateRuntimeError(f"Error rendering template, template={templatable}: {e}") from e
 
         elif isinstance(templatable, dict):
             res = {}

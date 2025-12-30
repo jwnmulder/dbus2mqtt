@@ -19,22 +19,59 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           activate-environment: true
           enable-cache: true
           python-version: ${{ matrix.python-version }}
 
-      # - name: "Set up Python"
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-
       - name: Run tests
         run: uv run pytest
-        # run: uv run --python ${{ matrix.python-version }} pytest
+
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      # Gives the action the necessary permissions for publishing new
+      # comments in pull requests.
+      pull-requests: write
+      # Gives the action the necessary permissions for pushing data to the
+      # python-coverage-comment-action branch, and for editing existing
+      # comments (to avoid publishing multiple comments in the same PR)
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov=dbus2mqtt
+
+      - name: Coverage step summary
+        run:
+          uv run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+
+      - name: Coverage comment
+        id: coverage_comment
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 80
+          MINIMUM_ORANGE: 60
+
+      - name: Store Pull Request comment to be posted
+        uses: actions/upload-artifact@v4
+        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+        with:
+          name: python-coverage-comment-action
+          path: python-coverage-comment-action.txt

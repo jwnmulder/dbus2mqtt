@@ -30,8 +30,7 @@ def camel_to_snake(name):
     return re.sub(r'([a-z])([A-Z])', r'\1_\2', name).lower()
 
 def _convert_value_to_dbus(value: Any) -> Any:
-    """
-    Recursively convert a single value to D-Bus compatible type.
+    """Recursively convert a single value to D-Bus compatible type.
 
     Args:
         value: The value to convert (can be dict, list, primitive, etc.)
@@ -84,8 +83,7 @@ def _convert_value_to_dbus(value: Any) -> Any:
         return str(value)
 
 def _get_dbus_signature(value: Any) -> str:
-    """
-    Get the appropriate D-Bus signature for a value.
+    """Get the appropriate D-Bus signature for a value.
 
     Args:
         value: The value to get signature for
@@ -136,8 +134,7 @@ def _get_dbus_signature(value: Any) -> str:
 
 # Wraps all complex types in VariantList
 def convert_mqtt_args_to_dbus(args: list[Any]) -> list[Any]:
-    """
-    Convert MQTT/JSON arguments to D-Bus with explicit Variant wrapping for all complex types.
+    """Convert MQTT/JSON arguments to D-Bus with explicit Variant wrapping for all complex types.
 
     Args:
         args: List of arguments from MQTT
@@ -154,9 +151,7 @@ def convert_mqtt_args_to_dbus(args: list[Any]) -> list[Any]:
     return converted_args
 
 def _convert_and_wrap_in_variant(value: Any) -> Any:
-    """
-    Convert a value and wrap complex types in Variants.
-    """
+    """Convert a value and wrap complex types in Variants."""
     if value is None:
         return value
     elif isinstance(value, bool | int | float | str):

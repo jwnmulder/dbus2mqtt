@@ -35,9 +35,3 @@ class DbusSignalWithState:
     subscription_config: SubscriptionConfig
     signal_config: SignalConfig
     args: list[Any]
-
-@dataclass
-class ExecuteCommandResults:
-    matched_method: bool
-    matched_property: bool
-    results: list[Any] | None

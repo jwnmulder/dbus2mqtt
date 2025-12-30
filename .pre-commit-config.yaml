@@ -33,7 +33,7 @@ repos:
           - --strict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.14.10
     hooks:
       - id: ruff
         args:
@@ -42,20 +42,35 @@ repos:
           - I
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.14
+    rev: 0.9.20
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.404
+    rev: v1.1.407
     hooks:
       - id: pyright
 
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.20.0
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: local
+    hooks:
+      - id: check-mkdocs
+        name: check-mkdocs
+        entry: uv run --active mkdocs build --strict
+        language: python
+        additional_dependencies:
+          - uv
+        always_run: true
+        pass_filenames: false
   - repo: local
     hooks:
       - id: deptry
         name: deptry
-        entry: uv run deptry .
+        entry: uv run --active deptry .
         language: python
         additional_dependencies:
           - uv

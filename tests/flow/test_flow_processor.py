@@ -6,9 +6,10 @@ from dbus2mqtt.config import (
     FlowActionContextSetConfig,
     FlowTriggerBusNameAddedConfig,
     FlowTriggerBusNameRemovedConfig,
+    FlowTriggerContextChangedConfig,
+    FlowTriggerDbusObjectAddedConfig,
+    FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
-    FlowTriggerObjectAddedConfig,
-    FlowTriggerObjectRemovedConfig,
     FlowTriggerScheduleConfig,
 )
 from dbus2mqtt.flow.flow_processor import FlowTriggerMessage
@@ -21,7 +22,7 @@ async def test_schedule_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "scheduler"
@@ -41,7 +42,7 @@ async def test_bus_name_added_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameAddedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "added"
@@ -61,7 +62,7 @@ async def test_bus_name_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameRemovedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "removed"
@@ -80,8 +81,8 @@ async def test_object_added_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectAddedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "added"
@@ -100,8 +101,8 @@ async def test_object_removed_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerObjectRemovedConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    trigger_config = FlowTriggerDbusObjectRemovedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": "removed"
@@ -124,7 +125,7 @@ async def test_dbus_signal_trigger():
         interface="org.freedesktop.DBus.Properties",
         signal="PropertiesChanged"
     )
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
         FlowActionContextSetConfig(
             global_context={
                 "res": {
@@ -148,22 +149,68 @@ async def test_dbus_signal_trigger():
         "subscription_interfaces": ["test-interface-name"]
     }
 
-# @pytest.mark.asyncio
-# async def test_mqtt_trigger():
+@pytest.mark.asyncio
+async def test_context_changed_trigger():
 
-#     app_context = mocked_app_context()
+    app_context = mocked_app_context()
 
-#     trigger_config = FlowTriggerMqttConfig()
-#     processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
-#         FlowActionContextSetConfig(
-#             global_context={
-#                 "res": "mqtt"
-#             }
-#         )
-#     ])
+    trigger_config = FlowTriggerContextChangedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
+        FlowActionContextSetConfig(
+            global_context={
+                "res": "triggered_by_context_changed"
+            }
+        )
+    ])
 
-#     await processor._process_flow_trigger(
-#         FlowTriggerMessage(flow_config, trigger_config, datetime.now())
-#     )
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
 
-#     assert processor._global_context["res"] == "mqtt"
+    assert processor._global_context["res"] == "triggered_by_context_changed"
+
+@pytest.mark.asyncio
+async def test_flow_conditions_should_execute():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": "triggered_by_context_changed"
+                }
+            )
+        ],
+        conditions=["{{ True }}"]
+    )
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert "res" in processor._global_context
+
+@pytest.mark.asyncio
+async def test_flow_conditions_should_not_execute():
+
+    app_context = mocked_app_context()
+
+    trigger_config = FlowTriggerDbusObjectAddedConfig()
+    processor, flow_config = mocked_flow_processor(app_context, [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": "triggered_by_context_changed"
+                }
+            )
+        ],
+        conditions=["{{ False }}"]
+    )
+
+    await processor._process_flow_trigger(
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+    )
+
+    assert "res" not in processor._global_context
