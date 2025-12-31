@@ -67,12 +67,12 @@ async def flow_processor_task(app_context: AppContext):
         asyncio.create_task(flow_processor.flow_processor_task())
     )
 
-async def run(config: Config):
+async def run(app_config: Config):
 
     event_broker = EventBroker()
     template_engine = TemplateEngine()
 
-    app_context = AppContext(config, event_broker, template_engine)
+    app_context = AppContext(app_config, event_broker, template_engine)
 
     flow_scheduler = FlowScheduler(app_context)
 
@@ -120,8 +120,8 @@ def main():
 
     parser = new_argument_parser()
 
-    parser.add_argument("--verbose", "-v", nargs="?", const=True, help="Enable verbose logging")
-    parser.add_argument("--config", action="config")
+    parser.add_argument("--verbose", "-v", nargs="?", const=True, default=False, help="Enable verbose logging")
+    parser.add_argument("--config", action="config", help="Path to a dbus2mqtt configuration file")
     parser.add_class_arguments(Config)
 
     cfg = parser.parse_args()
@@ -129,12 +129,12 @@ def main():
     setup_logging(cfg.verbose)
 
     cfg = parser.instantiate_classes(cfg)
-    config = ns_to_cls(Config, cfg)
+    app_config = ns_to_cls(Config, cfg)
 
-    logger.debug(f"config: {config}")
+    logger.debug(f"config: {app_config}")
 
     try:
-        asyncio.run(run(config))
+        asyncio.run(run(app_config))
     except KeyboardInterrupt:
         return 0
 

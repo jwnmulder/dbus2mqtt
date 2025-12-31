@@ -51,8 +51,8 @@ class InterfaceConfig:
 class FlowTriggerScheduleConfig:
     type: Literal["schedule"] = "schedule"
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    cron: dict[str, object] | None = None
-    interval: dict[str, object] | None = None
+    cron: dict[str, Any] | None = None
+    interval: dict[str, Any] | None = None
 
 @dataclass
 class FlowTriggerDbusSignalConfig:
@@ -64,6 +64,7 @@ class FlowTriggerDbusSignalConfig:
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
+    """Configuration for 'bus_name_adde' flow trigger (DEPRECATED)."""
     type: Literal["bus_name_added"] = "bus_name_added"
 
     def __post_init__(self):
@@ -71,6 +72,7 @@ class FlowTriggerBusNameAddedConfig:
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
+    """Configuration for 'bus_name_removed' flow trigger (DEPRECATED)."""
     type: Literal["bus_name_removed"] = "bus_name_removed"
 
     def __post_init__(self):
@@ -78,6 +80,7 @@ class FlowTriggerBusNameRemovedConfig:
 
 @dataclass
 class FlowTriggerDbusObjectAddedConfig:
+    """Configuration for 'dbus-object_added' flow trigger."""
     type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
 
     def __post_init__(self):
@@ -87,6 +90,7 @@ class FlowTriggerDbusObjectAddedConfig:
 
 @dataclass
 class FlowTriggerDbusObjectRemovedConfig:
+    """Configuration for 'dbus_object_removed' flow trigger."""
     type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
 
     def __post_init__(self):
@@ -96,6 +100,14 @@ class FlowTriggerDbusObjectRemovedConfig:
 
 @dataclass
 class FlowTriggerMqttMessageConfig:
+    """Configuration for 'mqtt_message' flow trigger.
+
+    Attributes:
+        topic: MQTT topic for the trigger.
+        content_type: Expected payload format, 'json' or 'text'.
+        filter: Optional template expression, trigger only when it evaluates truthy.
+    """
+
     topic: str
     type: Literal["mqtt_message"] = "mqtt_message"
     content_type: Literal["json", "text"] = "json"
@@ -108,6 +120,7 @@ class FlowTriggerMqttMessageConfig:
 
 @dataclass
 class FlowTriggerContextChangedConfig:
+    """Configuration for 'context_changed' flow trigger."""
     type: Literal["context_changed"] = "context_changed"
     scope: Literal["global"] = "global"
 
@@ -124,11 +137,16 @@ FlowTriggerConfig = (
 
 @dataclass
 class FlowActionContextSetConfig:
+    """Configuration for 'context_set' flow action.
+
+    Attributes:
+        context: Per flow execution context.
+        global_context: Global context, shared between multiple flow executions, over all subscriptions.
+    """
+
     type: Literal["context_set"] = "context_set"
-    context: dict[str, object] | None = None
-    """Per flow execution context"""
-    global_context: dict[str, object] | None = None
-    """Global context, shared between multiple flow executions, over all subscriptions"""
+    context: dict[str, Any] | None = None
+    global_context: dict[str, Any] | None = None
 
 @dataclass
 class FlowActionMqttPublishConfig:
@@ -151,6 +169,15 @@ FlowActionConfig = (
 
 @dataclass
 class FlowConfig:
+    """Flow configuration.
+
+    Attributes:
+        name: Optional human-readable name for the flow.
+        triggers: Trigger configurations that start the flow.
+        actions: Actions executed when the flow runs.
+        conditions: Optional condition or list of conditions that must be met before a flow is executed.
+        id: Unique flow identifier, automatically generated UUID.
+    """
     triggers: list[FlowTriggerConfig]
     actions: list[FlowActionConfig]
     conditions: str | list[str] = field(default_factory=list)
@@ -159,10 +186,17 @@ class FlowConfig:
 
 @dataclass
 class SubscriptionConfig:
+    """Configuration for a D-Bus subscription.
+
+    Attributes:
+        bus_name: Bus name pattern, supporting '*' wildcards.
+        path: Object path pattern, supporting '*' wildcards.
+        interfaces: List of dbus2mqtt interface configurations.
+        flows: List of dbus2mqtt flow configurations.
+        id: Unique subscription identifier, automatically generated UUID.
+    """
     bus_name: str
-    """bus_name pattern supporting * wildcards"""
     path: str
-    """path pattern supporting * wildcards"""
     interfaces: list[InterfaceConfig] = field(default_factory=list)
     flows: list[FlowConfig] = field(default_factory=list)
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
@@ -177,6 +211,12 @@ class SubscriptionConfig:
 
 @dataclass
 class DbusConfig:
+    """D-Bus configuration.
+
+    Attributes:
+        bus_type: Bus to connect to.
+        subscriptions: List of SubscriptionConfig.
+    """
     subscriptions: list[SubscriptionConfig]
     bus_type: Literal["SESSION", "SYSTEM"] = "SESSION"
 
@@ -196,6 +236,15 @@ class DbusConfig:
 
 @dataclass
 class MqttConfig:
+    """MQTT configuration.
+
+    Attributes:
+        host: MQTT broker hostname or IP address.
+        username: Username for broker authentication.
+        password: Password for broker authentication.
+        port: MQTT broker TCP port.
+        subscription_topics: List of MQTT topics to subscribe to. Wildcard characters '#' and '+' are supported.
+    """
     host: str
     username: str
     password: SecretStr
