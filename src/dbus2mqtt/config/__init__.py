@@ -30,6 +30,17 @@ class PropertyConfig:
 
 @dataclass
 class InterfaceConfig:
+    """Subscription Interface config.
+
+    Attributes:
+        interface: The D-Bus interface that defines the set of methods, signals, and properties available.
+        mqtt_command_topic: MQTT topic where dbus2mqtt listens for JSON commands. For example 'dbus2mqtt/mpris/command'. Value can be a string or templated string.
+        mqtt_response_topic: MQTT topic where dbus2mqtt published responses on. For example 'dbus2mqtt/mpris/response'. Value can be a string or templated string.
+        signals: List of D-Bus signals to subscribe to.
+        methods: List of methods to expose over MQTT.
+        properties: List of properties to expose over MQTT.
+    """
+
     interface: str
     mqtt_command_topic: str | None = None
     mqtt_response_topic: str | None = None
@@ -80,7 +91,7 @@ class FlowTriggerBusNameRemovedConfig:
 
 @dataclass
 class FlowTriggerDbusObjectAddedConfig:
-    """Configuration for 'dbus-object_added' flow trigger."""
+    """Configuration for 'dbus_object_added' flow trigger."""
     type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
 
     def __post_init__(self):
@@ -150,6 +161,13 @@ class FlowActionContextSetConfig:
 
 @dataclass
 class FlowActionMqttPublishConfig:
+    """Configuration for 'mqtt_publish' flow action.
+
+    Attributes:
+        topic: MQTT topic the messaage is published to
+        payload_template: A string, a dict of strings, a templated string or a nested dict of templated strings
+        payload_type: Message format for MQTT: json (default), yaml, text or binary. When set to binary, payload_template is expected to return a url formatted string where scheme is either file, http or https
+    """
     topic: str
     payload_template: str | dict[str, Any]
     type: Literal["mqtt_publish"] = "mqtt_publish"
@@ -157,6 +175,12 @@ class FlowActionMqttPublishConfig:
 
 @dataclass
 class FlowActionLogConfig:
+    """Configuration for 'log' flow action.
+
+    Attributes:
+        msg: Message to log, a string or templated string.
+        level: Log level, defaults to INFO.
+    """
     msg: str
     type: Literal["log"] = "log"
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
@@ -253,6 +277,7 @@ class MqttConfig:
 
 @dataclass
 class Config:
+    """App configuration."""
     mqtt: MqttConfig
     dbus: DbusConfig
     flows: list[FlowConfig] = field(default_factory=list)
