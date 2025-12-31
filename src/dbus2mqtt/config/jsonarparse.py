@@ -2,6 +2,8 @@ from typing import Any
 
 import jsonargparse
 
+from docstring_parser import DocstringStyle
+from jsonargparse import set_parsing_settings
 from yaml import YAMLError
 
 default_yaml_loader = jsonargparse.get_loader("yaml")
@@ -18,6 +20,10 @@ def _custom_yaml_load(stream: str) -> Any:
     return default_yaml_loader(stream)
 
 def new_argument_parser() -> jsonargparse.ArgumentParser:
+
+    set_parsing_settings(
+        docstring_parse_style=DocstringStyle.GOOGLE,
+    )
 
     # register out custom yaml loader for jsonargparse
     jsonargparse.set_loader(
