@@ -17,6 +17,7 @@ from dbus_fast.aio import MessageBus
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import (
+    FlowTriggerDbusSignalConfig,
     InterfaceConfig,
     MethodConfig,
     PropertyConfig,
@@ -708,7 +709,10 @@ class DbusClient:
                         await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
 
     async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
+        """Trigger subscription specific flows that have a corresponding trigger_type defined.
 
+        No filtering is done, if trigger.type matches, the flow is scheduled for execution.
+        """
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == type:
@@ -820,7 +824,7 @@ class DbusClient:
 
         for flow in signal.subscription_config.flows:
             for trigger in flow.triggers:
-                if trigger.type == "dbus_signal" and signal.signal_config.signal == trigger.signal:
+                if trigger.type == FlowTriggerDbusSignalConfig.type and signal.signal_config.signal == trigger.signal:
 
                     try:
 

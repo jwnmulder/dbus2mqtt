@@ -67,11 +67,19 @@ class FlowTriggerScheduleConfig:
 
 @dataclass
 class FlowTriggerDbusSignalConfig:
-    interface: str
+    """Configuration for 'dbus_signal' flow trigger.
+
+    Attributes:
+        interface: Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'.
+        signal: Signal name to filter on, e.g. PropertiesChanged.
+        bus_name: ?.
+        path: ?.
+    """
+    interface: str  # documented, used in all examples, not used in a filter?
     signal: str
     type: Literal["dbus_signal"] = "dbus_signal"
-    bus_name: str | None = None
-    path: str | None = None
+    bus_name: str | None = None  # Not documented, used by connman, not used in a filter?
+    path: str | None = None  # Not documented and used by connman, not used in a filter?
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
