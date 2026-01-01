@@ -20,7 +20,7 @@ def now(tz: tzinfo | None = None) -> datetime:
     """Returns new datetime object representing current time.
 
     Args:
-        tz (optional): If no tz is specified, uses local timezone.
+        tz: If no tz is specified, uses local timezone.
 
     Returns:
         Current datetime object.
@@ -31,7 +31,7 @@ def urldecode(string: str) -> str:
     """Decode a url-encoded URL string by replacing %xx escapes with their single-character equivalent.
 
     Args:
-        string (str): The string to decode.
+        string: The string to decode.
 
     Returns:
         A decoded URL string.
