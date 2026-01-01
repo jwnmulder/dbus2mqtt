@@ -13,7 +13,7 @@ Within each flow a set of actions can be configured. These are executed in the o
 
 * `log` for logging message
 * `context_set` to set variables
-* `mqtt_publish` to publish a mqtt message
+* `mqtt_publish` to publish a MQTT message
 
 Global flows are started even when dbus2mqtt is not subscribed to any dbus objects. An example for global flows:
 
