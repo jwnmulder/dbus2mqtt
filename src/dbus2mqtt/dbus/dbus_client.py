@@ -346,7 +346,7 @@ class DbusClient:
 
         return signal_subscription_count
 
-    async def _process_interface(self, bus_name: str, path: str, introspection: dbus_introspection.Node, interface: dbus_introspection.Interface) -> list[SubscribedInterface]:
+    async def _process_interface(self, bus_name: str, path: str, interface: dbus_introspection.Interface) -> list[SubscribedInterface]:
 
         logger.debug(f"process_interface: {bus_name}, {path}, {interface.name}")
 
@@ -455,7 +455,7 @@ class DbusClient:
 
         for interface in introspection.interfaces:
             new_subscriptions.extend(
-                await self._process_interface(bus_name, path, introspection, interface)
+                await self._process_interface(bus_name, path, interface)
             )
 
         return new_subscriptions
@@ -818,27 +818,33 @@ class DbusClient:
             await self._handle_dbus_object_lifecycle_signal(message)
             self._dbus_object_lifecycle_signal_queue.async_q.task_done()
 
-    async def _handle_on_dbus_signal(self, signal: DbusSignalWithState):
+    async def _handle_on_dbus_signal(self, signal_state: DbusSignalWithState):
 
-        logger.debug(f"dbus_signal: signal={signal.signal_config.signal}, args={signal.args}, bus_name={signal.bus_name}, path={signal.path}, interface={signal.interface_name}")
+        signal_config = signal_state.signal_config
+        signal = signal_state.signal_config.signal
+        logger.debug(f"dbus_signal: signal={signal}, args={signal_state.args}, bus_name={signal_state.bus_name}, path={signal_state.path}, interface={signal_state.interface_name}")
 
-        for flow in signal.subscription_config.flows:
+        for flow in signal_state.subscription_config.flows:
             for trigger in flow.triggers:
-                if trigger.type == FlowTriggerDbusSignalConfig.type and signal.signal_config.signal == trigger.signal:
-
+                if trigger.type == FlowTriggerDbusSignalConfig.type:
                     try:
+                        matches = signal_config.signal == trigger.signal
 
-                        matches_filter = True
-                        if signal.signal_config.filter is not None:
-                            matches_filter = signal.signal_config.matches_filter(self.app_context.templating, *signal.args)
+                        # dbus signal subscriptions might have a filter configured
+                        if signal_config.filter is not None:
+                            matches &= signal_config.matches_filter(self.app_context.templating, *signal_state.args)
 
-                        if matches_filter:
+                        # dbus_signal triggers might have an interface configured
+                        if trigger.interface:
+                            matches &= signal_state.interface_name == trigger.interface
+
+                        if matches:
                             trigger_context = {
-                                "bus_name": signal.bus_name,
-                                "path": signal.path,
-                                "interface": signal.interface_name,
-                                "signal": signal.signal_config.signal,
-                                "args": signal.args
+                                "bus_name": signal_state.bus_name,
+                                "path": signal_state.path,
+                                "interface": signal_state.interface_name,
+                                "signal": signal_config.signal,
+                                "args": signal_state.args
                             }
                             trigger_message = FlowTriggerMessage(
                                 flow,
