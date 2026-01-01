@@ -67,8 +67,8 @@ Trigger configuration:
 
 | Name      | Type  | Description  | Default |
 |-----------|-------|--------------|---------|
-| interface | `str` | interface to filter on, e.g. 'org.freedesktop.DBus.Properties' | *required* |
 | signal    | `str` | signal name to filter on, e.g. PropertiesChanged | *required* |
+| interface | `str` \| `None` | interface to filter on, e.g. 'org.freedesktop.DBus.Properties' |  |
 
 When triggered, the following context parameters are available
 

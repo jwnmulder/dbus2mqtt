@@ -75,11 +75,11 @@ class FlowTriggerDbusSignalConfig:
         bus_name: ?.
         path: ?.
     """
-    interface: str  # documented, used in all examples, not used in a filter?
     signal: str
     type: Literal["dbus_signal"] = "dbus_signal"
-    bus_name: str | None = None  # Not documented, used by connman, not used in a filter?
-    path: str | None = None  # Not documented and used by connman, not used in a filter?
+    interface: str | None = None
+    bus_name: str | None = None
+    path: str | None = None
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
