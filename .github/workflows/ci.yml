@@ -45,7 +45,7 @@ jobs:
       # comments (to avoid publishing multiple comments in the same PR)
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
