@@ -217,3 +217,96 @@ async def test_dbus_signal_trigger():
         "signal": "TestSignal",
         "args": ["first-arg", "second-arg"]
     }
+
+@pytest.mark.asyncio
+async def test_dbus_signal_interface_matcher():
+
+    app_context = mocked_app_context()
+
+    _, _ = mocked_flow_processor(app_context,
+        triggers=[
+            FlowTriggerDbusSignalConfig(
+                signal="TestSignal",
+                interface="test-wrong-interface"
+            )
+        ],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                    }
+                }
+            )
+        ]
+    )
+
+    subscription_config = app_context.config.dbus.subscriptions[0]
+    dbus_client = mocked_dbus_client(app_context)
+
+    bus_name = "test.bus_name.testapp"
+    dbus_client._subscriptions[bus_name] = BusNameSubscriptions(bus_name, ":1.1")
+
+    signal = DbusSignalWithState(
+        bus_name=bus_name,
+        path="/",
+        interface_name=subscription_config.interfaces[0].interface,
+        subscription_config=subscription_config,
+        signal_config=SignalConfig(signal="TestSignal"),
+        args=[]
+    )
+
+    # trigger dbus_client and capture the triggered message
+    await dbus_client._handle_on_dbus_signal(signal)
+
+    # no flow trigger messages must exist on the queue as the interface filter did not match
+    assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
+
+@pytest.mark.asyncio
+async def test_dbus_signal_filter():
+
+    app_context = mocked_app_context()
+
+    _, _ = mocked_flow_processor(app_context,
+        triggers=[
+            FlowTriggerDbusSignalConfig(
+                signal="TestSignal"
+            )
+        ],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                    }
+                }
+            )
+        ]
+    )
+
+    # this is the filter want to test
+    subscription_signal_config = SignalConfig(
+        signal="TestSignal",
+        filter="{{ False }}"
+    )
+
+    subscription_config = app_context.config.dbus.subscriptions[0]
+    dbus_client = mocked_dbus_client(app_context)
+
+    bus_name = "test.bus_name.testapp"
+    dbus_client._subscriptions[bus_name] = BusNameSubscriptions(bus_name, ":1.1")
+
+    signal = DbusSignalWithState(
+        bus_name=bus_name,
+        path="/",
+        interface_name=subscription_config.interfaces[0].interface,
+        subscription_config=subscription_config,
+        signal_config=subscription_signal_config,
+        args=[]
+    )
+
+    # trigger dbus_client and capture the triggered message
+    await dbus_client._handle_on_dbus_signal(signal)
+
+    # no flow trigger messages must exist on the queue as the interface filter did not match
+    assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0

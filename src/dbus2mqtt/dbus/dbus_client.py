@@ -17,6 +17,7 @@ from dbus_fast.aio import MessageBus
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import (
+    FlowTriggerDbusSignalConfig,
     InterfaceConfig,
     MethodConfig,
     PropertyConfig,
@@ -345,7 +346,7 @@ class DbusClient:
 
         return signal_subscription_count
 
-    async def _process_interface(self, bus_name: str, path: str, introspection: dbus_introspection.Node, interface: dbus_introspection.Interface) -> list[SubscribedInterface]:
+    async def _process_interface(self, bus_name: str, path: str, interface: dbus_introspection.Interface) -> list[SubscribedInterface]:
 
         logger.debug(f"process_interface: {bus_name}, {path}, {interface.name}")
 
@@ -454,7 +455,7 @@ class DbusClient:
 
         for interface in introspection.interfaces:
             new_subscriptions.extend(
-                await self._process_interface(bus_name, path, introspection, interface)
+                await self._process_interface(bus_name, path, interface)
             )
 
         return new_subscriptions
@@ -708,7 +709,10 @@ class DbusClient:
                         await self._trigger_object_added(subscription_config, bus_name, object_path, object_interfaces)
 
     async def _trigger_flows(self, subscription_config: SubscriptionConfig, type: str, context: dict):
+        """Trigger subscription specific flows that have a corresponding trigger_type defined.
 
+        No filtering is done, if trigger.type matches, the flow is scheduled for execution.
+        """
         for flow in subscription_config.flows:
             for trigger in flow.triggers:
                 if trigger.type == type:
@@ -792,7 +796,7 @@ class DbusClient:
     async def mqtt_receive_queue_processor_task(self):
         """Continuously processes messages from the async queue."""
         while True:
-            msg, hints = await self.event_broker.mqtt_receive_queue.async_q.get()  # Wait for a message
+            msg, hints = await self.event_broker.mqtt_receive_queue.async_q.get()
             try:
                 await self._on_mqtt_msg(msg, hints)
             except Exception as e:
@@ -804,8 +808,12 @@ class DbusClient:
         """Continuously processes messages from the async queue."""
         while True:
             signal = await self._dbus_signal_queue.async_q.get()
-            await self._handle_on_dbus_signal(signal)
-            self._dbus_signal_queue.async_q.task_done()
+            try:
+                await self._handle_on_dbus_signal(signal)
+            except Exception as e:
+                logger.warning(f"dbus_signal_queue_processor_task: Exception: {e}", exc_info=True)
+            finally:
+                self._dbus_signal_queue.async_q.task_done()
 
     async def dbus_object_lifecycle_signal_processor_task(self):
         """Continuously processes messages from the async queue."""
@@ -814,38 +822,41 @@ class DbusClient:
             await self._handle_dbus_object_lifecycle_signal(message)
             self._dbus_object_lifecycle_signal_queue.async_q.task_done()
 
-    async def _handle_on_dbus_signal(self, signal: DbusSignalWithState):
+    async def _handle_on_dbus_signal(self, signal_state: DbusSignalWithState):
 
-        logger.debug(f"dbus_signal: signal={signal.signal_config.signal}, args={signal.args}, bus_name={signal.bus_name}, path={signal.path}, interface={signal.interface_name}")
+        signal_config = signal_state.signal_config
+        signal = signal_state.signal_config.signal
+        logger.debug(f"dbus_signal: signal={signal}, args={signal_state.args}, bus_name={signal_state.bus_name}, path={signal_state.path}, interface={signal_state.interface_name}")
 
-        for flow in signal.subscription_config.flows:
+        for flow in signal_state.subscription_config.flows:
             for trigger in flow.triggers:
-                if trigger.type == "dbus_signal" and signal.signal_config.signal == trigger.signal:
+                if trigger.type == FlowTriggerDbusSignalConfig.type:
+                    matches = signal_config.signal == trigger.signal
 
-                    try:
+                    # dbus signal subscriptions might have a filter configured
+                    if signal_config.filter is not None:
+                        matches &= signal_config.matches_filter(self.app_context.templating, *signal_state.args)
 
-                        matches_filter = True
-                        if signal.signal_config.filter is not None:
-                            matches_filter = signal.signal_config.matches_filter(self.app_context.templating, *signal.args)
+                    # dbus_signal triggers might have an interface configured
+                    if trigger.interface:
+                        matches &= signal_state.interface_name == trigger.interface
 
-                        if matches_filter:
-                            trigger_context = {
-                                "bus_name": signal.bus_name,
-                                "path": signal.path,
-                                "interface": signal.interface_name,
-                                "signal": signal.signal_config.signal,
-                                "args": signal.args
-                            }
-                            trigger_message = FlowTriggerMessage(
-                                flow,
-                                trigger,
-                                datetime.now(),
-                                trigger_context=trigger_context
-                            )
+                    if matches:
+                        trigger_context = {
+                            "bus_name": signal_state.bus_name,
+                            "path": signal_state.path,
+                            "interface": signal_state.interface_name,
+                            "signal": signal_config.signal,
+                            "args": signal_state.args
+                        }
+                        trigger_message = FlowTriggerMessage(
+                            flow,
+                            trigger,
+                            datetime.now(),
+                            trigger_context=trigger_context
+                        )
 
-                            await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
-                    except Exception as e:
-                        logger.warning(f"dbus_signal_queue_processor_task: Exception: {e}", exc_info=True)
+                        await self.event_broker.flow_trigger_queue.async_q.put(trigger_message)
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):
 
