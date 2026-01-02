@@ -72,8 +72,8 @@ class FlowTriggerDbusSignalConfig:
     Attributes:
         interface: Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'.
         signal: Signal name to filter on, e.g. PropertiesChanged.
-        bus_name: ?.
-        path: ?.
+        bus_name: undocumented, not used.
+        path: undocumented, not used.
     """
     signal: str
     type: Literal["dbus_signal"] = "dbus_signal"
@@ -81,13 +81,19 @@ class FlowTriggerDbusSignalConfig:
     bus_name: str | None = None
     path: str | None = None
 
+    def __post_init__(self):
+        if self.bus_name:
+            warnings.warn(f"{self.type} attribute 'bus_name' is not yet implemented.", UserWarning, stacklevel=2)
+        if self.path:
+            warnings.warn(f"{self.type} attribute 'path' is not yet implemented.", UserWarning, stacklevel=2)
+
 @dataclass
 class FlowTriggerBusNameAddedConfig:
     """Configuration for 'bus_name_adde' flow trigger (DEPRECATED)."""
     type: Literal["bus_name_added"] = "bus_name_added"
 
     def __post_init__(self):
-        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", FutureWarning, stacklevel=2)
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
@@ -95,7 +101,7 @@ class FlowTriggerBusNameRemovedConfig:
     type: Literal["bus_name_removed"] = "bus_name_removed"
 
     def __post_init__(self):
-        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", DeprecationWarning, stacklevel=2)
+        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", FutureWarning, stacklevel=2)
 
 @dataclass
 class FlowTriggerDbusObjectAddedConfig:
@@ -104,7 +110,7 @@ class FlowTriggerDbusObjectAddedConfig:
 
     def __post_init__(self):
         if self.type != FlowTriggerDbusObjectAddedConfig.type:
-            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", FutureWarning, stacklevel=2)
             self.type = FlowTriggerDbusObjectAddedConfig.type
 
 @dataclass
@@ -114,7 +120,7 @@ class FlowTriggerDbusObjectRemovedConfig:
 
     def __post_init__(self):
         if self.type != FlowTriggerDbusObjectRemovedConfig.type:
-            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.", DeprecationWarning, stacklevel=2)
+            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.", FutureWarning, stacklevel=2)
             self.type = FlowTriggerDbusObjectRemovedConfig.type
 
 @dataclass
