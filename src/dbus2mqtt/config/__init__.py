@@ -13,7 +13,7 @@ from dbus2mqtt.template.templating import TemplateEngine
 @dataclass
 class SignalConfig:
     signal: str
-    filter: str | None = None
+    filter: str | None = None  # Deprecate this?, see #280
 
     def matches_filter(self, template_engine: TemplateEngine, *args) -> bool:
         if self.filter:

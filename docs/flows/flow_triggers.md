@@ -68,7 +68,7 @@ Trigger configuration:
 | Name      | Type  | Description  | Default |
 |-----------|-------|--------------|---------|
 | signal    | `str` | signal name to filter on, e.g. PropertiesChanged | *required* |
-| interface | `str` \| `None` | interface to filter on, e.g. 'org.freedesktop.DBus.Properties' |  |
+| interface | `str` \| `None` | interface to filter on, e.g. `org.freedesktop.DBus.Properties` |  |
 
 When triggered, the following context parameters are available
 
@@ -80,6 +80,17 @@ When triggered, the following context parameters are available
 | interface    | `str`  | name of interface for which the signal was triggered |
 | signal       | `str`  | name of the signal, e.g. 'Seeked' |
 | args         | `list` | signal arguments, list of objects |
+
+!!! note
+     Take care with `PropertiesChanged` signals. These always originate from `org.freedesktop.DBus.Properties`. They contain the real interface the event originated from as their first argument. To filter on that interface you can use the `conditions` configuration on flows.
+     ```yaml
+     flows:
+       - name: PropertiesChanged in player interface
+         triggers:
+           - type: dbus_signal
+         conditions:
+           - "{{ args[0] == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+     ```
 
 ## mqtt_message
 
