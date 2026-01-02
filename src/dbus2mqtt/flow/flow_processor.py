@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-from datetime import datetime
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -23,6 +22,7 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
 
 logger = logging.getLogger(__name__)
@@ -33,10 +33,10 @@ class FlowScheduler:
         self.config = app_context.config
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
+        self._trigger_processor = FlowTriggerProcessor(app_context)
 
-    async def _schedule_flow_strigger(self, flow, trigger_config: FlowTriggerConfig):
-        trigger = FlowTriggerMessage(flow, trigger_config, datetime.now())
-        await self.event_broker.flow_trigger_queue.async_q.put(trigger)
+    async def _schedule_flow_trigger(self, flow, trigger_config: FlowTriggerConfig):
+        await self._trigger_processor.trigger_flow(flow, trigger_config, {})
 
     async def scheduler_task(self):
 
@@ -61,7 +61,7 @@ class FlowScheduler:
                             trigger_args: dict[str, Any] = trigger.interval
                             # Each schedule gets its own job
                             self.scheduler.add_job(
-                                self._schedule_flow_strigger,
+                                self._schedule_flow_trigger,
                                 "interval",
                                 id=trigger.id,
                                 max_instances=1,
@@ -74,7 +74,7 @@ class FlowScheduler:
                             trigger_args: dict[str, Any] = trigger.cron
                             # Each schedule gets its own job
                             self.scheduler.add_job(
-                                self._schedule_flow_strigger,
+                                self._schedule_flow_trigger,
                                 "cron",
                                 id=trigger.id,
                                 max_instances=1,
@@ -139,6 +139,7 @@ class FlowProcessor:
         self.event_broker = app_context.event_broker
 
         self._global_context: dict[str, Any] = {}
+        self._trigger_processor = FlowTriggerProcessor(app_context)
 
         self._flows: dict[str, FlowActionContext] = {}
 
@@ -232,7 +233,8 @@ class FlowProcessor:
 
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
-            await self._trigger_context_changed({"scope": "global"})
+            trigger_context = {"scope": "global"}
+            await self._trigger_processor.trigger_all_flows(FlowTriggerContextChangedConfig.type, trigger_context)
 
     def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:
         """Per flow execution context allows for updates during flow execution without affecting other executions.
@@ -267,25 +269,3 @@ class FlowProcessor:
                 return False
 
         return True
-
-    async def _trigger_context_changed(self, trigger_context: dict):
-        """Trigger all flows that have a context_changed defined.
-
-        Global scope changes are triggered to all global and subscription specific flows
-        """
-        all_flows: list[FlowConfig] = []
-        all_flows.extend(self.app_context.config.flows)
-        for subscription in self.app_context.config.dbus.subscriptions:
-            all_flows.extend(subscription.flows)
-
-        for flow in all_flows:
-            for trigger in flow.triggers:
-                if trigger.type == FlowTriggerContextChangedConfig.type:
-                    trigger_message = FlowTriggerMessage(
-                        flow,
-                        trigger,
-                        datetime.now(),
-                        trigger_context=trigger_context,
-                    )
-
-                    self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)

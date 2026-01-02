@@ -4,7 +4,6 @@ import logging
 import random
 import string
 
-from datetime import datetime
 from typing import Any, Literal
 from urllib.parse import ParseResult
 from urllib.request import urlopen
@@ -19,7 +18,8 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowConfig, FlowTriggerMqttMessageConfig
-from dbus2mqtt.event_broker import FlowTriggerMessage, MqttMessage, MqttReceiveHints
+from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,8 @@ class MqttClient:
         self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
+
+        self._trigger_processor = FlowTriggerProcessor(app_context)
 
         unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.client_id_prefix = "dbus2mqtt-"
@@ -179,7 +181,7 @@ class MqttClient:
         logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={log_payload}")
 
         # Publish to flow trigger queue for any configured mqtt_message triggers
-        flow_trigger_messages = self._trigger_flows(msg.topic, payload, json_payload)
+        flow_triggered = self._trigger_flows(msg.topic, payload, json_payload)
 
         # Publish on a queue that is being processed by dbus_client
         # Messages on the mqtt_receive_queue are all expected to have json payloads
@@ -188,14 +190,15 @@ class MqttClient:
             self.event_broker.on_mqtt_receive(
                 MqttMessage(msg.topic, json_payload),
                 MqttReceiveHints(
-                    log_unmatched_message=len(flow_trigger_messages) == 0
+                    log_unmatched_message=flow_triggered
                 )
             )
 
-    def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> list[FlowTriggerMessage]:
+    def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> bool:
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic and configured filters."""
-        flow_trigger_messages = []
+        flow_triggered = False
 
+        # TODO: clean
         all_flows: list[FlowConfig] = []
         all_flows.extend(self.app_context.config.flows)
         for subscription in self.app_context.config.dbus.subscriptions:
@@ -220,14 +223,7 @@ class MqttClient:
                         matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
 
                     if matches_filter:
-                        trigger_message = FlowTriggerMessage(
-                            flow,
-                            trigger,
-                            datetime.now(),
-                            trigger_context=trigger_context,
-                        )
+                        self._trigger_processor.trigger_flow_sync(flow, trigger, trigger_context)
+                        flow_triggered = True
 
-                        flow_trigger_messages.append(trigger_message)
-                        self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
-
-        return flow_trigger_messages
+        return flow_triggered
