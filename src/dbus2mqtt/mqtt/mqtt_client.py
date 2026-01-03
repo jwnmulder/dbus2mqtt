@@ -19,7 +19,10 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowConfig, FlowTriggerMqttMessageConfig
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
-from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.flow.flow_trigger_processor import (
+    FlowTriggerMqttMessageHandler,
+    FlowTriggerProcessor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -196,34 +199,12 @@ class MqttClient:
 
     def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> bool:
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic and configured filters."""
-        flow_triggered = False
-
-        # TODO: clean
-        all_flows: list[FlowConfig] = []
-        all_flows.extend(self.app_context.config.flows)
-        for subscription in self.app_context.config.dbus.subscriptions:
-            all_flows.extend(subscription.flows)
-
-        for flow in all_flows:
-            for trigger in flow.triggers:
-                if trigger.type == FlowTriggerMqttMessageConfig.type:
-
-                    # Use the correct payload type which is configured for the trigger
-                    trigger_context_payload: Any = payload
-                    if trigger.content_type == "json":
-                        trigger_context_payload = json_payload
-
-                    trigger_context: dict[str, Any] = {
-                        "topic": topic,
-                        "payload": trigger_context_payload,
-                    }
-
-                    matches_filter = trigger.topic == topic
-                    if matches_filter and trigger.filter is not None:
-                        matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
-
-                    if matches_filter:
-                        self._trigger_processor.trigger_flow_sync(flow, trigger, trigger_context)
-                        flow_triggered = True
+        trigger_context: dict[str, Any] = {
+            "topic": topic,
+        }
+        flow_trigger_handler = FlowTriggerMqttMessageHandler(trigger_context, topic, payload, json_payload)
+        flow_triggered = self._trigger_processor.trigger_all_flows_sync(
+            flow_trigger_handler
+        )
 
         return flow_triggered
