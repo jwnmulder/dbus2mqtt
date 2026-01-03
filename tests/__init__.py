@@ -5,12 +5,7 @@ import dbus_fast.aio as dbus_aio
 from jsonargparse.typing import SecretStr
 
 from dbus2mqtt import AppContext, config
-from dbus2mqtt.config import (
-    FlowActionConfig,
-    FlowConfig,
-    FlowTriggerConfig,
-    InterfaceConfig,
-)
+from dbus2mqtt.config import FlowActionConfig, FlowConfig, FlowTriggerConfig, InterfaceConfig
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler

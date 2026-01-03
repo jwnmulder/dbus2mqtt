@@ -3,11 +3,7 @@ import logging
 from datetime import datetime
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import (
-    FlowConfig,
-    FlowTriggerConfig,
-    SubscriptionConfig,
-)
+from dbus2mqtt.config import FlowConfig, FlowTriggerConfig, SubscriptionConfig
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 

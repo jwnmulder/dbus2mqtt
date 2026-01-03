@@ -2,10 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from dbus2mqtt.config import (
-    FlowActionLogConfig,
-    FlowTriggerScheduleConfig,
-)
+from dbus2mqtt.config import FlowActionLogConfig, FlowTriggerScheduleConfig
 from dbus2mqtt.flow.flow_processor import FlowTriggerMessage
 from tests import mocked_app_context, mocked_flow_processor
 

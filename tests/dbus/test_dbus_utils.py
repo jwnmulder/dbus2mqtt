@@ -2,10 +2,7 @@ import pytest
 
 from dbus_fast import SignatureTree, Variant
 
-from dbus2mqtt.dbus.dbus_util import (
-    _convert_and_wrap_in_variant,
-    convert_mqtt_args_to_dbus,
-)
+from dbus2mqtt.dbus.dbus_util import _convert_and_wrap_in_variant, convert_mqtt_args_to_dbus
 
 
 class TestConvertMqttArgsToDbus:

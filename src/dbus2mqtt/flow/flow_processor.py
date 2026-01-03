@@ -23,9 +23,7 @@ from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
-from dbus2mqtt.flow.flow_trigger_processor import (
-    FlowTriggerProcessor,
-)
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
 
 logger = logging.getLogger(__name__)

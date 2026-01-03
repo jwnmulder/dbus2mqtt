@@ -25,30 +25,19 @@ from dbus2mqtt.config import (
     MethodConfig,
     PropertyConfig,
 )
-from dbus2mqtt.dbus.dbus_types import (
-    BusNameSubscriptions,
-    DbusSignalWithState,
-    SubscribedInterface,
-)
+from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState, SubscribedInterface
 from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     convert_mqtt_args_to_dbus,
     unwrap_dbus_object,
     unwrap_dbus_objects,
 )
-from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
-    mpris_introspection_playerctl,
-)
+from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import mpris_introspection_playerctl
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
-from dbus2mqtt.flow.flow_trigger_handlers import (
-    FlowTriggerDbusSignalHandler,
-    FlowTriggerHandler,
-)
-from dbus2mqtt.flow.flow_trigger_processor import (
-    FlowTriggerProcessor,
-)
+from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 
 logger = logging.getLogger(__name__)
 

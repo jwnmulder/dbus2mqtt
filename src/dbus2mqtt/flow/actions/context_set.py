@@ -1,9 +1,7 @@
 import logging
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import (
-    FlowActionContextSetConfig,
-)
+from dbus2mqtt.config import FlowActionContextSetConfig
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 
 logger = logging.getLogger(__name__)

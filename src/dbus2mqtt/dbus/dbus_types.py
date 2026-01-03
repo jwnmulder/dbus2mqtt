@@ -3,10 +3,7 @@ from typing import Any
 
 import dbus_fast.aio as dbus_aio
 
-from dbus2mqtt.config import (
-    SignalConfig,
-    SubscriptionConfig,
-)
+from dbus2mqtt.config import SignalConfig, SubscriptionConfig
 
 
 class BusNameSubscriptions:

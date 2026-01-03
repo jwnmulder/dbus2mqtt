@@ -12,11 +12,7 @@ from dbus2mqtt.config import (
     SignalConfig,
 )
 from dbus2mqtt.dbus.dbus_client import DbusClient
-from dbus2mqtt.dbus.dbus_types import (
-    BusNameSubscriptions,
-    DbusSignalWithState,
-    SubscribedInterface,
-)
+from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState, SubscribedInterface
 from tests import mocked_app_context, mocked_dbus_client, mocked_flow_processor
 
 
