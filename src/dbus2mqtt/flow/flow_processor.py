@@ -22,8 +22,8 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import (
-    FlowTriggerAlwaysTrueHandler,
     FlowTriggerProcessor,
 )
 from dbus2mqtt.template.templating import TemplateEngine
@@ -42,7 +42,7 @@ class FlowScheduler:
         await self._trigger_processor.trigger_flow(
             flow,
             trigger_config,
-            FlowTriggerAlwaysTrueHandler(trigger_config.type, {})
+            FlowTriggerHandler(trigger_config.type, {})
         )
 
     async def scheduler_task(self):
@@ -242,7 +242,7 @@ class FlowProcessor:
         if flow_execution_context.global_context_updated:
             trigger_context = {"scope": "global"}
             await self._trigger_processor.trigger_all_flows(
-                FlowTriggerAlwaysTrueHandler(FlowTriggerContextChangedConfig.type, trigger_context)
+                FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context)
             )
 
     def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:

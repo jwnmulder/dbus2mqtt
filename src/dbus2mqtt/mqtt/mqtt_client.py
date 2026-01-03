@@ -19,8 +19,8 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowConfig, FlowTriggerMqttMessageConfig
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
+from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerMqttMessageHandler
 from dbus2mqtt.flow.flow_trigger_processor import (
-    FlowTriggerMqttMessageHandler,
     FlowTriggerProcessor,
 )
 
