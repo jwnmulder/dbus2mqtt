@@ -67,12 +67,6 @@ class DbusClient:
 
         self._bus_init_lock = asyncio.Lock()
 
-        self._name_owner_match_rule = "sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',path='/org/freedesktop/DBus',member='NameOwnerChanged'"
-        self._interfaces_added_match_rule = (
-            "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesAdded'"
-        )
-        self._interfaces_removed_match_rule = "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
-
     async def _reconnect(self):
         """Initializes a new MessageBus, clears all subscriptions and re-connects to DBus."""
         async with self._bus_init_lock:
@@ -131,9 +125,15 @@ class DbusClient:
         # Setup signal handler and match rules
         try:
             self._bus.add_message_handler(self.object_lifecycle_signal_handler)
-            await self._add_match_rule(self._name_owner_match_rule)
-            await self._add_match_rule(self._interfaces_added_match_rule)
-            await self._add_match_rule(self._interfaces_removed_match_rule)
+            await self._add_match_rule(
+                "sender='org.freedesktop.DBus',interface='org.freedesktop.DBus',path='/org/freedesktop/DBus',member='NameOwnerChanged'"
+            )
+            await self._add_match_rule(
+                "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesAdded'"
+            )
+            await self._add_match_rule(
+                "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
+            )
         except Exception as e:
             # Disconnect if setup of listeners didn't succeed
             self._bus.disconnect()

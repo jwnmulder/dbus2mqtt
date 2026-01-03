@@ -181,9 +181,8 @@ class FlowProcessor:
         # logger.info(f"flow_processor_task: configuring flows={[f.name for f in self.app_context.config.flows]}")
 
         while True:
-            flow_trigger_message = (
-                await self.event_broker.flow_trigger_queue.async_q.get()
-            )  # Wait for a message
+            flow_trigger_message = await self.event_broker.flow_trigger_queue.async_q.get()
+
             try:
                 await self._process_flow_trigger(flow_trigger_message)
 
