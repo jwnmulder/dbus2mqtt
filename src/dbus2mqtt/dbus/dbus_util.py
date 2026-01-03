@@ -10,6 +10,7 @@ from dbus_fast import Variant
 
 logger = logging.getLogger(__name__)
 
+
 def unwrap_dbus_object(obj):
     if isinstance(obj, dict):
         return {k: unwrap_dbus_object(v) for k, v in obj.items()}
@@ -18,16 +19,19 @@ def unwrap_dbus_object(obj):
     elif isinstance(obj, dbus_signature.Variant):
         return unwrap_dbus_object(obj.value)
     elif isinstance(obj, bytes):
-        return base64.b64encode(obj).decode('utf-8')
+        return base64.b64encode(obj).decode("utf-8")
     else:
         return obj
+
 
 def unwrap_dbus_objects(args):
     res = [unwrap_dbus_object(o) for o in args]
     return res
 
+
 def camel_to_snake(name):
-    return re.sub(r'([a-z])([A-Z])', r'\1_\2', name).lower()
+    return re.sub(r"([a-z])([A-Z])", r"\1_\2", name).lower()
+
 
 def _convert_value_to_dbus(value: Any) -> Any:
     """Recursively convert a single value to D-Bus compatible type.
@@ -79,8 +83,11 @@ def _convert_value_to_dbus(value: Any) -> Any:
 
     else:
         # For any other type, try to convert to string as fallback
-        logger.warning(f"Unknown type {type(value)} for D-Bus conversion, converting to string: {value}")
+        logger.warning(
+            f"Unknown type {type(value)} for D-Bus conversion, converting to string: {value}"
+        )
         return str(value)
+
 
 def _get_dbus_signature(value: Any) -> str:
     """Get the appropriate D-Bus signature for a value.
@@ -92,7 +99,7 @@ def _get_dbus_signature(value: Any) -> str:
         D-Bus type signature string
     """
     if isinstance(value, bool):
-        return 'b'  # boolean
+        return "b"  # boolean
     elif isinstance(value, int):
         uint16_min = 0
         uint16_max = 0xFFFF
@@ -106,31 +113,32 @@ def _get_dbus_signature(value: Any) -> str:
         uint64_max = 18446744073709551615
 
         if uint16_min <= value <= uint16_max:
-            return 'q'  # 16-bit unsigned int
+            return "q"  # 16-bit unsigned int
         elif int16_min <= value <= int16_max:
-            return 'n'  # 16-bit signed int
+            return "n"  # 16-bit signed int
         elif uint32_min <= value <= uint32_max:
-            return 'u'  # 32-bit unsigned int
+            return "u"  # 32-bit unsigned int
         elif int32_min <= value <= int32_max:
-            return 'i'  # 32-bit signed integer
+            return "i"  # 32-bit signed integer
         elif uint64_min <= value <= uint64_max:
-            return 't'  # 64-bit unsigned integer
+            return "t"  # 64-bit unsigned integer
         else:
-            return 'x'  # 64-bit signed integer
+            return "x"  # 64-bit signed integer
     elif isinstance(value, float):
-        return 'd'  # double
+        return "d"  # double
     elif isinstance(value, str):
-        return 's'  # string
+        return "s"  # string
     elif isinstance(value, list):
         if not value:
-            return 'as'  # assume array of strings for empty arrays
+            return "as"  # assume array of strings for empty arrays
         # Get signature of first element and assume homogeneous array
         element_sig = _get_dbus_signature(value[0])
-        return f'a{element_sig}'  # array of elements
+        return f"a{element_sig}"  # array of elements
     elif isinstance(value, dict):
-        return 'a{sv}'  # dictionary of string to variant
+        return "a{sv}"  # dictionary of string to variant
     else:
-        return 's'  # fallback to string
+        return "s"  # fallback to string
+
 
 # Wraps all complex types in VariantList
 def convert_mqtt_args_to_dbus(args: list[Any]) -> list[Any]:
@@ -149,6 +157,7 @@ def convert_mqtt_args_to_dbus(args: list[Any]) -> list[Any]:
         converted_args.append(converted_arg)
 
     return converted_args
+
 
 def _convert_and_wrap_in_variant(value: Any) -> Any:
     """Convert a value and wrap complex types in Variants."""

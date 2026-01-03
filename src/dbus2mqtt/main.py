@@ -38,8 +38,9 @@ async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowSched
         asyncio.create_task(dbus_client.dbus_connection_monitor()),
         asyncio.create_task(dbus_client.dbus_signal_queue_processor_task()),
         asyncio.create_task(dbus_client.mqtt_receive_queue_processor_task()),
-        asyncio.create_task(dbus_client.dbus_object_lifecycle_signal_processor_task())
+        asyncio.create_task(dbus_client.dbus_object_lifecycle_signal_processor_task()),
     )
+
 
 async def mqtt_processor_task(app_context: AppContext):
 
@@ -54,25 +55,25 @@ async def mqtt_processor_task(app_context: AppContext):
     try:
         await asyncio.gather(
             mqtt_client_run_future,
-            asyncio.create_task(mqtt_client.mqtt_publish_queue_processor_task())
+            asyncio.create_task(mqtt_client.mqtt_publish_queue_processor_task()),
         )
     except asyncio.CancelledError:
         mqtt_client.client.loop_stop()
+
 
 async def flow_processor_task(app_context: AppContext):
 
     flow_processor = FlowProcessor(app_context)
 
-    await asyncio.gather(
-        asyncio.create_task(flow_processor.flow_processor_task())
-    )
+    await asyncio.gather(asyncio.create_task(flow_processor.flow_processor_task()))
 
-async def run(config: Config):
+
+async def run(app_config: Config):
 
     event_broker = EventBroker()
     template_engine = TemplateEngine()
 
-    app_context = AppContext(config, event_broker, template_engine)
+    app_context = AppContext(app_config, event_broker, template_engine)
 
     flow_scheduler = FlowScheduler(app_context)
 
@@ -81,24 +82,27 @@ async def run(config: Config):
             dbus_processor_task(app_context, flow_scheduler),
             mqtt_processor_task(app_context),
             flow_processor_task(app_context),
-            asyncio.create_task(flow_scheduler.scheduler_task())
+            asyncio.create_task(flow_scheduler.scheduler_task()),
         )
     except asyncio.CancelledError:
         pass
+
 
 def setup_logging(verbose: bool):
 
     handler = colorlog.StreamHandler(stream=sys.stdout)
     handler.addFilter(NamePartsFilter())
-    handler.setFormatter(colorlog.ColoredFormatter(
-        '%(log_color)s%(levelname)s:%(name_last)s:%(message)s',
-        log_colors={
-            "DEBUG": "light_black",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "bold_red",
-        }
-    ))
+    handler.setFormatter(
+        colorlog.ColoredFormatter(
+            "%(log_color)s%(levelname)s:%(name_last)s:%(message)s",
+            log_colors={
+                "DEBUG": "light_black",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "bold_red",
+            },
+        )
+    )
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG, handlers=[handler])
@@ -110,6 +114,7 @@ def setup_logging(verbose: bool):
     logging.captureWarnings(capture=True)
     warnings.filterwarnings("default", category=DeprecationWarning)
 
+
 def main():
 
     # load environment from .env if it exists
@@ -120,8 +125,10 @@ def main():
 
     parser = new_argument_parser()
 
-    parser.add_argument("--verbose", "-v", nargs="?", const=True, help="Enable verbose logging")
-    parser.add_argument("--config", action="config")
+    parser.add_argument(
+        "--verbose", "-v", nargs="?", const=True, default=False, help="Enable verbose logging"
+    )
+    parser.add_argument("--config", action="config", help="Path to a dbus2mqtt configuration file")
     parser.add_class_arguments(Config)
 
     cfg = parser.parse_args()
@@ -129,21 +136,23 @@ def main():
     setup_logging(cfg.verbose)
 
     cfg = parser.instantiate_classes(cfg)
-    config = ns_to_cls(Config, cfg)
+    app_config = ns_to_cls(Config, cfg)
 
-    logger.debug(f"config: {config}")
+    logger.debug(f"config: {app_config}")
 
     try:
-        asyncio.run(run(config))
+        asyncio.run(run(app_config))
     except KeyboardInterrupt:
         return 0
 
+
 class NamePartsFilter(logging.Filter):
     def filter(self, record):
-        record.name_last = record.name.rsplit('.', 1)[-1]
+        record.name_last = record.name.rsplit(".", 1)[-1]
         return True
 
-def ns_to_cls(cls, ns: Namespace) :
+
+def ns_to_cls(cls, ns: Namespace):
     ns_dict = vars(ns)
     allowed_keys = {f.name for f in fields(cls)}
     filtered = {k: v for k, v in ns_dict.items() if k in allowed_keys}

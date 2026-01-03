@@ -1,4 +1,3 @@
-
 import logging
 
 from jinja2.exceptions import TemplateError
@@ -9,8 +8,8 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 
 logger = logging.getLogger(__name__)
 
-class LogAction(FlowAction):
 
+class LogAction(FlowAction):
     def __init__(self, config: FlowActionLogConfig, app_context: AppContext):
         self.config = config
         self.templating = app_context.templating
@@ -24,13 +23,14 @@ class LogAction(FlowAction):
 
         try:
             log_msg = await self.templating.async_render_template(
-                templatable=self.config.msg,
-                context=render_context,
-                res_type=str
+                templatable=self.config.msg, context=render_context, res_type=str
             )
 
         except TemplateError as e:
-            logger.warning(f"Error rendering jinja template, flow: '{context.name or ''}', msg={e}, msg={self.config.msg}, render_context={render_context}", exc_info=True)
+            logger.warning(
+                f"Error rendering jinja template, flow: '{context.name or ''}', msg={e}, msg={self.config.msg}, render_context={render_context}",
+                exc_info=True,
+            )
             return
 
         logger.log(level=log_level, msg=log_msg)

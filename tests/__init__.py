@@ -5,12 +5,7 @@ import dbus_fast.aio as dbus_aio
 from jsonargparse.typing import SecretStr
 
 from dbus2mqtt import AppContext, config
-from dbus2mqtt.config import (
-    FlowActionConfig,
-    FlowConfig,
-    FlowTriggerConfig,
-    InterfaceConfig,
-)
+from dbus2mqtt.config import FlowActionConfig, FlowConfig, FlowTriggerConfig, InterfaceConfig
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
@@ -26,21 +21,12 @@ def mocked_app_context():
                 config.SubscriptionConfig(
                     bus_name="test.bus_name.*",
                     path="/",
-                    interfaces=[
-                        InterfaceConfig(
-                            interface="test-interface-name"
-                        )
-                    ]
-
+                    interfaces=[InterfaceConfig(interface="test-interface-name")],
                 )
             ]
         ),
-        mqtt=config.MqttConfig(
-            host="localhost",
-            username="test",
-            password=SecretStr("test")
-        ),
-        flows=[]
+        mqtt=config.MqttConfig(host="localhost", username="test", password=SecretStr("test")),
+        flows=[],
     )
 
     event_broker = EventBroker()
@@ -49,7 +35,13 @@ def mocked_app_context():
 
     return app_context
 
-def mocked_flow_processor(app_context: AppContext, triggers: list[FlowTriggerConfig], actions: list[FlowActionConfig], conditions: list[str] = []):
+
+def mocked_flow_processor(
+    app_context: AppContext,
+    triggers: list[FlowTriggerConfig],
+    actions: list[FlowActionConfig],
+    conditions: list[str] = [],
+):
 
     flow_config = FlowConfig(triggers=triggers, actions=actions, conditions=conditions)
 
@@ -58,10 +50,10 @@ def mocked_flow_processor(app_context: AppContext, triggers: list[FlowTriggerCon
     processor = FlowProcessor(app_context)
     return processor, flow_config
 
+
 def mocked_dbus_client(app_context: AppContext):
 
     with patch("socket.socket", autospec=True):
-
         flow_scheduler = FlowScheduler(app_context)
 
         bus = dbus_aio.message_bus.MessageBus(bus_address="unix:path=/test-path")
@@ -69,6 +61,7 @@ def mocked_dbus_client(app_context: AppContext):
 
         dbus_client = DbusClient(app_context, flow_scheduler, bus)
         return dbus_client
+
 
 def mocked_mqtt_client(app_context: AppContext):
 

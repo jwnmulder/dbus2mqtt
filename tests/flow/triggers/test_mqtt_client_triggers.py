@@ -13,13 +13,10 @@ async def test_mqtt_message_trigger():
     test_payload = {
         "action": "test-action",
     }
-    trigger_config = FlowTriggerMqttMessageConfig(
-        topic=test_topic,
-        filter="{{ true }}"
-    )
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, filter="{{ true }}")
 
     app_context = mocked_app_context()
-    processor =_mocked_flow_processor(app_context, trigger_config)
+    processor = _mocked_flow_processor(app_context, trigger_config)
     mqtt_client = mocked_mqtt_client(app_context)
 
     mqtt_client._trigger_flows(topic=test_topic, payload="", json_payload=test_payload)
@@ -33,8 +30,9 @@ async def test_mqtt_message_trigger():
     assert processor._global_context["res"] == {
         "trigger_type": "mqtt_message",
         "topic": test_topic,
-        "payload": test_payload
+        "payload": test_payload,
     }
+
 
 @pytest.mark.asyncio
 async def test_mqtt_message_trigger_filter_true():
@@ -43,10 +41,7 @@ async def test_mqtt_message_trigger_filter_true():
     test_payload = {
         "action": "test-action",
     }
-    trigger_config = FlowTriggerMqttMessageConfig(
-        topic=test_topic,
-        filter="{{ true }}"
-    )
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, filter="{{ true }}")
 
     app_context = mocked_app_context()
     _ = _mocked_flow_processor(app_context, trigger_config)
@@ -56,6 +51,7 @@ async def test_mqtt_message_trigger_filter_true():
 
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 1
 
+
 @pytest.mark.asyncio
 async def test_mqtt_message_trigger_filter_false():
 
@@ -63,30 +59,34 @@ async def test_mqtt_message_trigger_filter_false():
     test_payload = {
         "action": "test-action",
     }
-    trigger_config = FlowTriggerMqttMessageConfig(
-        topic=test_topic,
-        filter="{{ false }}"
-    )
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, filter="{{ false }}")
 
     app_context = mocked_app_context()
-    _ =_mocked_flow_processor(app_context, trigger_config)
+    _ = _mocked_flow_processor(app_context, trigger_config)
     mqtt_client = mocked_mqtt_client(app_context)
 
     mqtt_client._trigger_flows(topic=test_topic, payload="", json_payload=test_payload)
 
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
 
-def _mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig) -> FlowProcessor:
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "topic": "{{ topic }}",
-                    "payload": "{{ payload }}"
+
+def _mocked_flow_processor(
+    app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig
+) -> FlowProcessor:
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "topic": "{{ topic }}",
+                        "payload": "{{ payload }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     return processor

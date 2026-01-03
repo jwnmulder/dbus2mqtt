@@ -4,7 +4,6 @@ import logging
 import random
 import string
 
-from datetime import datetime
 from typing import Any, Literal
 from urllib.parse import ParseResult
 from urllib.request import urlopen
@@ -19,30 +18,35 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowConfig, FlowTriggerMqttMessageConfig
-from dbus2mqtt.event_broker import FlowTriggerMessage, MqttMessage, MqttReceiveHints
+from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
+from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerMqttMessageHandler
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 
 logger = logging.getLogger(__name__)
 
-class MqttClient:
 
+class MqttClient:
     def __init__(self, app_context: AppContext, loop):
         self.app_context = app_context
         self.config = app_context.config.mqtt
         self.event_broker = app_context.event_broker
 
-        unique_client_id_postfix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        self._trigger_processor = FlowTriggerProcessor(app_context)
+
+        unique_client_id_postfix = "".join(
+            random.choices(string.ascii_lowercase + string.digits, k=6)
+        )
         self.client_id_prefix = "dbus2mqtt-"
         self.client_id = f"{self.client_id_prefix}{unique_client_id_postfix}"
 
         self.client = mqtt.Client(
             client_id=self.client_id,
             protocol=mqtt.MQTTv5,
-            callback_api_version=CallbackAPIVersion.VERSION2
+            callback_api_version=CallbackAPIVersion.VERSION2,
         )
 
         self.client.username_pw_set(
-            username=self.config.username,
-            password=self.config.password.get_secret_value()
+            username=self.config.username, password=self.config.password.get_secret_value()
         )
 
         self.client.on_connect = self.on_connect
@@ -51,17 +55,21 @@ class MqttClient:
         self.loop = loop
         self.connected_event = asyncio.Event()
 
-        self.topic_content_types: dict[str, Literal["json", "text"]] = self._init_topic_content_types(app_context)
+        self.topic_content_types: dict[str, Literal["json", "text"]] = (
+            self._init_topic_content_types(app_context)
+        )
 
     def connect(self):
 
         self.client.connect_async(
             host=self.config.host,
             port=self.config.port,
-            clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY
+            clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY,
         )
 
-    def _init_topic_content_types(self, app_context: AppContext) -> dict[str, Literal["json", "text"]]:
+    def _init_topic_content_types(
+        self, app_context: AppContext
+    ) -> dict[str, Literal["json", "text"]]:
 
         topic_content_types: dict[str, Literal["json", "text"]] = {}
 
@@ -109,10 +117,15 @@ class MqttClient:
                     except Exception as e:
                         # In case failing uri reads, we still publish an empty msg to avoid stale data
                         payload = None
-                        logger.warning(f"mqtt_publish_queue_processor_task: Exception: {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
+                        logger.warning(
+                            f"mqtt_publish_queue_processor_task: Exception: {e}",
+                            exc_info=logger.isEnabledFor(logging.DEBUG),
+                        )
 
                 payload_log_msg = payload if isinstance(payload, str) else msg.payload
-                logger.debug(f"mqtt_publish_queue_processor_task: topic={msg.topic}, type={payload.__class__}, payload={payload_log_msg}")
+                logger.debug(
+                    f"mqtt_publish_queue_processor_task: topic={msg.topic}, type={payload.__class__}, payload={payload_log_msg}"
+                )
 
                 if first_message:
                     await asyncio.wait_for(self.connected_event.wait(), timeout=5)
@@ -121,18 +134,21 @@ class MqttClient:
                 publish_properties.UserProperty = ("client_id", self.client_id)
 
                 publish_info = self.client.publish(
-                    topic=msg.topic,
-                    payload=payload or "",
-                    properties=publish_properties
+                    topic=msg.topic, payload=payload or "", properties=publish_properties
                 )
                 publish_info.wait_for_publish(timeout=1000)
 
                 if first_message:
-                    logger.info(f"First message published: topic={msg.topic}, payload={payload_log_msg}")
+                    logger.info(
+                        f"First message published: topic={msg.topic}, payload={payload_log_msg}"
+                    )
                     first_message = False
 
             except Exception as e:
-                logger.warning(f"mqtt_publish_queue_processor_task: Exception: {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
+                logger.warning(
+                    f"mqtt_publish_queue_processor_task: Exception: {e}",
+                    exc_info=logger.isEnabledFor(logging.DEBUG),
+                )
             finally:
                 self.event_broker.mqtt_publish_queue.async_q.task_done()
 
@@ -143,7 +159,9 @@ class MqttClient:
         else:
             logger.info(f"on_connect: Connected to {self.config.host}:{self.config.port}")
 
-            subscriptions = [(t, SubscribeOptions(noLocal=True)) for t in self.config.subscription_topics]
+            subscriptions = [
+                (t, SubscribeOptions(noLocal=True)) for t in self.config.subscription_topics
+            ]
             client.subscribe(subscriptions)
 
             self.loop.call_soon_threadsafe(self.connected_event.set)
@@ -155,7 +173,9 @@ class MqttClient:
             user_properties: list[tuple[str, object]] = getattr(msg.properties, "UserProperty", [])
             client_id = next((str(v) for k, v in user_properties if k == "client_id"), None)
             if client_id and client_id != self.client_id:
-                logger.debug(f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}")
+                logger.debug(
+                    f"on_message: skipping msg from another dbus2mqtt client, topic={msg.topic}, client_id={client_id}"
+                )
             if client_id and client_id.startswith(self.client_id_prefix):
                 return
 
@@ -163,7 +183,9 @@ class MqttClient:
 
         # Skip retained messages
         if msg.retain:
-            logger.info(f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}")
+            logger.info(
+                f"on_message: skipping msg with retain=True, topic={msg.topic}, payload={payload}"
+            )
             return
 
         json_payload: Any = None
@@ -173,13 +195,15 @@ class MqttClient:
                 json_payload = json.loads(payload) if payload else {}
                 log_payload = json.dumps(json_payload)
             except json.JSONDecodeError as e:
-                logger.warning(f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, properties={msg.properties}, error={e}")
+                logger.warning(
+                    f"on_message: Unexpected payload, expecting json, topic={msg.topic}, payload={payload}, properties={msg.properties}, error={e}"
+                )
                 return
 
         logger.debug(f"on_message: msg.topic={msg.topic}, msg.payload={log_payload}")
 
         # Publish to flow trigger queue for any configured mqtt_message triggers
-        flow_trigger_messages = self._trigger_flows(msg.topic, payload, json_payload)
+        flow_triggered = self._trigger_flows(msg.topic, payload, json_payload)
 
         # Publish on a queue that is being processed by dbus_client
         # Messages on the mqtt_receive_queue are all expected to have json payloads
@@ -187,47 +211,17 @@ class MqttClient:
         if json_payload:
             self.event_broker.on_mqtt_receive(
                 MqttMessage(msg.topic, json_payload),
-                MqttReceiveHints(
-                    log_unmatched_message=len(flow_trigger_messages) == 0
-                )
+                MqttReceiveHints(log_unmatched_message=flow_triggered),
             )
 
-    def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> list[FlowTriggerMessage]:
+    def _trigger_flows(self, topic: str, payload: str, json_payload: Any) -> bool:
         """Triggers all flows that have a mqtt_trigger defined that matches the given topic and configured filters."""
-        flow_trigger_messages = []
+        trigger_context: dict[str, Any] = {
+            "topic": topic,
+        }
+        flow_trigger_handler = FlowTriggerMqttMessageHandler(
+            trigger_context, topic, payload, json_payload
+        )
+        flow_triggered = self._trigger_processor.trigger_all_flows_sync(flow_trigger_handler)
 
-        all_flows: list[FlowConfig] = []
-        all_flows.extend(self.app_context.config.flows)
-        for subscription in self.app_context.config.dbus.subscriptions:
-            all_flows.extend(subscription.flows)
-
-        for flow in all_flows:
-            for trigger in flow.triggers:
-                if trigger.type == FlowTriggerMqttMessageConfig.type:
-
-                    # Use the correct payload type which is configured for the trigger
-                    trigger_context_payload: Any = payload
-                    if trigger.content_type == "json":
-                        trigger_context_payload = json_payload
-
-                    trigger_context: dict[str, Any] = {
-                        "topic": topic,
-                        "payload": trigger_context_payload,
-                    }
-
-                    matches_filter = trigger.topic == topic
-                    if matches_filter and trigger.filter is not None:
-                        matches_filter = trigger.matches_filter(self.app_context.templating, trigger_context)
-
-                    if matches_filter:
-                        trigger_message = FlowTriggerMessage(
-                            flow,
-                            trigger,
-                            datetime.now(),
-                            trigger_context=trigger_context,
-                        )
-
-                        flow_trigger_messages.append(trigger_message)
-                        self.event_broker.flow_trigger_queue.sync_q.put(trigger_message)
-
-        return flow_trigger_messages
+        return flow_triggered

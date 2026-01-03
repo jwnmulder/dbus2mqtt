@@ -13,7 +13,7 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 | Name                | Type      | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|
-| `dbus2mqtt.version` | string    | The current version of the `dbus2mqtt` package.                             |
+| `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package.                             |
 | `now`               | function  | Returns the current date and time as a `datetime` object.                   |
 | `urldecode`         | function  | Decodes a URL-encoded string.                                               |
 | `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
