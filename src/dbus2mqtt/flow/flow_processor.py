@@ -255,7 +255,7 @@ class FlowProcessor:
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
             # Check if this flow was not triggered by a context change to avoid looping
-            if trigger_type != FlowTriggerContextChangedConfig.type:
+            if trigger_type == FlowTriggerContextChangedConfig.type:
                 logger.debug("Skip firing context_change trigger to avoid looping")
             else:
                 trigger_context = {"scope": "global"}
