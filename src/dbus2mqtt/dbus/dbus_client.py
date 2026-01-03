@@ -21,7 +21,6 @@ from dbus2mqtt.config import (
     FlowTriggerBusNameRemovedConfig,
     FlowTriggerDbusObjectAddedConfig,
     FlowTriggerDbusObjectRemovedConfig,
-    FlowTriggerDbusSignalConfig,
     InterfaceConfig,
     MethodConfig,
     PropertyConfig,
@@ -43,7 +42,11 @@ from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
-from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.flow.flow_trigger_processor import (
+    FlowTriggerAlwaysTrueHandler,
+    FlowTriggerDbusSignalHandler,
+    FlowTriggerProcessor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -578,15 +581,13 @@ class DbusClient:
                     # Trigger flows that have a bus_name_removed trigger configured
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
-                        FlowTriggerBusNameRemovedConfig.type,
-                        trigger_context
+                        FlowTriggerAlwaysTrueHandler(FlowTriggerBusNameRemovedConfig.type, trigger_context)
                     )
 
                     # Trigger flows that have an object_removed trigger configured
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
-                        FlowTriggerDbusObjectRemovedConfig.type,
-                        trigger_context
+                        FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
                     )
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
@@ -652,8 +653,7 @@ class DbusClient:
             trigger_context = {"bus_name": bus_name, "path": path}
             await self._trigger_processor.trigger_subscription_flows(
                 subscription_config,
-                FlowTriggerDbusObjectRemovedConfig.type,
-                trigger_context
+                FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
             )
 
     async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface], trigger_flows: bool = True):
@@ -726,8 +726,7 @@ class DbusClient:
                             # leaving it now for backwards compatibility
                             await self._trigger_processor.trigger_subscription_flows(
                                 subscription_config,
-                                FlowTriggerBusNameAddedConfig.type,
-                                trigger_context
+                                FlowTriggerAlwaysTrueHandler(FlowTriggerBusNameAddedConfig.type, trigger_context)
                             )
 
                         processed_new_subscriptions.add(subscription_config.id)
@@ -736,8 +735,7 @@ class DbusClient:
                         # Trigger flows that have a object_added trigger configured
                         await self._trigger_processor.trigger_subscription_flows(
                             subscription_config,
-                            FlowTriggerDbusObjectAddedConfig.type,
-                            trigger_context
+                            FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectAddedConfig.type, trigger_context)
                         )
 
     async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]) -> object:
@@ -817,30 +815,30 @@ class DbusClient:
         signal = signal_state.signal_config.signal
         logger.debug(f"dbus_signal: signal={signal}, args={signal_state.args}, bus_name={signal_state.bus_name}, path={signal_state.path}, interface={signal_state.interface_name}")
 
-        # TODO: clean
-        for flow in signal_state.subscription_config.flows:
-            for trigger in flow.triggers:
-                if trigger.type == FlowTriggerDbusSignalConfig.type:
-                    matches = signal_config.signal == trigger.signal
+        accept_signal = True
 
-                    # dbus signal subscriptions might have a filter configured
-                    if signal_config.filter is not None:
-                        matches &= signal_config.matches_filter(self.app_context.templating, *signal_state.args)
+        # dbus signal subscriptions might have a filter configured
+        if signal_config.filter is not None:
+            accept_signal = signal_config.matches_filter(self.templating, *signal_state.args)
 
-                    # dbus_signal triggers might have an interface configured
-                    if trigger.interface:
-                        matches &= signal_state.interface_name == trigger.interface
+        if accept_signal:
+            trigger_context = {
+                "bus_name": signal_state.bus_name,
+                "path": signal_state.path,
+                "interface": signal_state.interface_name,
+                "signal": signal_config.signal,
+                "args": signal_state.args
+            }
+            flow_trigger_handler = FlowTriggerDbusSignalHandler(
+                trigger_context=trigger_context,
+                signal=signal_config.signal,
+                interface=signal_state.interface_name
+            )
 
-                    if matches:
-                        trigger_context = {
-                            "bus_name": signal_state.bus_name,
-                            "path": signal_state.path,
-                            "interface": signal_state.interface_name,
-                            "signal": signal_config.signal,
-                            "args": signal_state.args
-                        }
-
-                        await self._trigger_processor.trigger_flow(flow, trigger, trigger_context)
+            await self._trigger_processor.trigger_subscription_flows(
+                signal_state.subscription_config,
+                flow_trigger_handler,
+            )
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):
 

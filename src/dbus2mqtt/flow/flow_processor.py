@@ -22,7 +22,10 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
-from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.flow.flow_trigger_processor import (
+    FlowTriggerAlwaysTrueHandler,
+    FlowTriggerProcessor,
+)
 from dbus2mqtt.template.templating import TemplateEngine
 
 logger = logging.getLogger(__name__)
@@ -36,7 +39,11 @@ class FlowScheduler:
         self._trigger_processor = FlowTriggerProcessor(app_context)
 
     async def _schedule_flow_trigger(self, flow, trigger_config: FlowTriggerConfig):
-        await self._trigger_processor.trigger_flow(flow, trigger_config, {})
+        await self._trigger_processor.trigger_flow(
+            flow,
+            trigger_config,
+            FlowTriggerAlwaysTrueHandler(trigger_config.type, {})
+        )
 
     async def scheduler_task(self):
 
@@ -234,7 +241,9 @@ class FlowProcessor:
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
             trigger_context = {"scope": "global"}
-            await self._trigger_processor.trigger_all_flows(FlowTriggerContextChangedConfig.type, trigger_context)
+            await self._trigger_processor.trigger_all_flows(
+                FlowTriggerAlwaysTrueHandler(FlowTriggerContextChangedConfig.type, trigger_context)
+            )
 
     def _flow_execution_context(self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage) -> FlowExecutionContext:
         """Per flow execution context allows for updates during flow execution without affecting other executions.
