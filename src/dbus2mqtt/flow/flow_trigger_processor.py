@@ -14,7 +14,6 @@ from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 logger = logging.getLogger(__name__)
 
 
-
 class FlowTriggerProcessor:
     def __init__(self, app_context: AppContext):
         self.config = app_context.config
@@ -98,12 +97,13 @@ class FlowTriggerProcessor:
         flow_trigger_handler: FlowTriggerHandler,
     ):
         should_trigger_flow = flow_trigger_handler.should_trigger_flow(
-            trigger_config,
-            self.templating
+            trigger_config, self.templating
         )
         if should_trigger_flow:
             trigger_context = flow_trigger_handler.final_trigger_context(trigger_config)
-            trigger = FlowTriggerMessage(flow, trigger_config, datetime.now(), trigger_context)
+            trigger = FlowTriggerMessage(
+                flow, trigger_config, datetime.now(), trigger_context
+            )
             await self.event_broker.flow_trigger_queue.async_q.put(trigger)
 
     def _execute_flow_sync(
@@ -113,10 +113,11 @@ class FlowTriggerProcessor:
         flow_trigger_handler: FlowTriggerHandler,
     ):
         should_trigger_flow = flow_trigger_handler.should_trigger_flow(
-            trigger_config,
-            self.templating
+            trigger_config, self.templating
         )
         if should_trigger_flow:
             trigger_context = flow_trigger_handler.final_trigger_context(trigger_config)
-            trigger = FlowTriggerMessage(flow, trigger_config, datetime.now(), trigger_context)
+            trigger = FlowTriggerMessage(
+                flow, trigger_config, datetime.now(), trigger_context
+            )
             self.event_broker.flow_trigger_queue.sync_q.put(trigger)
