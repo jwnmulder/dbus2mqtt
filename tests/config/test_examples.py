@@ -1,4 +1,3 @@
-
 import os
 
 import dotenv
@@ -7,6 +6,7 @@ from dbus2mqtt.config import Config
 from dbus2mqtt.config.jsonarparse import new_argument_parser
 
 FILE_DIR = os.path.dirname(__file__)
+
 
 def test_home_assistant_media_player_example():
 
@@ -20,6 +20,7 @@ def test_home_assistant_media_player_example():
 
     assert config is not None
 
+
 def test_linux_desktop_example():
     dotenv.load_dotenv(".env.example")
 
@@ -31,6 +32,7 @@ def test_linux_desktop_example():
 
     assert config is not None
 
+
 def test_bluez_example():
     dotenv.load_dotenv(".env.example")
 
@@ -41,6 +43,7 @@ def test_bluez_example():
     config = parser.instantiate_classes(cfg)
 
     assert config is not None
+
 
 def test_connman_example():
     dotenv.load_dotenv(".env.example")

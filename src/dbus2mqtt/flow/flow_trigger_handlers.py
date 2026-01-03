@@ -20,18 +20,14 @@ class FlowTriggerHandler:
     ) -> bool:
         return True
 
-    def final_trigger_context(
-        self, trigger_config: FlowTriggerConfig
-    ) -> dict[str, Any]:
+    def final_trigger_context(self, trigger_config: FlowTriggerConfig) -> dict[str, Any]:
         return self.context
 
 
 class FlowTriggerDbusSignalHandler(FlowTriggerHandler):
     """Trigger flows only if signal and interface are matching."""
 
-    def __init__(
-        self, trigger_context: dict[str, Any], signal: str, interface: str | None = None
-    ):
+    def __init__(self, trigger_context: dict[str, Any], signal: str, interface: str | None = None):
         super().__init__(FlowTriggerDbusSignalConfig.type, trigger_context)
         self.signal = signal
         self.interface = interface
@@ -78,9 +74,7 @@ class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
 
         return matches
 
-    def final_trigger_context(
-        self, trigger_config: FlowTriggerMqttMessageConfig
-    ) -> dict[str, Any]:
+    def final_trigger_context(self, trigger_config: FlowTriggerMqttMessageConfig) -> dict[str, Any]:
         assert isinstance(trigger_config, FlowTriggerMqttMessageConfig)
 
         # Use the correct payload type which is configured for the trigger
@@ -88,6 +82,4 @@ class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
         if trigger_config.content_type == "json":
             trigger_context_payload = self.json_payload
 
-        return super().final_trigger_context(trigger_config) | {
-            "payload": trigger_context_payload
-        }
+        return super().final_trigger_context(trigger_config) | {"payload": trigger_context_payload}

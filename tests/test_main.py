@@ -23,6 +23,7 @@ def test_main_help_shows_help_and_exits(capsys, monkeypatch):
     assert "--config" in output
     assert "--verbose" in output
 
+
 def test_main_invokes_run_with_config(monkeypatch):
 
     mock_run = AsyncMock()
@@ -37,9 +38,14 @@ def test_main_invokes_run_with_config(monkeypatch):
     assert isinstance(config, Config)
     assert len(config.dbus.subscriptions) > 0
 
+
 def test_main_print_config_with_comments(capsys, monkeypatch):
 
-    monkeypatch.setattr(sys, "argv", ["dbus2mqtt", "--config", "docs/examples/linux_desktop.yaml", "--print_config=comments"])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["dbus2mqtt", "--config", "docs/examples/linux_desktop.yaml", "--print_config=comments"],
+    )
     with pytest.raises(SystemExit) as excinfo:
         main()
 

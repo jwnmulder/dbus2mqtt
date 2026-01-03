@@ -17,11 +17,9 @@ async def test_context_changed():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context,
-        triggers=[
-            trigger_config,
-            FlowTriggerContextChangedConfig()
-        ],
+    processor, flow_config = mocked_flow_processor(
+        app_context,
+        triggers=[trigger_config, FlowTriggerContextChangedConfig()],
         actions=[
             FlowActionContextSetConfig(
                 global_context={
@@ -30,7 +28,7 @@ async def test_context_changed():
                     }
                 }
             )
-        ]
+        ],
     )
 
     # Flow will be first triggered by the schedule trigger
@@ -40,14 +38,10 @@ async def test_context_changed():
     )
 
     # First execution should be triggered by schedule
-    assert processor._global_context["res"] == {
-        "trigger_type": "schedule"
-    }
+    assert processor._global_context["res"] == {"trigger_type": "schedule"}
 
     # Global context changed, so a new trigger message must be on the event_broker
     context_changed_trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
 
     assert context_changed_trigger is not None
-    assert context_changed_trigger.trigger_context == {
-        "scope": "global"
-    }
+    assert context_changed_trigger.trigger_context == {"scope": "global"}

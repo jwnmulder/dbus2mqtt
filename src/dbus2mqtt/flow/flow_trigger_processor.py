@@ -3,11 +3,7 @@ import logging
 from datetime import datetime
 
 from dbus2mqtt import AppContext
-from dbus2mqtt.config import (
-    FlowConfig,
-    FlowTriggerConfig,
-    SubscriptionConfig,
-)
+from dbus2mqtt.config import FlowConfig, FlowTriggerConfig, SubscriptionConfig
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 
@@ -101,9 +97,7 @@ class FlowTriggerProcessor:
         )
         if should_trigger_flow:
             trigger_context = flow_trigger_handler.final_trigger_context(trigger_config)
-            trigger = FlowTriggerMessage(
-                flow, trigger_config, datetime.now(), trigger_context
-            )
+            trigger = FlowTriggerMessage(flow, trigger_config, datetime.now(), trigger_context)
             await self.event_broker.flow_trigger_queue.async_q.put(trigger)
 
     def _execute_flow_sync(
@@ -117,7 +111,5 @@ class FlowTriggerProcessor:
         )
         if should_trigger_flow:
             trigger_context = flow_trigger_handler.final_trigger_context(trigger_config)
-            trigger = FlowTriggerMessage(
-                flow, trigger_config, datetime.now(), trigger_context
-            )
+            trigger = FlowTriggerMessage(flow, trigger_config, datetime.now(), trigger_context)
             self.event_broker.flow_trigger_queue.sync_q.put(trigger)

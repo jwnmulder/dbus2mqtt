@@ -17,18 +17,16 @@ async def test_context():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            context={
-                "var1": "{{ subscription_bus_name }}"
-            }
-        ),
-        FlowActionMqttPublishConfig(
-            topic="dbus2mqtt/test",
-            payload_type="text",
-            payload_template="{{ var1 }}"
-        )
-    ])
+    processor, flow_config = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(context={"var1": "{{ subscription_bus_name }}"}),
+            FlowActionMqttPublishConfig(
+                topic="dbus2mqtt/test", payload_type="text", payload_template="{{ var1 }}"
+            ),
+        ],
+    )
 
     await processor._process_flow_trigger(
         FlowTriggerMessage(flow_config, trigger_config, datetime.now())
@@ -39,19 +37,20 @@ async def test_context():
     assert mqtt_message is not None
     assert mqtt_message.payload == "test.bus_name.*"
 
+
 @pytest.mark.asyncio
 async def test_global_context():
 
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "var1": "{{ subscription_bus_name }}"
-            }
-        )
-    ])
+    processor, flow_config = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(global_context={"var1": "{{ subscription_bus_name }}"})
+        ],
+    )
 
     await processor._process_flow_trigger(
         FlowTriggerMessage(flow_config, trigger_config, datetime.now())
