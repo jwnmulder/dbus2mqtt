@@ -42,9 +42,11 @@ from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import (
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
-from dbus2mqtt.flow.flow_trigger_processor import (
-    FlowTriggerAlwaysTrueHandler,
+from dbus2mqtt.flow.flow_trigger_handlers import (
     FlowTriggerDbusSignalHandler,
+    FlowTriggerHandler,
+)
+from dbus2mqtt.flow.flow_trigger_processor import (
     FlowTriggerProcessor,
 )
 
@@ -581,13 +583,13 @@ class DbusClient:
                     # Trigger flows that have a bus_name_removed trigger configured
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
-                        FlowTriggerAlwaysTrueHandler(FlowTriggerBusNameRemovedConfig.type, trigger_context)
+                        FlowTriggerHandler(FlowTriggerBusNameRemovedConfig.type, trigger_context)
                     )
 
                     # Trigger flows that have an object_removed trigger configured
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
-                        FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
+                        FlowTriggerHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
                     )
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
@@ -653,7 +655,7 @@ class DbusClient:
             trigger_context = {"bus_name": bus_name, "path": path}
             await self._trigger_processor.trigger_subscription_flows(
                 subscription_config,
-                FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
+                FlowTriggerHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context)
             )
 
     async def _start_subscription_flows(self, bus_name: str, subscribed_interfaces: list[SubscribedInterface], trigger_flows: bool = True):
@@ -726,7 +728,7 @@ class DbusClient:
                             # leaving it now for backwards compatibility
                             await self._trigger_processor.trigger_subscription_flows(
                                 subscription_config,
-                                FlowTriggerAlwaysTrueHandler(FlowTriggerBusNameAddedConfig.type, trigger_context)
+                                FlowTriggerHandler(FlowTriggerBusNameAddedConfig.type, trigger_context)
                             )
 
                         processed_new_subscriptions.add(subscription_config.id)
@@ -735,7 +737,7 @@ class DbusClient:
                         # Trigger flows that have a object_added trigger configured
                         await self._trigger_processor.trigger_subscription_flows(
                             subscription_config,
-                            FlowTriggerAlwaysTrueHandler(FlowTriggerDbusObjectAddedConfig.type, trigger_context)
+                            FlowTriggerHandler(FlowTriggerDbusObjectAddedConfig.type, trigger_context)
                         )
 
     async def call_dbus_interface_method(self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]) -> object:
