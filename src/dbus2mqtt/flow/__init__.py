@@ -3,8 +3,9 @@ from typing import Any
 
 
 class FlowExecutionContext:
-
-    def __init__(self, name: str | None, global_flows_context: dict[str, Any], flow_context: dict[str, Any]):
+    def __init__(
+        self, name: str | None, global_flows_context: dict[str, Any], flow_context: dict[str, Any]
+    ):
         self.name = name
 
         self._global_context = global_flows_context
@@ -53,8 +54,8 @@ class FlowExecutionContext:
             context.update(self._context)
         return context
 
-class FlowAction(ABC):
 
+class FlowAction(ABC):
     @abstractmethod
     async def execute(self, context: FlowExecutionContext):
         """Execute the action with the given flow execution context."""

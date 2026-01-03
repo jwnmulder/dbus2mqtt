@@ -18,6 +18,7 @@ def test_non_template_dict_result():
     assert res["a_string"] == "Off"
     assert res["a_number"] == 5
 
+
 @pytest.mark.asyncio
 async def test_signal_filter_bool_result():
 
@@ -28,13 +29,12 @@ async def test_signal_filter_bool_result():
     """)
 
     templating = TemplateEngine()
-    context = {
-        "args": ["org.mpris.MediaPlayer2.Player", {}, []]
-    }
+    context = {"args": ["org.mpris.MediaPlayer2.Player", {}, []]}
 
     res = await templating.async_render_template(config["signals"][0]["filter"], bool, context)
 
     assert res
+
 
 @pytest.mark.asyncio
 async def test_str_template_with_dict_result():
@@ -72,16 +72,18 @@ async def test_str_template_with_dict_result():
             "PlaybackStatus": "Stopped",
             "Position": 0,
             "Rate": 1.0,
-            "Shuffle": False
+            "Shuffle": False,
         }
 
     context = {
         "mpris_bus_name": "org.mpris.MediaPlayer2.Player.firefox",
         "dbus_call": mock_dbus_call,
-        "dbus_property_get": mock_dbus_property_get
+        "dbus_property_get": mock_dbus_property_get,
     }
 
-    res = await templating.async_render_template(config["actions"][0]["payload_template"], dict, context)
+    res = await templating.async_render_template(
+        config["actions"][0]["payload_template"], dict, context
+    )
 
     assert res["bus_name"] == "org.mpris.MediaPlayer2.Player.firefox"
     assert res["Metadata"]["mpris:trackid"] == "/org/mpris/MediaPlayer2/firefox"

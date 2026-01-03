@@ -26,17 +26,21 @@ async def test_bus_name_added_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameAddedConfig()
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "bus_name": "{{ bus_name }}",
-                    "path": "{{ path }}",
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "bus_name": "{{ bus_name }}",
+                        "path": "{{ path }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
@@ -44,12 +48,14 @@ async def test_bus_name_added_trigger():
     dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
-    subscribed_interfaces = [SubscribedInterface(
-        bus_name=object_bus_name,
-        path=object_path,
-        interface_name="test",
-        subscription_config=app_context.config.dbus.subscriptions[0]
-    )]
+    subscribed_interfaces = [
+        SubscribedInterface(
+            bus_name=object_bus_name,
+            path=object_path,
+            interface_name="test",
+            subscription_config=app_context.config.dbus.subscriptions[0],
+        )
+    ]
     await dbus_client._start_subscription_flows(object_bus_name, subscribed_interfaces, True)
 
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
@@ -61,8 +67,9 @@ async def test_bus_name_added_trigger():
     assert processor._global_context["res"] == {
         "trigger_type": "bus_name_added",
         "bus_name": object_bus_name,
-        "path": object_path
+        "path": object_path,
     }
+
 
 @pytest.mark.asyncio
 async def test_bus_name_removed_trigger():
@@ -70,17 +77,21 @@ async def test_bus_name_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerBusNameRemovedConfig()
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "bus_name": "{{ bus_name }}",
-                    "path": "{{ path }}"
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "bus_name": "{{ bus_name }}",
+                        "path": "{{ path }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
@@ -101,23 +112,28 @@ async def test_bus_name_removed_trigger():
         "path": object_path,
     }
 
+
 @pytest.mark.asyncio
 async def test_object_added_trigger():
 
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerDbusObjectAddedConfig()
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "bus_name": "{{ bus_name }}",
-                    "path": "{{ path }}",
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "bus_name": "{{ bus_name }}",
+                        "path": "{{ path }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     object_bus_name = "org.mpris.MediaPlayer2.vlc"
     object_path = "/org/mpris/MediaPlayer2"
@@ -129,12 +145,14 @@ async def test_object_added_trigger():
     dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
-    subscribed_interfaces = [SubscribedInterface(
-        bus_name=object_bus_name,
-        path=object_path,
-        interface_name="test",
-        subscription_config=app_context.config.dbus.subscriptions[0]
-    )]
+    subscribed_interfaces = [
+        SubscribedInterface(
+            bus_name=object_bus_name,
+            path=object_path,
+            interface_name="test",
+            subscription_config=app_context.config.dbus.subscriptions[0],
+        )
+    ]
     await dbus_client._start_subscription_flows(object_bus_name, subscribed_interfaces, True)
 
     trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()
@@ -146,8 +164,9 @@ async def test_object_added_trigger():
     assert processor._global_context["res"] == {
         "trigger_type": "dbus_object_added",
         "bus_name": object_bus_name,
-        "path": object_path
+        "path": object_path,
     }
+
 
 @pytest.mark.asyncio
 async def test_object_removed_trigger():
@@ -155,17 +174,21 @@ async def test_object_removed_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerDbusObjectRemovedConfig()
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "bus_name": "{{ bus_name }}",
-                    "path": "{{ path }}"
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "bus_name": "{{ bus_name }}",
+                        "path": "{{ path }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
@@ -194,23 +217,26 @@ async def test_dbus_signal_trigger():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerDbusSignalConfig(
-        interface="test-interface-name",
-        signal="TestSignal"
+        interface="test-interface-name", signal="TestSignal"
     )
-    processor, _ = mocked_flow_processor(app_context, [trigger_config], actions=[
-        FlowActionContextSetConfig(
-            global_context={
-                "res": {
-                    "trigger_type": "{{ trigger_type }}",
-                    "bus_name": "{{ bus_name }}",
-                    "path": "{{ path }}",
-                    "interface": "{{ interface }}",
-                    "signal": "{{ signal }}",
-                    "args": "{{ args }}"
+    processor, _ = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionContextSetConfig(
+                global_context={
+                    "res": {
+                        "trigger_type": "{{ trigger_type }}",
+                        "bus_name": "{{ bus_name }}",
+                        "path": "{{ path }}",
+                        "interface": "{{ interface }}",
+                        "signal": "{{ signal }}",
+                        "args": "{{ args }}",
+                    }
                 }
-            }
-        )
-    ])
+            )
+        ],
+    )
 
     subscription_config = app_context.config.dbus.subscriptions[0]
 
@@ -225,10 +251,7 @@ async def test_dbus_signal_trigger():
         interface_name=subscription_config.interfaces[0].interface,
         subscription_config=subscription_config,
         signal_config=SignalConfig(signal="TestSignal"),
-        args=[
-            "first-arg",
-            "second-arg"
-        ]
+        args=["first-arg", "second-arg"],
     )
 
     # trigger dbus_client and capture the triggered message
@@ -245,20 +268,19 @@ async def test_dbus_signal_trigger():
         "path": "/",
         "interface": "test-interface-name",
         "signal": "TestSignal",
-        "args": ["first-arg", "second-arg"]
+        "args": ["first-arg", "second-arg"],
     }
+
 
 @pytest.mark.asyncio
 async def test_dbus_signal_interface_matcher():
 
     app_context = mocked_app_context()
 
-    _, _ = mocked_flow_processor(app_context,
+    _, _ = mocked_flow_processor(
+        app_context,
         triggers=[
-            FlowTriggerDbusSignalConfig(
-                signal="TestSignal",
-                interface="test-wrong-interface"
-            )
+            FlowTriggerDbusSignalConfig(signal="TestSignal", interface="test-wrong-interface")
         ],
         actions=[
             FlowActionContextSetConfig(
@@ -268,7 +290,7 @@ async def test_dbus_signal_interface_matcher():
                     }
                 }
             )
-        ]
+        ],
     )
 
     subscription_config = app_context.config.dbus.subscriptions[0]
@@ -283,7 +305,7 @@ async def test_dbus_signal_interface_matcher():
         interface_name=subscription_config.interfaces[0].interface,
         subscription_config=subscription_config,
         signal_config=SignalConfig(signal="TestSignal"),
-        args=[]
+        args=[],
     )
 
     # trigger dbus_client and capture the triggered message
@@ -292,17 +314,15 @@ async def test_dbus_signal_interface_matcher():
     # no flow trigger messages must exist on the queue as the interface filter did not match
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
 
+
 @pytest.mark.asyncio
 async def test_dbus_signal_filter():
 
     app_context = mocked_app_context()
 
-    _, _ = mocked_flow_processor(app_context,
-        triggers=[
-            FlowTriggerDbusSignalConfig(
-                signal="TestSignal"
-            )
-        ],
+    _, _ = mocked_flow_processor(
+        app_context,
+        triggers=[FlowTriggerDbusSignalConfig(signal="TestSignal")],
         actions=[
             FlowActionContextSetConfig(
                 global_context={
@@ -311,14 +331,11 @@ async def test_dbus_signal_filter():
                     }
                 }
             )
-        ]
+        ],
     )
 
     # this is the filter want to test
-    subscription_signal_config = SignalConfig(
-        signal="TestSignal",
-        filter="{{ False }}"
-    )
+    subscription_signal_config = SignalConfig(signal="TestSignal", filter="{{ False }}")
 
     subscription_config = app_context.config.dbus.subscriptions[0]
     dbus_client = mocked_dbus_client(app_context)
@@ -332,7 +349,7 @@ async def test_dbus_signal_filter():
         interface_name=subscription_config.interfaces[0].interface,
         subscription_config=subscription_config,
         signal_config=subscription_signal_config,
-        args=[]
+        args=[],
     )
 
     # trigger dbus_client and capture the triggered message
@@ -340,6 +357,7 @@ async def test_dbus_signal_filter():
 
     # no flow trigger messages must exist on the queue as the interface filter did not match
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
+
 
 def _mocked_dbus_client_with_dbus_object(app_context, bus_name: str, path: str) -> DbusClient:
 

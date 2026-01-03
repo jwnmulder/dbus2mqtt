@@ -1,4 +1,3 @@
-
 import os
 
 from typing import cast
@@ -9,6 +8,7 @@ from dbus2mqtt.config import Config
 from dbus2mqtt.config.jsonarparse import new_argument_parser
 
 FILE_DIR = os.path.dirname(__file__)
+
 
 def test_off_string_value():
 
@@ -24,10 +24,14 @@ def test_off_string_value():
 
     action = config.flows[0].actions[0]
     assert action.type == "mqtt_publish"
-    assert action.payload_template == {
-        'PlaybackStatus': 'Off',  # This is the real test, it was False before the 'yaml_custom' loader
-        'TestFalseString': False  # This is one that should also be fixed. For now it's what it is
-    }
+    assert (
+        action.payload_template
+        == {
+            "PlaybackStatus": "Off",  # This is the real test, it was False before the 'yaml_custom' loader
+            "TestFalseString": False,  # This is one that should also be fixed. For now it's what it is
+        }
+    )
+
 
 def test_cron_trigger_string_value():
     """Test that the cron trigger is parsed correctly from a string value.
@@ -47,6 +51,7 @@ def test_cron_trigger_string_value():
     trigger = config.flows[0].triggers[0]
     assert trigger.type == "schedule"
     assert trigger.cron == {"minute": "*/5"}
+
 
 def test_jsonargparse_jinja_expressions():
     """Test proper parsing of Jinja2 expressions in configuration values.
@@ -77,6 +82,7 @@ def test_jsonargparse_jinja_expressions():
     action = config.flows[2].actions[0]
     assert action.type == "log"
     assert action.msg == """jinja value {{ "testvalue" }} in the middle of a string"""
+
 
 def test_backwards_compat_check_264():
 

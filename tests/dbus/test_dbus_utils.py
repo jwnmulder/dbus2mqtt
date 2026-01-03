@@ -79,23 +79,16 @@ class TestConvertMqttArgsToDbus:
 
     def test_mixed_argument_types(self):
         """Test conversion of mixed argument types in a single call."""
-        args = [
-            "string_arg",
-            42,
-            True,
-            {"dict_key": "dict_value"},
-            [1, 2, 3],
-            None
-        ]
+        args = ["string_arg", 42, True, {"dict_key": "dict_value"}, [1, 2, 3], None]
         result = convert_mqtt_args_to_dbus(args)
 
         assert len(result) == 6
-        assert result[0] == "string_arg"    # string passthrough
-        assert result[1] == 42              # int passthrough
-        assert result[2] is True            # bool passthrough
+        assert result[0] == "string_arg"  # string passthrough
+        assert result[1] == 42  # int passthrough
+        assert result[2] is True  # bool passthrough
         assert isinstance(result[3], dict)  # dict wrapped
-        assert result[4] == [1, 2, 3]       # list passthrough
-        assert result[5] is None            # None passthrough
+        assert result[4] == [1, 2, 3]  # list passthrough
+        assert result[5] is None  # None passthrough
 
     def test_boolean_values(self):
         """Test specific boolean value handling."""
@@ -164,15 +157,15 @@ class TestConvertMqttArgsToDbus:
             <arg type="u" name="id" direction="out"/>
         """
         signature_tree = SignatureTree("susssasa{sv}i")
-        args=[
+        args = [
             "dbus2mqtt",
             0,
             "dialog-information",
             "dbus2mqtt",
             "Message from <b><i>dbus2mqtt</i></b>",
             [],
-            { "urgency": 1, "category": "device" },
-            5000
+            {"urgency": 1, "category": "device"},
+            5000,
         ]
         converted_args = convert_mqtt_args_to_dbus(args)
 
@@ -186,7 +179,7 @@ class TestConvertMqttArgsToDbus:
         assert converted_args[5] == []  # actions
         assert converted_args[6] == {
             "urgency": Variant("q", 1),
-            "category": Variant("s", "device")
+            "category": Variant("s", "device"),
         }  # hints
         assert converted_args[7] == 5000  # expire_timeout
 
@@ -243,13 +236,15 @@ class TestIntegrationScenarios:
     def test_mpris_metadata_structure(self):
         """Test conversion of MPRIS-like metadata structure."""
         signature_tree = SignatureTree("a{sv}")
-        args = [{
-            "xesam:title": "Song Title",
-            "xesam:artist": ["Artist Name"],
-            "xesam:album": "Album Name",
-            "mpris:length": 180000000,  # microseconds
-            "mpris:trackid": "/org/mpris/MediaPlayer2/Track/1"
-        }]
+        args = [
+            {
+                "xesam:title": "Song Title",
+                "xesam:artist": ["Artist Name"],
+                "xesam:album": "Album Name",
+                "mpris:length": 180000000,  # microseconds
+                "mpris:trackid": "/org/mpris/MediaPlayer2/Track/1",
+            }
+        ]
 
         result = convert_mqtt_args_to_dbus(args)
         signature_tree.verify(result)
@@ -269,8 +264,8 @@ class TestIntegrationScenarios:
         signature_tree = SignatureTree("oxa{sv}")
         args = [
             "/org/mpris/MediaPlayer2/Track/1",  # object path
-            180000000,                          # position in microseconds
-            {"metadata": {"title": "New Song"}} # metadata dict
+            180000000,  # position in microseconds
+            {"metadata": {"title": "New Song"}},  # metadata dict
         ]
 
         result = convert_mqtt_args_to_dbus(args)
@@ -278,20 +273,19 @@ class TestIntegrationScenarios:
 
         assert len(result) == 3
         assert result[0] == "/org/mpris/MediaPlayer2/Track/1"  # string passthrough
-        assert result[1] == 180000000                          # int passthrough
-        assert isinstance(result[2], dict)                     # dict wrapped
+        assert result[1] == 180000000  # int passthrough
+        assert isinstance(result[2], dict)  # dict wrapped
 
     def test_property_set_with_complex_value(self):
         """Test setting a property with a complex value."""
         signature_tree = SignatureTree("a{sv}")
-        args = [{
-            "Volume": 0.8,
-            "LoopStatus": "None",
-            "Metadata": {
-                "xesam:title": "Test Song",
-                "xesam:artist": ["Test Artist"]
+        args = [
+            {
+                "Volume": 0.8,
+                "LoopStatus": "None",
+                "Metadata": {"xesam:title": "Test Song", "xesam:artist": ["Test Artist"]},
             }
-        }]
+        ]
 
         result = convert_mqtt_args_to_dbus(args)
         signature_tree.verify(result)
@@ -310,13 +304,7 @@ class TestIntegrationScenarios:
 
     def test_list_of_mixed_types(self):
         """Test list containing mixed primitive and complex types."""
-        args = [[
-            "string",
-            42,
-            {"dict_item": "value"},
-            True,
-            [1, 2, 3]
-        ]]
+        args = [["string", 42, {"dict_item": "value"}, True, [1, 2, 3]]]
 
         result = convert_mqtt_args_to_dbus(args)
 
@@ -325,11 +313,11 @@ class TestIntegrationScenarios:
         assert len(result[0]) == 5
 
         list_items = result[0]
-        assert list_items[0] == "string"        # string passthrough
-        assert list_items[1] == 42              # int passthrough
+        assert list_items[0] == "string"  # string passthrough
+        assert list_items[1] == 42  # int passthrough
         assert isinstance(list_items[2], dict)  # dict wrapped
-        assert list_items[3] is True            # bool passthrough
-        assert list_items[4] == [1, 2, 3]       # list passthrough
+        assert list_items[3] is True  # bool passthrough
+        assert list_items[4] == [1, 2, 3]  # list passthrough
 
     def test_edge_case_empty_structures(self):
         """Test edge cases with empty structures."""
@@ -337,20 +325,20 @@ class TestIntegrationScenarios:
         result = convert_mqtt_args_to_dbus(args)
 
         assert len(result) == 3
-        assert isinstance(result[0], dict)     # empty dict wrapped
+        assert isinstance(result[0], dict)  # empty dict wrapped
         assert result[0] == {}
-        assert result[1] == []                 # empty list passthrough
-        assert result[2] == ""                 # empty string passthrough
+        assert result[1] == []  # empty list passthrough
+        assert result[2] == ""  # empty string passthrough
 
     def test_large_numbers(self):
         """Test handling of large numbers that might affect D-Bus signature selection."""
         args = [
-            65535,      # UINT16_MAX
-            65536,      # > UINT16_MAX
-            2147483647, # INT32_MAX
-            2147483648, # > INT32_MAX
-            -2147483648, # INT32_MIN
-            -2147483649  # < INT32_MIN
+            65535,  # UINT16_MAX
+            65536,  # > UINT16_MAX
+            2147483647,  # INT32_MAX
+            2147483648,  # > INT32_MAX
+            -2147483648,  # INT32_MIN
+            -2147483649,  # < INT32_MIN
         ]
 
         result = convert_mqtt_args_to_dbus(args)
@@ -361,17 +349,7 @@ class TestIntegrationScenarios:
 
     def test_deeply_nested_lists_and_dicts(self):
         """Test deeply nested structures."""
-        args = [[
-            {
-                "level1": [
-                    {
-                        "level2": {
-                            "level3": ["deep", "nesting"]
-                        }
-                    }
-                ]
-            }
-        ]]
+        args = [[{"level1": [{"level2": {"level3": ["deep", "nesting"]}}]}]]
 
         result = convert_mqtt_args_to_dbus(args)
 
@@ -391,6 +369,7 @@ class TestIntegrationScenarios:
 
 class TestErrorHandling:
     """Test error handling and edge cases."""
+
     def test_conversion_with_circular_reference(self):
         """Test handling of circular references in data structures."""
         circular_dict: dict[str, object] = {"key": "value"}

@@ -17,16 +17,19 @@ class SignalConfig:
 
     def matches_filter(self, template_engine: TemplateEngine, *args) -> bool:
         if self.filter:
-            return template_engine.render_template(self.filter, bool, { "args": args })
+            return template_engine.render_template(self.filter, bool, {"args": args})
         return True
+
 
 @dataclass
 class MethodConfig:
     method: str
 
+
 @dataclass
 class PropertyConfig:
     property: str
+
 
 @dataclass
 class InterfaceConfig:
@@ -48,15 +51,20 @@ class InterfaceConfig:
     methods: list[MethodConfig] = field(default_factory=list)
     properties: list[PropertyConfig] = field(default_factory=list)
 
-    def render_mqtt_command_topic(self, template_engine: TemplateEngine, context: dict[str, Any]) -> Any:
+    def render_mqtt_command_topic(
+        self, template_engine: TemplateEngine, context: dict[str, Any]
+    ) -> Any:
         if self.mqtt_command_topic:
             return template_engine.render_template(self.mqtt_command_topic, str, context)
         return None
 
-    def render_mqtt_response_topic(self, template_engine: TemplateEngine, context: dict[str, Any]) -> str | None:
+    def render_mqtt_response_topic(
+        self, template_engine: TemplateEngine, context: dict[str, Any]
+    ) -> str | None:
         if self.mqtt_response_topic:
             return template_engine.render_template(self.mqtt_response_topic, str, context)
         return None
+
 
 @dataclass
 class FlowTriggerScheduleConfig:
@@ -64,6 +72,7 @@ class FlowTriggerScheduleConfig:
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     cron: dict[str, Any] | None = None
     interval: dict[str, Any] | None = None
+
 
 @dataclass
 class FlowTriggerDbusSignalConfig:
@@ -75,6 +84,7 @@ class FlowTriggerDbusSignalConfig:
         bus_name: undocumented, not used.
         path: undocumented, not used.
     """
+
     signal: str
     type: Literal["dbus_signal"] = "dbus_signal"
     interface: str | None = None
@@ -83,45 +93,76 @@ class FlowTriggerDbusSignalConfig:
 
     def __post_init__(self):
         if self.bus_name:
-            warnings.warn(f"{self.type} attribute 'bus_name' is not yet implemented.", UserWarning, stacklevel=2)
+            warnings.warn(
+                f"{self.type} attribute 'bus_name' is not yet implemented.",
+                UserWarning,
+                stacklevel=2,
+            )
         if self.path:
-            warnings.warn(f"{self.type} attribute 'path' is not yet implemented.", UserWarning, stacklevel=2)
+            warnings.warn(
+                f"{self.type} attribute 'path' is not yet implemented.", UserWarning, stacklevel=2
+            )
+
 
 @dataclass
 class FlowTriggerBusNameAddedConfig:
     """Configuration for 'bus_name_adde' flow trigger (DEPRECATED)."""
+
     type: Literal["bus_name_added"] = "bus_name_added"
 
     def __post_init__(self):
-        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", FutureWarning, stacklevel=2)
+        warnings.warn(
+            f"{self.type} flow trigger may be removed in a future version.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
 
 @dataclass
 class FlowTriggerBusNameRemovedConfig:
     """Configuration for 'bus_name_removed' flow trigger (DEPRECATED)."""
+
     type: Literal["bus_name_removed"] = "bus_name_removed"
 
     def __post_init__(self):
-        warnings.warn(f"{self.type} flow trigger may be removed in a future version.", FutureWarning, stacklevel=2)
+        warnings.warn(
+            f"{self.type} flow trigger may be removed in a future version.",
+            FutureWarning,
+            stacklevel=2,
+        )
+
 
 @dataclass
 class FlowTriggerDbusObjectAddedConfig:
     """Configuration for 'dbus_object_added' flow trigger."""
+
     type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
 
     def __post_init__(self):
         if self.type != FlowTriggerDbusObjectAddedConfig.type:
-            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.", FutureWarning, stacklevel=2)
+            warnings.warn(
+                f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectAddedConfig.type}' and might be removed in a future version.",
+                FutureWarning,
+                stacklevel=2,
+            )
             self.type = FlowTriggerDbusObjectAddedConfig.type
+
 
 @dataclass
 class FlowTriggerDbusObjectRemovedConfig:
     """Configuration for 'dbus_object_removed' flow trigger."""
+
     type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
 
     def __post_init__(self):
         if self.type != FlowTriggerDbusObjectRemovedConfig.type:
-            warnings.warn(f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.", FutureWarning, stacklevel=2)
+            warnings.warn(
+                f"Trigger `{self.type}` has been renamed to '{FlowTriggerDbusObjectRemovedConfig.type}' and might be removed in a future version.",
+                FutureWarning,
+                stacklevel=2,
+            )
             self.type = FlowTriggerDbusObjectRemovedConfig.type
+
 
 @dataclass
 class FlowTriggerMqttMessageConfig:
@@ -138,16 +179,21 @@ class FlowTriggerMqttMessageConfig:
     content_type: Literal["json", "text"] = "json"
     filter: str | None = None
 
-    def matches_filter(self, template_engine: TemplateEngine, trigger_context: dict[str, Any]) -> bool:
+    def matches_filter(
+        self, template_engine: TemplateEngine, trigger_context: dict[str, Any]
+    ) -> bool:
         if self.filter:
             return template_engine.render_template(self.filter, bool, trigger_context)
         return True
 
+
 @dataclass
 class FlowTriggerContextChangedConfig:
     """Configuration for 'context_changed' flow trigger."""
+
     type: Literal["context_changed"] = "context_changed"
     scope: Literal["global"] = "global"
+
 
 FlowTriggerConfig = (
     FlowTriggerContextChangedConfig
@@ -159,6 +205,7 @@ FlowTriggerConfig = (
     | FlowTriggerMqttMessageConfig
     | FlowTriggerScheduleConfig
 )
+
 
 @dataclass
 class FlowActionContextSetConfig:
@@ -173,6 +220,7 @@ class FlowActionContextSetConfig:
     context: dict[str, Any] | None = None
     global_context: dict[str, Any] | None = None
 
+
 @dataclass
 class FlowActionMqttPublishConfig:
     """Configuration for 'mqtt_publish' flow action.
@@ -182,10 +230,12 @@ class FlowActionMqttPublishConfig:
         payload_template: A string, a dict of strings, a templated string or a nested dict of templated strings
         payload_type: Message format for MQTT: json (default), yaml, text or binary. When set to binary, payload_template is expected to return a url formatted string where scheme is either file, http or https
     """
+
     topic: str
     payload_template: str | dict[str, Any]
     type: Literal["mqtt_publish"] = "mqtt_publish"
     payload_type: Literal["json", "yaml", "text", "binary"] = "json"
+
 
 @dataclass
 class FlowActionLogConfig:
@@ -195,15 +245,14 @@ class FlowActionLogConfig:
         msg: Message to log, a string or templated string.
         level: Log level, defaults to INFO.
     """
+
     msg: str
     type: Literal["log"] = "log"
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
-FlowActionConfig = (
-    FlowActionMqttPublishConfig
-    | FlowActionContextSetConfig
-    | FlowActionLogConfig
-)
+
+FlowActionConfig = FlowActionMqttPublishConfig | FlowActionContextSetConfig | FlowActionLogConfig
+
 
 @dataclass
 class FlowConfig:
@@ -216,11 +265,13 @@ class FlowConfig:
         conditions: Optional condition or list of conditions that must be met before a flow is executed.
         id: Unique flow identifier, automatically generated UUID.
     """
+
     triggers: list[FlowTriggerConfig]
     actions: list[FlowActionConfig]
     conditions: str | list[str] = field(default_factory=list)
     name: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
+
 
 @dataclass
 class SubscriptionConfig:
@@ -233,6 +284,7 @@ class SubscriptionConfig:
         flows: List of dbus2mqtt flow configurations.
         id: Unique subscription identifier, automatically generated UUID.
     """
+
     bus_name: str
     path: str
     interfaces: list[InterfaceConfig] = field(default_factory=list)
@@ -247,6 +299,7 @@ class SubscriptionConfig:
                 return True
         return False
 
+
 @dataclass
 class DbusConfig:
     """D-Bus configuration.
@@ -255,6 +308,7 @@ class DbusConfig:
         bus_type: Bus to connect to.
         subscriptions: List of SubscriptionConfig.
     """
+
     subscriptions: list[SubscriptionConfig]
     bus_type: Literal["SESSION", "SYSTEM"] = "SESSION"
 
@@ -265,12 +319,15 @@ class DbusConfig:
                 return True
         return False
 
-    def get_subscription_configs(self, bus_name: str, path: str | None = None) -> list[SubscriptionConfig]:
+    def get_subscription_configs(
+        self, bus_name: str, path: str | None = None
+    ) -> list[SubscriptionConfig]:
         res: list[SubscriptionConfig] = []
         for subscription in self.subscriptions:
             if subscription.matches_dbus_object(bus_name, path):
                 res.append(subscription)
         return res
+
 
 @dataclass
 class MqttConfig:
@@ -283,15 +340,18 @@ class MqttConfig:
         port: MQTT broker TCP port.
         subscription_topics: List of MQTT topics to subscribe to. Wildcard characters '#' and '+' are supported.
     """
+
     host: str
     username: str
     password: SecretStr
     port: int = 1883
-    subscription_topics: list[str] = field(default_factory=lambda: ['dbus2mqtt/#'])
+    subscription_topics: list[str] = field(default_factory=lambda: ["dbus2mqtt/#"])
+
 
 @dataclass
 class Config:
     """App configuration."""
+
     mqtt: MqttConfig
     dbus: DbusConfig
     flows: list[FlowConfig] = field(default_factory=list)

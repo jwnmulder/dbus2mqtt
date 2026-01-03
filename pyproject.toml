@@ -106,6 +106,12 @@ venv = ".venv"
 
 typeCheckingMode = "basic"
 
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+preview = true
+
 [tool.ruff.lint]
 extend-select = [
 
