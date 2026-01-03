@@ -18,7 +18,7 @@
 | src/dbus2mqtt/flow/actions/context\_set.py                    |       19 |        0 |        4 |        0 |    100% |           |
 | src/dbus2mqtt/flow/actions/log\_action.py                     |       20 |        3 |        0 |        0 |     85% |     29-34 |
 | src/dbus2mqtt/flow/actions/mqtt\_publish.py                   |       36 |       11 |        8 |        2 |     66% | 33, 43-60 |
-| src/dbus2mqtt/flow/flow\_processor.py                         |      153 |       33 |       68 |        7 |     77% |40, 46-52, 58-81, 96-100, 120, 121->124, 135->138, 138->129, 183-206, 221 |
+| src/dbus2mqtt/flow/flow\_processor.py                         |      156 |       33 |       70 |        7 |     78% |41, 47-53, 59-82, 97-101, 121, 122->125, 136->139, 139->130, 184-207, 222 |
 | src/dbus2mqtt/flow/flow\_trigger\_handlers.py                 |       40 |        0 |        6 |        3 |     93% |43->46, 72->75, 82->85 |
 | src/dbus2mqtt/flow/flow\_trigger\_processor.py                |       54 |        2 |       26 |        1 |     96% |53->52, 79, 87 |
 | src/dbus2mqtt/main.py                                         |       85 |       32 |        4 |        2 |     62% |28-36, 47-61, 66-68, 73-88, 108, 123-124, 145-146, 151-152 |
@@ -26,7 +26,7 @@
 | src/dbus2mqtt/template/\_\_init\_\_.py                        |        0 |        0 |        0 |        0 |    100% |           |
 | src/dbus2mqtt/template/dbus\_template\_functions.py           |       39 |       26 |       12 |        0 |     25% |16, 40-45, 94-106, 117-129, 134-143 |
 | src/dbus2mqtt/template/templating.py                          |       91 |       11 |       24 |        5 |     86% |49, 90, 103-104, 115-116, 127->exit, 144, 159-160, 171->exit, 177, 188 |
-| **TOTAL**                                                     | **1558** |  **511** |  **522** |   **68** | **64%** |           |
+| **TOTAL**                                                     | **1561** |  **511** |  **524** |   **68** | **64%** |           |
 
 
 ## Setup coverage badge
