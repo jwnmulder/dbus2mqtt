@@ -16,6 +16,7 @@ from dbus2mqtt.config import (
     FlowTriggerDbusObjectAddedConfig,
     FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
+    FlowTriggerScheduleConfig,
 )
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
@@ -223,6 +224,7 @@ class FlowProcessor:
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
 
+        trigger_type = flow_trigger_message.flow_trigger_config.type
         trigger_str = self._trigger_config_to_str(flow_trigger_message)
         flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
 
@@ -242,7 +244,7 @@ class FlowProcessor:
         if not should_execute_actions:
             log_message = f"{log_message} - conditions not met, skipping actions"
 
-        if should_execute_actions and flow_trigger_message.flow_trigger_config.type != "schedule":
+        if should_execute_actions and trigger_type != FlowTriggerScheduleConfig.type:
             logger.info(log_message)
         else:
             logger.debug(log_message)
@@ -252,10 +254,14 @@ class FlowProcessor:
 
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
-            trigger_context = {"scope": "global"}
-            await self._trigger_processor.trigger_all_flows(
-                FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context)
-            )
+            # Check if this flow was not triggered by a context_changed trigger to avoid looping
+            if trigger_type == FlowTriggerContextChangedConfig.type:
+                logger.debug("Skip firing context_change trigger to avoid looping")
+            else:
+                trigger_context = {"scope": "global"}
+                await self._trigger_processor.trigger_all_flows(
+                    FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context)
+                )
 
     def _flow_execution_context(
         self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage
