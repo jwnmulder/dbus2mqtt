@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_f2b74e2c6dc11e5c_flow_trigger_handlers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.0">coverage.py v7.13.0</a>,
-            created at 2026-01-03 22:59 +0000
+            created at 2026-01-04 10:32 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -294,8 +294,8 @@
     <p class="run"><span class="n"><a id="t210" href="#t210">210</a></span><span class="t">        <span class="nam">config</span> <span class="op">=</span> <span class="nam">msg</span><span class="op">.</span><span class="nam">flow_trigger_config</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t211" href="#t211">211</a></span><span class="t">        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">config</span><span class="op">,</span> <span class="nam">FlowTriggerDbusSignalConfig</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t212" href="#t212">212</a></span><span class="t">            <span class="key">return</span> <span class="fst">f"</span><span class="op">{</span><span class="nam">config</span><span class="op">.</span><span class="nam">type</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">config</span><span class="op">.</span><span class="nam">signal</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t213" href="#t213">213</a></span><span class="t">        <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">config</span><span class="op">,</span> <span class="nam">FlowTriggerDbusObjectAddedConfig</span><span class="op">)</span> <span class="key">or</span> <span class="nam">isinstance</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t">            <span class="nam">config</span><span class="op">,</span> <span class="nam">FlowTriggerDbusObjectRemovedConfig</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t213" href="#t213">213</a></span><span class="t">        <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t">            <span class="nam">config</span><span class="op">,</span> <span class="op">(</span><span class="nam">FlowTriggerDbusObjectAddedConfig</span><span class="op">,</span> <span class="nam">FlowTriggerDbusObjectRemovedConfig</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t215" href="#t215">215</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t216" href="#t216">216</a></span><span class="t">            <span class="nam">path</span> <span class="op">=</span> <span class="nam">msg</span><span class="op">.</span><span class="nam">trigger_context</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"path"</span><span class="op">)</span> <span class="key">if</span> <span class="nam">msg</span><span class="op">.</span><span class="nam">trigger_context</span> <span class="key">else</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t217" href="#t217">217</a></span><span class="t">            <span class="key">if</span> <span class="nam">path</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -395,7 +395,7 @@
             <a class="nav" href="z_f2b74e2c6dc11e5c_flow_trigger_handlers_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.0">coverage.py v7.13.0</a>,
-            created at 2026-01-03 22:59 +0000
+            created at 2026-01-04 10:32 +0000
         </p>
     </div>
 </footer>
