@@ -309,9 +309,18 @@ class DbusClient:
 
         return proxy_object, bus_name_subscriptions
 
-    def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], *args):
+    def _dbus_fast_signal_publisher(
+        self, signal: dbus_introspection.Signal, dbus_signal_state: dict[str, Any], *args
+    ):
         """Publish a dbus signal to the event broker, one for each subscription_config."""
         unwrapped_args = unwrap_dbus_objects(args)
+
+        named_args: dict[str, Any] = {}
+        for idx, arg in enumerate(signal.args):
+            if arg.name:
+                named_args[arg.name] = unwrapped_args[idx]
+
+        print(f"signal={signal.name}, args={unwrapped_args}, named_args={named_args}")
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
         for signal_subscription in signal_subscriptions:
@@ -335,13 +344,13 @@ class DbusClient:
         expected_args = len(signal.args)
 
         if expected_args == 1:
-            return lambda a: self._dbus_fast_signal_publisher(state, a)
+            return lambda a: self._dbus_fast_signal_publisher(signal, state, a)
         elif expected_args == 2:
-            return lambda a, b: self._dbus_fast_signal_publisher(state, a, b)
+            return lambda a, b: self._dbus_fast_signal_publisher(signal, state, a, b)
         elif expected_args == 3:
-            return lambda a, b, c: self._dbus_fast_signal_publisher(state, a, b, c)
+            return lambda a, b, c: self._dbus_fast_signal_publisher(signal, state, a, b, c)
         elif expected_args == 4:
-            return lambda a, b, c, d: self._dbus_fast_signal_publisher(state, a, b, c, d)
+            return lambda a, b, c, d: self._dbus_fast_signal_publisher(signal, state, a, b, c, d)
         raise ValueError("Unsupported nr of arguments")
 
     async def _subscribe_interface_signals(
@@ -450,9 +459,8 @@ class DbusClient:
 
         # MPRIS: If no introspection data is available, load a default
         if (
-            path == "/org/mpris/MediaPlayer2"
-            and bus_name.startswith("org.mpris.MediaPlayer2.")
-            and len(introspection.interfaces) == 0
+            path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2.")
+            # and len(introspection.interfaces) == 0
         ):
             introspection = mpris_introspection_playerctl
 

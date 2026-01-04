@@ -13,23 +13,24 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
 
   <interface name="org.freedesktop.DBus.Properties">
     <method name="Get">
-      <arg direction="in" type="s"/>
-      <arg direction="in" type="s"/>
-      <arg direction="out" type="v"/>
+      <arg name="interface_name" direction="in" type="s"/>
+      <arg name="property_name" direction="in" type="s"/>
+      <arg name="value" direction="out" type="v"/>
     </method>
     <method name="Set">
-      <arg direction="in" type="s"/>
-      <arg direction="in" type="s"/>
-      <arg direction="in" type="v"/>
+      <arg name="interface_name" direction="in" type="s"/>
+      <arg name="property_name" direction="in" type="s"/>
+      <arg name="value" direction="in" type="v"/>
     </method>
     <method name="GetAll">
-      <arg direction="in" type="s"/>
-      <arg direction="out" type="a{sv}"/>
+      <arg name="interface_name" direction="in" type="s"/>
+      <arg name="properties" direction="out" type="a{sv}"/>
     </method>
+
     <signal name="PropertiesChanged">
-      <arg type="s"/>
-      <arg type="a{sv}"/>
-      <arg type="as"/>
+      <arg name="interface_name" type="s"/>
+      <arg name="changed_properties" type="a{sv}"/>
+      <arg name="invalidated_properties" type="as"/>
     </signal>
   </interface>
 
@@ -63,6 +64,7 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
     <property name="CanPause" type="b" access="read"/>
     <property name="CanSeek" type="b" access="read"/>
     <property name="CanControl" type="b" access="read"/>
+
     <method name="Next"/>
     <method name="Previous"/>
     <method name="Pause"/>
@@ -70,17 +72,18 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
     <method name="Stop"/>
     <method name="Play"/>
     <method name="Seek">
-      <arg type="x" name="Offset" direction="in"/>
+      <arg name="Offset" direction="in" type="x"/>
     </method>
     <method name="SetPosition">
-      <arg type="o" name="TrackId" direction="in"/>
-      <arg type="x" name="Offset" direction="in"/>
+      <arg name="TrackId" direction="in" type="o"/>
+      <arg name="Position" direction="in" type="x"/>
     </method>
     <method name="OpenUri">
-      <arg type="s" name="Uri" direction="in"/>
+      <arg name="Uri" direction="in" type="s"/>
     </method>
+
     <signal name="Seeked">
-      <arg type="x" name="Position" direction="out"/>
+      <arg name="Position" type="x"/>
     </signal>
   </interface>
 
@@ -91,21 +94,23 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
     <property name="CanEditTracks" type="b" access="read">
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
     </property>
+
     <method name="GetTracksMetadata">
-      <arg direction="in" name="TrackIds" type="ao"/>
-      <arg direction="out" name="Metadata" type="aa{sv}"/>
+      <arg name="TrackIds" direction="in" type="ao"/>
+      <arg name="Metadata" direction="out" type="aa{sv}"/>
     </method>
     <method name="AddTrack">
-      <arg direction="in" name="Uri" type="s"/>
-      <arg direction="in" name="AfterTrack" type="o"/>
-      <arg direction="in" name="SetAsCurrent" type="b"/>
+      <arg name="Uri" direction="in" type="s"/>
+      <arg name="AfterTrack" direction="in" type="o"/>
+      <arg name="SetAsCurrent" direction="in" type="b"/>
     </method>
     <method name="RemoveTrack">
-      <arg direction="in" name="TrackId" type="o"/>
+      <arg name="TrackId" direction="in" type="o"/>
     </method>
     <method name="GoTo">
-      <arg direction="in" name="TrackId" type="o"/>
+      <arg name="TrackId" direction="in" type="o"/>
     </method>
+
     <signal name="TrackListReplaced">
       <arg name="Tracks" type="ao"/>
       <arg name="CurrentTrack" type="o"/>
@@ -125,15 +130,16 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
 
   <interface name="org.mpris.MediaPlayer2.Playlists">
     <method name="ActivatePlaylist">
-      <arg direction="in" name="PlaylistId" type="o"/>
+      <arg name="PlaylistId" direction="in" type="o"/>
     </method>
     <method name="GetPlaylists">
-      <arg direction="in" name="Index" type="u"/>
-      <arg direction="in" name="MaxCount" type="u"/>
-      <arg direction="in" name="Order" type="s"/>
-      <arg direction="in" name="ReverseOrder" type="b"/>
-      <arg direction="out" name="Playlists" type="a(oss)"/>
+      <arg name="Index" direction="in" type="u"/>
+      <arg name="MaxCount" direction="in" type="u"/>
+      <arg name="Order" direction="in" type="s"/>
+      <arg name="ReverseOrder" direction="in" type="b"/>
+      <arg name="Playlists" direction="out" type="a(oss)"/>
     </method>
+
     <property name="PlaylistCount" type="u" access="read">
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
     </property>
@@ -143,6 +149,7 @@ mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
     <property name="ActivePlaylist" type="(b(oss))" access="read">
       <annotation name="org.freedesktop.DBus.Property.EmitsChangedSignal" value="true"/>
     </property>
+
     <signal name="PlaylistChanged">
       <arg name="Playlist" type="(oss)"/>
     </signal>
