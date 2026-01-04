@@ -231,7 +231,7 @@ class DbusClient:
 
     def object_lifecycle_signal_handler(self, message: dbus_message.Message) -> None:
 
-        if not message.message_type == dbus_constants.MessageType.SIGNAL:
+        if message.message_type != dbus_constants.MessageType.SIGNAL:
             return
 
         logger.debug(
@@ -248,7 +248,7 @@ class DbusClient:
         """Return a list of all subscribed (bus_name, path) tuples."""
         res: list[tuple[str, str]] = []
         for bus_name_subscriptions in self._subscriptions.values():
-            for path in bus_name_subscriptions.path_objects.keys():
+            for path in bus_name_subscriptions.path_objects:
                 res.append((bus_name_subscriptions.bus_name, path))
         return res
 
@@ -610,7 +610,7 @@ class DbusClient:
                     # proxy_interface.off_properties_changed(self.on_properties_changed)
 
                     # clean lingering interface matchrule from bus
-                    if proxy_interface._signal_match_rule in self._bus._match_rules.keys():
+                    if proxy_interface._signal_match_rule in self._bus._match_rules:
                         self._bus._remove_match_rule(proxy_interface._signal_match_rule)
 
                     # clean lingering interface messgage handler from bus
@@ -620,7 +620,7 @@ class DbusClient:
             del self._subscriptions[bus_name]
 
             # Fire object_removed triggers for all flows
-            for path in bus_name_subscriptions.path_objects.keys():
+            for path in bus_name_subscriptions.path_objects:
                 subscription_configs = self.config.get_subscription_configs(
                     bus_name=bus_name, path=path
                 )
@@ -683,7 +683,7 @@ class DbusClient:
                 # proxy_interface.off_properties_changed(self.on_properties_changed)
 
                 # clean lingering interface matchrule from bus
-                if proxy_interface._signal_match_rule in self._bus._match_rules.keys():
+                if proxy_interface._signal_match_rule in self._bus._match_rules:
                     self._bus._remove_match_rule(proxy_interface._signal_match_rule)
 
                 # clean lingering interface messgage handler from bus

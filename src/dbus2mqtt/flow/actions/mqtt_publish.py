@@ -27,9 +27,7 @@ class MqttPublishAction(FlowAction):
                 self.config.topic, str, render_context
             )
 
-            if self.config.payload_type == "text":
-                res_type = str
-            elif self.config.payload_type == "binary":
+            if self.config.payload_type == "text" or self.config.payload_type == "binary":
                 res_type = str
             else:
                 res_type = dict

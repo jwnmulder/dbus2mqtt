@@ -3,6 +3,7 @@ import logging
 import sys
 import warnings
 
+from contextlib import suppress
 from dataclasses import fields
 
 import colorlog
@@ -77,15 +78,13 @@ async def run(app_config: Config):
 
     flow_scheduler = FlowScheduler(app_context)
 
-    try:
+    with suppress(asyncio.CancelledError):
         await asyncio.gather(
             dbus_processor_task(app_context, flow_scheduler),
             mqtt_processor_task(app_context),
             flow_processor_task(app_context),
             asyncio.create_task(flow_scheduler.scheduler_task()),
         )
-    except asyncio.CancelledError:
-        pass
 
 
 def setup_logging(verbose: bool):

@@ -127,7 +127,7 @@ class TemplateEngine:
         elif isinstance(templatable, dict):
             res = {}
             for k, v in templatable.items():
-                if isinstance(v, dict) or isinstance(v, str):
+                if isinstance(v, (dict, str)):
                     res[k] = self._render_template_nested(v, context)
                 else:
                     res[k] = v
@@ -171,7 +171,7 @@ class TemplateEngine:
         elif isinstance(templatable, dict):
             res = {}
             for k, v in templatable.items():
-                if isinstance(v, dict) or isinstance(v, str):
+                if isinstance(v, (dict, str)):
                     res[k] = await self._async_render_template_nested(v, context)
                 else:
                     res[k] = v
