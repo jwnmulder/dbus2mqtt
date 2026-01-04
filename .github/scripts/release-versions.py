@@ -32,7 +32,7 @@ def latest_version_by_cycle(
         for v in versions:
             # check if version is in cycle range
             # cycle can be major or major.minor or major.minor.patch
-            if len(v.release) > len(cycle.release) and v.base_version.startswith(
+            if len(v.release) > len(cycle.release) and v.base_version.startswith(  # noqa: SIM102
                 cycle.base_version
             ):
                 # update if version is later within cycle

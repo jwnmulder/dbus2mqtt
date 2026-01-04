@@ -210,8 +210,8 @@ class FlowProcessor:
         config = msg.flow_trigger_config
         if isinstance(config, FlowTriggerDbusSignalConfig):
             return f"{config.type}({config.signal})"
-        elif isinstance(config, FlowTriggerDbusObjectAddedConfig) or isinstance(
-            config, FlowTriggerDbusObjectRemovedConfig
+        elif isinstance(
+            config, (FlowTriggerDbusObjectAddedConfig, FlowTriggerDbusObjectRemovedConfig)
         ):
             path = msg.trigger_context.get("path") if msg.trigger_context else None
             if path:
