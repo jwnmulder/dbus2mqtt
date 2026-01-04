@@ -49,8 +49,8 @@ class MqttClient:
             username=self.config.username, password=self.config.password.get_secret_value()
         )
 
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
+        self.client.on_connect = self._on_connect
+        self.client.on_message = self._on_message_safe
 
         self.loop = loop
         self.connected_event = asyncio.Event()
@@ -153,7 +153,7 @@ class MqttClient:
                 self.event_broker.mqtt_publish_queue.async_q.task_done()
 
     # The callback for when the client receives a CONNACK response from the server.
-    def on_connect(self, client: mqtt.Client, userdata, flags, reason_code, properties):
+    def _on_connect(self, client: mqtt.Client, userdata, flags, reason_code, properties):
         if reason_code.is_failure:
             logger.warning(f"on_connect: Failed to connect: {reason_code}. Will retry connection")
         else:
@@ -166,7 +166,15 @@ class MqttClient:
 
             self.loop.call_soon_threadsafe(self.connected_event.set)
 
-    def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage):
+    def _on_message_safe(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
+        try:
+            return self._on_message(msg)
+        except Exception:
+            # Catch all uncaught exceptions to avoid mqtt_client processing anything at all
+            # after the first exception occurred
+            logger.exception("on_message: Uncaught exception while handling MQTT msg")
+
+    def _on_message(self, msg: mqtt.MQTTMessage) -> None:
 
         # Skip messages being sent by other dbus2mqtt clients
         if msg.properties:
@@ -222,6 +230,14 @@ class MqttClient:
         flow_trigger_handler = FlowTriggerMqttMessageHandler(
             trigger_context, topic, payload, json_payload
         )
-        flow_triggered = self._trigger_processor.trigger_all_flows_sync(flow_trigger_handler)
+
+        flow_triggered = False
+        try:
+            flow_triggered = self._trigger_processor.trigger_all_flows_sync(flow_trigger_handler)
+        except Exception as e:
+            logger.warning(
+                f"_trigger_flows: Error while triggering flow, topic={topic}, payload={payload}, error={e}"
+            )
+            return False
 
         return flow_triggered
