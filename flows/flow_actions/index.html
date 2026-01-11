@@ -939,26 +939,28 @@
 <h2 id="log">log</h2>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log</span>
 <span class="w">  </span><span class="nt">msg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your log message</span>
-<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
 </code></pre></div>
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>msg</td>
-<td>str</td>
+<td><code>str</code></td>
 <td>A <code>string</code> or <code>templated string</code></td>
+<td><em>required</em></td>
 </tr>
 <tr>
 <td>level</td>
-<td>str</td>
-<td>One of <code>DEBUG</code>, <code>INFO</code> (default), <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code></td>
+<td><code>str</code></td>
+<td>One of <code>DEBUG</code>, <code>INFO</code>, <code>WARNING</code>, <code>ERROR</code>, <code>CRITICAL</code></td>
+<td><code>INFO</code></td>
 </tr>
 </tbody>
 </table>
@@ -970,21 +972,24 @@
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>context</td>
-<td>dict</td>
+<td><code>dict</code></td>
 <td>Per flow execution context. Value can be a <code>dict of strings</code> or <code>dict of templated strings</code></td>
+<td><code>{}</code></td>
 </tr>
 <tr>
 <td>global_context</td>
-<td>dict</td>
+<td><code>dict</code></td>
 <td>Global context, shared between multiple flow executions, over all subscriptions. Value can be a <code>dict of strings</code> or <code>dict of templated strings</code></td>
+<td><code>{}</code></td>
 </tr>
 </tbody>
 </table>
@@ -997,26 +1002,30 @@
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>topic</td>
-<td>string</td>
-<td>mqtt topic the messaage is published to</td>
+<td><code>str</code></td>
+<td>MQTT topic the messaage is published to</td>
+<td><em>required</em></td>
 </tr>
 <tr>
 <td>payload_type</td>
-<td>string</td>
-<td>Message format for MQTT: <code>json</code> (default), <code>yaml</code>, <code>text</code> or <code>binary</code>. When set to <code>binary</code>, payload_template is expected to return a url formatted string where scheme is either <code>file</code>,<code>http</code> or <code>https</code></td>
+<td><code>str</code></td>
+<td>Message format for MQTT: <code>json</code>, <code>yaml</code>, <code>text</code> or <code>binary</code>. When set to <code>binary</code>, payload_template is expected to return a url formatted string where scheme is either <code>file</code>,<code>http</code> or <code>https</code></td>
+<td><code>json</code></td>
 </tr>
 <tr>
 <td>payload_template</td>
-<td>string, dict</td>
+<td><code>str</code> | <code>dict</code></td>
 <td>value can be a <code>string</code>, a <code>dict of strings</code>, a <code>templated string</code> or a nested <code>dict of templated strings</code></td>
+<td><em>required</em></td>
 </tr>
 </tbody>
 </table>

@@ -1003,25 +1003,33 @@
 
 <h1 id="flow-triggers">Flow triggers</h1>
 <h2 id="schedule">schedule</h2>
+<p>Schedule based triggers can be configured by setting either a <code>cron</code> or <code>interval</code> parameter.
+Scheduling is based on the APScheduler library and allows the following configuration options.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schedule</span>
 <span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="nv">5</span><span class="p p-Indicator">}</span>
 </code></pre></div>
-<p>Schedule based triggers can be configured by setting either a cron or interval parameter. Scheduling is based on the   APScheduler library and allows the following configuration options</p>
+<p>Trigger configuration:</p>
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>interval</td>
+<td><code>dict</code></td>
 <td>dict of time units and intervals, see <a href="https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html">https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html</a></td>
+<td></td>
 </tr>
 <tr>
 <td>cron</td>
+<td><code>dict</code></td>
 <td>dict of time units and cron expressions, see <a href="https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html">https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html</a></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -1029,15 +1037,15 @@
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>trigger_type</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>'schedule'</td>
 </tr>
 </tbody>
@@ -1050,25 +1058,25 @@
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>trigger_type</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>'object_added'</td>
 </tr>
 <tr>
 <td>bus_name</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>bus_name of the object that was registered on dbus</td>
 </tr>
 <tr>
 <td>path</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>path of the object that was registered on dbus</td>
 </tr>
 </tbody>
@@ -1080,121 +1088,57 @@
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>trigger_type</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>'object_removed'</td>
 </tr>
 <tr>
 <td>bus_name</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>bus_name of the object that was registered on dbus</td>
 </tr>
 <tr>
 <td>path</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>path of the object that was registered on dbus</td>
 </tr>
 </tbody>
 </table>
 <h2 id="dbus_signal">dbus_signal</h2>
+<p>DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus_signal</span>
 <span class="w">  </span><span class="nt">interface</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.freedesktop.DBus.Properties</span>
 <span class="w">  </span><span class="nt">signal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged</span>
 </code></pre></div>
-<p>DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.</p>
-<table>
-<thead>
-<tr>
-<th>key</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>interface</td>
-<td>interface to filter on, e.g. 'org.freedesktop.DBus.Properties'</td>
-</tr>
-<tr>
-<td>signal</td>
-<td>signal name to filter on, e.g. PropertiesChanged</td>
-</tr>
-</tbody>
-</table>
-<p>When triggered, the following context parameters are available</p>
-<table>
-<thead>
-<tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>trigger_type</td>
-<td>string</td>
-<td>'dbus_signal'</td>
-</tr>
-<tr>
-<td>bus_name</td>
-<td>string</td>
-<td>bus_name of the object that was registered on dbus</td>
-</tr>
-<tr>
-<td>path</td>
-<td>string</td>
-<td>path of the object that was registered on dbus</td>
-</tr>
-<tr>
-<td>interface</td>
-<td>string</td>
-<td>name of interface for which the signal was triggered</td>
-</tr>
-<tr>
-<td>signal</td>
-<td>string</td>
-<td>name of the signal, e.g. 'Seeked'</td>
-</tr>
-<tr>
-<td>args</td>
-<td>list</td>
-<td>signal arguments, list of objects</td>
-</tr>
-</tbody>
-</table>
-<h2 id="mqtt_message">mqtt_message</h2>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_message</span>
-<span class="w">  </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger</span>
-<span class="w">  </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">payload.get(&#39;action&#39;)</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;Mute&#39;</span><span class="nv"> </span><span class="s">}}&quot;</span>
-</code></pre></div>
-<p>Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted</p>
 <p>Trigger configuration:</p>
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>topic</td>
-<td>topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger'</td>
+<td>signal</td>
+<td><code>str</code></td>
+<td>signal name to filter on, e.g. PropertiesChanged</td>
+<td><em>required</em></td>
 </tr>
 <tr>
-<td>content_type</td>
-<td>One of <code>json</code> or <code>text</code>, defaults to <code>json</code></td>
-</tr>
-<tr>
-<td>filter</td>
-<td>A templated string that must evaluate to a boolean result. When False, the flow is not triggered</td>
+<td>interface</td>
+<td><code>str</code> | <code>None</code></td>
+<td>interface to filter on, e.g. <code>org.freedesktop.DBus.Properties</code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -1202,25 +1146,115 @@
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>trigger_type</td>
-<td>string</td>
+<td><code>str</code></td>
+<td>'dbus_signal'</td>
+</tr>
+<tr>
+<td>bus_name</td>
+<td><code>str</code></td>
+<td>bus_name of the object that was registered on dbus</td>
+</tr>
+<tr>
+<td>path</td>
+<td><code>str</code></td>
+<td>path of the object that was registered on dbus</td>
+</tr>
+<tr>
+<td>interface</td>
+<td><code>str</code></td>
+<td>name of interface for which the signal was triggered</td>
+</tr>
+<tr>
+<td>signal</td>
+<td><code>str</code></td>
+<td>name of the signal, e.g. 'Seeked'</td>
+</tr>
+<tr>
+<td>args</td>
+<td><code>list</code></td>
+<td>signal arguments, list of objects</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Take care with <code>PropertiesChanged</code> signals. These always originate from <code>org.freedesktop.DBus.Properties</code>. They contain the real interface the event originated from as their first argument. To filter on that interface you can use the <code>conditions</code> configuration on flows.
+ <div class="highlight"><pre><span></span><code><span class="nt">flows</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PropertiesChanged in player interface</span>
+<span class="w">    </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus_signal</span>
+<span class="w">    </span><span class="nt">conditions</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">args[0]</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;org.mpris.MediaPlayer2.Player&#39;</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">trigger_type</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;dbus_signal&#39;</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">signal</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;PropertiesChanged&#39;</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">True</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div></p>
+</div>
+<h2 id="mqtt_message">mqtt_message</h2>
+<p>Listens for MQTT messages on the configured topic. The message payload is expected to be JSON formatted</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt_message</span>
+<span class="w">  </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger</span>
+<span class="w">  </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">payload.get(&#39;action&#39;)</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;Mute&#39;</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div>
+<p>Trigger configuration:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic</td>
+<td><code>str</code></td>
+<td>topic to subscribe to, e.g. 'dbus2mqtt/org.mpris.MediaPlayer2/flow-trigger'</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td>content_type</td>
+<td><code>str</code></td>
+<td>One of <code>json</code> or <code>text</code></td>
+<td><code>json</code></td>
+</tr>
+<tr>
+<td>filter</td>
+<td><code>str</code> | <code>None</code></td>
+<td>Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>When triggered, the following context parameters are available</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>trigger_type</td>
+<td><code>str</code></td>
 <td>'mqtt_message'</td>
 </tr>
 <tr>
 <td>topic</td>
-<td>string</td>
-<td>mqtt topic</td>
+<td><code>str</code></td>
+<td>MQTT topic</td>
 </tr>
 <tr>
 <td>payload</td>
-<td>any</td>
+<td><code>any</code></td>
 <td>text or json deserialized MQTT message payload</td>
 </tr>
 </tbody>
@@ -1242,20 +1276,24 @@
 <p>If <code>topic</code> overlaps with <code>subscription[].interfaces[].mqtt_command_topic</code> and the JSON payload structure follows <code>mqtt_command_topic</code> layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.</p>
 </div>
 <h2 id="context_changed">context_changed</h2>
+<p>Triggered when the dbus2mqtt context was updated by a <code>context_set</code> action. For now only <code>global_context</code> updates result in a <code>context_changed</code> trigger.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">context_changed</span>
 </code></pre></div>
-<p>Triggered when the dbus2mqtt context was updated by a <code>context_set</code> action. For now only <code>global_context</code> updates result in a <code>context_changed</code> trigger.</p>
 <p>Trigger configuration:</p>
 <table>
 <thead>
 <tr>
-<th>key</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>scope</td>
+<td><code>str</code></td>
+<td>For now, only <code>global</code> is supported</td>
 <td><code>global</code></td>
 </tr>
 </tbody>
@@ -1264,15 +1302,15 @@
 <table>
 <thead>
 <tr>
-<th>name</th>
-<th>type</th>
-<th>description</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>scope</td>
-<td>string</td>
+<td><code>str</code></td>
 <td>Scope of the context that changed, for now this can only be <code>global</code></td>
 </tr>
 </tbody>

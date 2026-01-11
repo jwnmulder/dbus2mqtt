@@ -9,7 +9,6 @@ dbus:
         - interface: org.freedesktop.DBus.Properties
           signals:
             - signal: PropertiesChanged
-              filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
           methods:
             - method: GetAll
 
@@ -42,20 +41,20 @@ dbus:
             - type: schedule
               interval: {seconds: 5}
             - type: dbus_signal
-              interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
-              # filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
             - type: dbus_signal
-              interface: org.mpris.MediaPlayer2.Player
               signal: Seeked
+          conditions:
+            # For PropertiesChanged signals, only trigger for org.mpris.MediaPlayer2.Player interfaces
+            - "{{ args[0] == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
           actions:
             - type: context_set
               context:
-                mpris_bus_name: '{{ dbus_list("org.mpris.MediaPlayer2.*") | first }}'
+                mpris_bus_name: "{{ dbus_list('org.mpris.MediaPlayer2.*') | first }}"
                 mpris_path: /org/mpris/MediaPlayer2
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
-                seeked_position: '{{ args[0] if trigger_type == "dbus_signal" and signal == "Seeked" else None }}'
+                seeked_position: "{{ args[0] if trigger_type == 'dbus_signal' and signal == 'Seeked' else None }}"
             - type: context_set
               context:
                 player_properties: |
@@ -79,7 +78,6 @@ dbus:
           triggers:
             - type: dbus_object_added
             - type: dbus_signal
-              interface: org.freedesktop.DBus.Properties
               signal: PropertiesChanged
           actions:
             - type: context_set
