@@ -30,7 +30,6 @@ from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     convert_mqtt_args_to_dbus,
     unwrap_dbus_object,
-    unwrap_dbus_objects,
 )
 from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import mpris_introspection_playerctl
 from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
@@ -309,9 +308,9 @@ class DbusClient:
 
         return proxy_object, bus_name_subscriptions
 
-    def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], *args):
+    def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], args: list[Any]):
         """Publish a dbus signal to the event broker, one for each subscription_config."""
-        unwrapped_args = unwrap_dbus_objects(args)
+        unwrapped_args = unwrap_dbus_object(args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
         for signal_subscription in signal_subscriptions:
@@ -335,13 +334,13 @@ class DbusClient:
         expected_args = len(signal.args)
 
         if expected_args == 1:
-            return lambda a: self._dbus_fast_signal_publisher(state, a)
+            return lambda a: self._dbus_fast_signal_publisher(state, [a])
         elif expected_args == 2:
-            return lambda a, b: self._dbus_fast_signal_publisher(state, a, b)
+            return lambda a, b: self._dbus_fast_signal_publisher(state, [a, b])
         elif expected_args == 3:
-            return lambda a, b, c: self._dbus_fast_signal_publisher(state, a, b, c)
+            return lambda a, b, c: self._dbus_fast_signal_publisher(state, [a, b, c])
         elif expected_args == 4:
-            return lambda a, b, c, d: self._dbus_fast_signal_publisher(state, a, b, c, d)
+            return lambda a, b, c, d: self._dbus_fast_signal_publisher(state, [a, b, c, d])
         raise ValueError("Unsupported nr of arguments")
 
     async def _subscribe_interface_signals(
