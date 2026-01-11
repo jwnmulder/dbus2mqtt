@@ -1055,11 +1055,11 @@ class DbusClient:
 
             # Send success (or error) response if configured
             await self._send_mqtt_response(
-                interface_config,
-                result,
-                error,
-                interface.bus_name,
-                interface.path,
+                interface_config=interface_config,
+                result=result,
+                error=error,
+                bus_name=interface.bus_name,
+                path=interface.path,
                 method=method.method,
                 args=payload_method_args,
             )
@@ -1082,13 +1082,13 @@ class DbusClient:
 
             # Send success (or error) response if configured
             await self._send_mqtt_response(
-                interface_config,
-                payload_value,
-                error,
-                interface.bus_name,
-                interface.path,
+                interface_config=interface_config,
+                result=payload_value,
+                error=error,
+                bus_name=interface.bus_name,
+                path=interface.path,
                 property=property.property,
-                value=[payload_value],
+                value=payload_value,
             )
 
     async def _send_mqtt_response(

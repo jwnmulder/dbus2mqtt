@@ -239,20 +239,20 @@ class TestUnwrapping:
         assert val == 1
 
     def test_unwrap_list(self):
-        val = unwrap_dbus_object([1, 2, "test"])
-        assert val == [1, 2, "test"]
+        val = unwrap_dbus_object([1, 2, "string"])
+        assert val == [1, 2, "string"]
 
     def test_unwrap_tuple(self):
-        val = unwrap_dbus_object((1, 2, "test"))
-        assert val == (1, 2, "test")
+        val = unwrap_dbus_object((1, 2, "string"))
+        assert val == (1, 2, "string")
 
     def test_unwrap_variant_int(self):
         val = unwrap_dbus_object(Variant("q", 1))
         assert val == 1
 
     def test_unwrap_variant_list(self):
-        val = unwrap_dbus_object(["normal", Variant("q", 1)])
-        assert val == ["normal", 1]
+        val = unwrap_dbus_object(["string", Variant("q", 1)])
+        assert val == ["string", 1]
 
 
 class TestIntegrationScenarios:
