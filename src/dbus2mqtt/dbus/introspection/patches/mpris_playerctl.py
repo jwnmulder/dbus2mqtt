@@ -1,7 +1,7 @@
-import dbus_fast.introspection as dbus_introspection
+import dbus_fast.introspection as intr
 
 # taken from https://github.com/altdesktop/playerctl/blob/b19a71cb9dba635df68d271bd2b3f6a99336a223/playerctl/playerctl-daemon.c#L578
-mpris_introspection_playerctl = dbus_introspection.Node.parse("""\
+mpris_introspection_playerctl = intr.Node.parse("""\
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
   "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>

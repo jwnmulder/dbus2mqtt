@@ -1,7 +1,7 @@
-import dbus_fast.introspection as dbus_introspection
+import dbus_fast.introspection as intr
 
 # taken from https://code.videolan.org/videolan/vlc/-/blob/master/modules/control/dbus/dbus_introspect.h
-mpris_introspection_vlc = dbus_introspection.Node.parse("""\
+mpris_introspection_vlc = intr.Node.parse("""\
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
   "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>

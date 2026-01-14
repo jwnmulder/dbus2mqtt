@@ -32,8 +32,7 @@ from dbus2mqtt.dbus.dbus_util import (
     unwrap_dbus_object,
     unwrap_dbus_objects,
 )
-from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import mpris_introspection_playerctl
-from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
+from dbus2mqtt.dbus.introspection.patcher import IntrospectPatcher
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
@@ -66,6 +65,8 @@ class DbusClient:
         self._trigger_processor = FlowTriggerProcessor(app_context)
 
         self._bus_init_lock = asyncio.Lock()
+        self._introspection_patcher = IntrospectPatcher()
+        self._introspection_cache: dict[str, dbus_introspection.Node] = {}
 
     async def _reconnect(self):
         """Initializes a new MessageBus, clears all subscriptions and re-connects to DBus."""
@@ -278,7 +279,7 @@ class DbusClient:
         logger.warning(
             f"Returning temporary proxy_object with an additional introspection call, bus_name={bus_name}, path={path}"
         )
-        introspection = await self._bus.introspect(bus_name=bus_name, path=path)
+        introspection = await self._introspect(bus_name=bus_name, path=path)
         proxy_object = self._bus.get_proxy_object(bus_name, path, introspection)
         if proxy_object:
             return proxy_object
@@ -449,20 +450,15 @@ class DbusClient:
 
     async def _introspect(self, bus_name: str, path: str) -> dbus_introspection.Node:
 
-        if path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2.vlc"):
-            # vlc 3.x branch contains an incomplete dbus introspection
-            # https://github.com/videolan/vlc/commit/48e593f164d2bf09b0ca096d88c86d78ec1a2ca0
-            # Until vlc 4.x is out we use the official specification instead
-            introspection = mpris_introspection_vlc
-        else:
-            introspection = await self._bus.introspect(bus_name, path)
+        # TODO: Cache introspection data?
+        # cache_key = f"{bus_name}-{path}"
+        # introspection = self._introspection_cache.get(cache_key)
+        # if introspection:
+        #     return introspection
 
-        # MPRIS: If no introspection data is available, load a default
-        if (
-            path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2.")
-            # and len(introspection.interfaces) == 0
-        ):
-            introspection = mpris_introspection_playerctl
+        introspection = await self._bus.introspect(bus_name, path)
+        introspection = self._introspection_patcher.patch_if_needed(bus_name, path, introspection)
+        # self._introspection_cache[cache_key] = introspection
 
         return introspection
 
@@ -471,7 +467,7 @@ class DbusClient:
         paths: list[str] = []
 
         try:
-            introspection = await self._introspect(bus_name, path)
+            introspection = await self._bus.introspect(bus_name, path)
         except TypeError as e:
             logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
             return paths
