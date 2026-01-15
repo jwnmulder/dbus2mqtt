@@ -67,7 +67,6 @@ class DbusClient:
 
         self._bus_init_lock = asyncio.Lock()
         self._introspection_patcher = IntrospectPatcher()
-        self._introspection_cache: dict[str, dbus_introspection.Node] = {}
 
     async def _reconnect(self):
         """Initializes a new MessageBus, clears all subscriptions and re-connects to DBus."""
@@ -445,16 +444,9 @@ class DbusClient:
         return []
 
     async def _introspect(self, bus_name: str, path: str) -> dbus_introspection.Node:
-
-        # TODO: Cache introspection data?
-        # cache_key = f"{bus_name}-{path}"
-        # introspection = self._introspection_cache.get(cache_key)
-        # if introspection:
-        #     return introspection
-
+        """Like _bus.introspect but with patching logic for incomplete introspection data."""
         introspection = await self._bus.introspect(bus_name, path)
         introspection = self._introspection_patcher.patch_if_needed(bus_name, path, introspection)
-        # self._introspection_cache[cache_key] = introspection
 
         return introspection
 

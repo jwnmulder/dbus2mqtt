@@ -23,10 +23,10 @@ def test_enrich_names():
     patcher = IntrospectPatcher()
     patcher._enrich(introspection, reference=mpris_introspection_playerctl)
 
-    # method arguments should have names
+    # method arguments should have been enriched with valid names
     method = introspection.interface("org.freedesktop.DBus.Properties").method("Get")
     assert method.in_args[0].name
 
-    # signal arguments should have names
+    # signal arguments should have been enriched with valid names
     signal = introspection.interface("org.freedesktop.DBus.Properties").signal("PropertiesChanged")
     assert signal.args[0].name

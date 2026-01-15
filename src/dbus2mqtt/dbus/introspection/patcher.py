@@ -20,8 +20,12 @@ class IntrospectPatcher:
 
         reference = None
         if path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2."):
+            # MPRIS: If no introspection data is available, load a default
+            if len(introspection.interfaces) == 0:
+                return mpris_introspection_playerctl
+
             # Not all players provide argument names in their introspection data.
-            # Load a well known mpris introspection data to enrich the original
+            # Load well known mpris introspection data to enrich the original
             reference = mpris_introspection_playerctl
 
         if reference:
