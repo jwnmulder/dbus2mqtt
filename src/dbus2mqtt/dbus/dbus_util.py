@@ -174,9 +174,23 @@ def _convert_and_wrap_in_variant(value: Any) -> Any:
         return value
 
 
-def positional_args_to_kwargs(signal: intr.Signal, args: list[Any]) -> dict[str, Any]:
-    kwargs: dict[str, Any] = {}
-    for idx, arg in enumerate(signal.args):
+def positional_args_to_kwargs(
+    introspection_args: list[intr.Arg], args: list[Any]
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for idx, arg in enumerate(introspection_args):
         if arg.name:
-            kwargs[arg.name] = args[idx]
-    return kwargs
+            result[arg.name] = args[idx]
+    return result
+
+
+def kwargs_to_positional_args(
+    introspection_args: list[intr.Arg], args: dict[str, Any]
+) -> list[Any]:
+
+    # TODO: Verify that all args keys are valid
+    result: list[Any] = [None] * len(introspection_args)
+
+    for idx, arg in enumerate(introspection_args):
+        result[idx] = args.get(arg.name) if arg.name else None
+    return result

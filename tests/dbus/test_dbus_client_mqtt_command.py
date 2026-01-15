@@ -2,6 +2,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from dbus_fast import ArgDirection
+from dbus_fast import introspection as intr
+
 import dbus2mqtt.config as config
 
 from dbus2mqtt import AppContext
@@ -192,6 +195,46 @@ async def test_method_command_response():
     assert mqtt_message.payload["method"] == "TestMethod2"
     assert mqtt_message.payload["args"] == ["arg0", 2]
     assert mqtt_message.payload["result"] == "response-val"
+
+
+@pytest.mark.asyncio
+async def test_method_kwargs_command_response():
+    """Tests that a successful dbus method call publishes a MQTT response."""
+    app_context = _mocked_app_context()
+    dbus_client, mocked_interfaces = _mocked_dbus_client(app_context)
+
+    # Configure a response topic for the first interface
+    app_context.config.dbus.subscriptions[0].interfaces[
+        0
+    ].mqtt_response_topic = "dbus2mqtt/test/command"
+
+    # Set introspection data
+    mocked_interfaces[0].introspection.methods = [
+        intr.Method(
+            name="TestMethod2",
+            in_args=[
+                intr.Arg(name="arg0", signature="s", direction=ArgDirection.IN),
+                intr.Arg(name="arg1", signature="i", direction=ArgDirection.IN),
+            ],
+        )
+    ]
+
+    mocked_interfaces[0].call_test_method2.return_value = "response-val"
+    msg = MqttMessage(
+        topic="dbus2mqtt/test/command",
+        payload={
+            "bus_name": "org.mpris.MediaPlayer2.vlc",
+            "method": "TestMethod2",
+            "kwargs": {"arg0": "val0", "arg1": 1},
+        },
+    )
+
+    # Process message and check if message is published on the internal queue
+    await dbus_client._on_mqtt_msg(msg, MqttReceiveHints())
+    mqtt_message = app_context.event_broker.mqtt_publish_queue.sync_q.get_nowait()
+
+    assert mqtt_message.payload.get("success")
+    assert mqtt_message.payload["kwargs"] == {"arg0": "val0", "arg1": 1}
 
 
 @pytest.mark.asyncio
