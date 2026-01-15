@@ -29,6 +29,7 @@ from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState,
 from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     convert_mqtt_args_to_dbus,
+    positional_args_to_kwargs,
     unwrap_dbus_object,
     unwrap_dbus_objects,
 )
@@ -315,13 +316,7 @@ class DbusClient:
     ):
         """Publish a dbus signal to the event broker, one for each subscription_config."""
         unwrapped_args = unwrap_dbus_objects(args)
-
-        named_args: dict[str, Any] = {}
-        for idx, arg in enumerate(signal.args):
-            if arg.name:
-                named_args[arg.name] = unwrapped_args[idx]
-
-        print(f"signal={signal.name}, args={unwrapped_args}, named_args={named_args}")
+        kwargs = positional_args_to_kwargs(signal, unwrapped_args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
         for signal_subscription in signal_subscriptions:
@@ -336,6 +331,7 @@ class DbusClient:
                     subscription_config=subscription_config,
                     signal_config=signal_config,
                     args=unwrapped_args,
+                    kwargs=kwargs,
                 )
             )
 
@@ -907,6 +903,7 @@ class DbusClient:
                 "interface": signal_state.interface_name,
                 "signal": signal_config.signal,
                 "args": signal_state.args,
+                "kwargs": signal_state.kwargs,
             }
             flow_trigger_handler = FlowTriggerDbusSignalHandler(
                 trigger_context=trigger_context,

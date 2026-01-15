@@ -212,12 +212,11 @@ async def test_dbus_signal_trigger():
 
     app_context = mocked_app_context()
 
-    trigger_config = FlowTriggerDbusSignalConfig(
-        interface="test-interface-name", signal="TestSignal"
-    )
     processor, _ = mocked_flow_processor(
         app_context,
-        [trigger_config],
+        triggers=[
+            FlowTriggerDbusSignalConfig(interface="test-interface-name", signal="TestSignal")
+        ],
         actions=[
             FlowActionContextSetConfig(
                 global_context={
@@ -228,6 +227,7 @@ async def test_dbus_signal_trigger():
                         "interface": "{{ interface }}",
                         "signal": "{{ signal }}",
                         "args": "{{ args }}",
+                        "kwargs": "{{ kwargs }}",
                     }
                 }
             )
@@ -247,7 +247,8 @@ async def test_dbus_signal_trigger():
         interface_name=subscription_config.interfaces[0].interface,
         subscription_config=subscription_config,
         signal_config=SignalConfig(signal="TestSignal"),
-        args=["first-arg", "second-arg"],
+        args=["val0", "val1"],
+        kwargs={"key0": "val0", "key1": "val1"},
     )
 
     # trigger dbus_client and capture the triggered message
@@ -264,7 +265,8 @@ async def test_dbus_signal_trigger():
         "path": "/",
         "interface": "test-interface-name",
         "signal": "TestSignal",
-        "args": ["first-arg", "second-arg"],
+        "args": ["val0", "val1"],
+        "kwargs": {"key0": "val0", "key1": "val1"},
     }
 
 
@@ -302,6 +304,7 @@ async def test_dbus_signal_interface_matcher():
         subscription_config=subscription_config,
         signal_config=SignalConfig(signal="TestSignal"),
         args=[],
+        kwargs={},
     )
 
     # trigger dbus_client and capture the triggered message
@@ -346,6 +349,7 @@ async def test_dbus_signal_filter():
         subscription_config=subscription_config,
         signal_config=subscription_signal_config,
         args=[],
+        kwargs={},
     )
 
     # trigger dbus_client and capture the triggered message

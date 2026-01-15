@@ -5,7 +5,6 @@ from copy import deepcopy
 from dbus_fast.introspection import Interface, Node
 
 from dbus2mqtt.dbus.introspection.patches.mpris_playerctl import mpris_introspection_playerctl
-from dbus2mqtt.dbus.introspection.patches.mpris_vlc import mpris_introspection_vlc
 
 logger = logging.getLogger(__name__)
 
@@ -13,26 +12,21 @@ logger = logging.getLogger(__name__)
 class IntrospectPatcher:
     def patch_if_needed(self, bus_name: str, path: str, introspection: Node) -> Node:
 
-        # print(f"original introspection data: {introspection.tostring()}")
-
-        # This is only needed for testing
         if path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2.vlc"):
             # vlc 3.x branch contains an incomplete and wrong dbus introspection
             # https://github.com/videolan/vlc/commit/48e593f164d2bf09b0ca096d88c86d78ec1a2ca0
             # Until vlc 4.x is out we use the official specification instead
-            introspection = mpris_introspection_vlc
-            # return mpris_introspection_playerctl
+            return mpris_introspection_playerctl
 
-        # TODO: Make this configurable
         reference = None
         if path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2."):
+            # Not all players provide argument names in their introspection data.
+            # Load a well known mpris introspection data to enrich the original
             reference = mpris_introspection_playerctl
 
         if reference:
             introspection = deepcopy(introspection)
             self._enrich(introspection, reference)
-
-        # print(f"patched introspection data: {introspection.tostring()}")
 
         return introspection
 

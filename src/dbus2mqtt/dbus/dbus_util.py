@@ -7,6 +7,7 @@ from typing import Any
 import dbus_fast.signature as dbus_signature
 
 from dbus_fast import Variant
+from dbus_fast import introspection as intr
 
 logger = logging.getLogger(__name__)
 
@@ -184,3 +185,11 @@ def _convert_and_wrap_in_variant(value: Any) -> Any:
     else:
         # Fallback
         return value
+
+
+def positional_args_to_kwargs(signal: intr.Signal, args: list[Any]) -> dict[str, Any]:
+    kwargs: dict[str, Any] = {}
+    for idx, arg in enumerate(signal.args):
+        if arg.name:
+            kwargs[arg.name] = args[idx]
+    return kwargs
