@@ -80,7 +80,7 @@ When triggered, the following context parameters are available
 | interface    | `str`  | name of interface for which the signal was triggered |
 | signal       | `str`  | name of the signal, e.g. 'Seeked' |
 | args         | `list` | positional signal arguments, list of objects |
-| kwargs       | `dict` | keyworded signal arguments |
+| kwargs       | `dict` | keyworded signal arguments, only available when a D-Bus service provides introspection data with named method arguments |
 
 !!! note
      Take care with `PropertiesChanged` signals. These always originate from `org.freedesktop.DBus.Properties`. They contain the real interface the event originated from as their first argument. To filter on that interface you can use the `conditions` configuration on flows.
