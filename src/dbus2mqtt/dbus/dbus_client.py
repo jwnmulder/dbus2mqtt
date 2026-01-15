@@ -31,7 +31,6 @@ from dbus2mqtt.dbus.dbus_util import (
     convert_mqtt_args_to_dbus,
     positional_args_to_kwargs,
     unwrap_dbus_object,
-    unwrap_dbus_objects,
 )
 from dbus2mqtt.dbus.introspection.patcher import IntrospectPatcher
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
@@ -311,10 +310,10 @@ class DbusClient:
         return proxy_object, bus_name_subscriptions
 
     def _dbus_fast_signal_publisher(
-        self, signal: dbus_introspection.Signal, dbus_signal_state: dict[str, Any], *args
+        self, signal: dbus_introspection.Signal, dbus_signal_state: dict[str, Any], args: list[Any]
     ):
         """Publish a dbus signal to the event broker, one for each subscription_config."""
-        unwrapped_args = unwrap_dbus_objects(args)
+        unwrapped_args = unwrap_dbus_object(args)
         kwargs = positional_args_to_kwargs(signal, unwrapped_args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
@@ -340,13 +339,13 @@ class DbusClient:
         expected_args = len(signal.args)
 
         if expected_args == 1:
-            return lambda a: self._dbus_fast_signal_publisher(signal, state, a)
+            return lambda a: self._dbus_fast_signal_publisher(signal, state, [a])
         elif expected_args == 2:
-            return lambda a, b: self._dbus_fast_signal_publisher(signal, state, a, b)
+            return lambda a, b: self._dbus_fast_signal_publisher(signal, state, [a, b])
         elif expected_args == 3:
-            return lambda a, b, c: self._dbus_fast_signal_publisher(signal, state, a, b, c)
+            return lambda a, b, c: self._dbus_fast_signal_publisher(signal, state, [a, b, c])
         elif expected_args == 4:
-            return lambda a, b, c, d: self._dbus_fast_signal_publisher(signal, state, a, b, c, d)
+            return lambda a, b, c, d: self._dbus_fast_signal_publisher(signal, state, [a, b, c, d])
         raise ValueError("Unsupported nr of arguments")
 
     async def _subscribe_interface_signals(
@@ -1056,11 +1055,11 @@ class DbusClient:
 
             # Send success (or error) response if configured
             await self._send_mqtt_response(
-                interface_config,
-                result,
-                error,
-                interface.bus_name,
-                interface.path,
+                interface_config=interface_config,
+                result=result,
+                error=error,
+                bus_name=interface.bus_name,
+                path=interface.path,
                 method=method.method,
                 args=payload_method_args,
                 kwargs=payload_method_kwargs,
@@ -1084,25 +1083,25 @@ class DbusClient:
 
             # Send success (or error) response if configured
             await self._send_mqtt_response(
-                interface_config,
-                payload_value,
-                error,
-                interface.bus_name,
-                interface.path,
+                interface_config=interface_config,
+                result=payload_value,
+                error=error,
+                bus_name=interface.bus_name,
+                path=interface.path,
                 property=property.property,
-                value=[payload_value],
+                value=payload_value,
             )
 
     async def _send_mqtt_response(
         self,
-        interface_config,
+        interface_config: InterfaceConfig,
         result: Any,
         error: Exception | None,
         bus_name: str,
         path: str,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """Send MQTT response for a method call if response topic is configured.
 
         Args:
@@ -1114,44 +1113,46 @@ class DbusClient:
         if not interface_config.mqtt_response_topic:
             return
 
+        # Build response context
+        response_context: dict[str, Any] = {
+            "bus_name": bus_name,
+            "path": path,
+            "interface": interface_config.interface,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        # Check if 'method' and 'args' are provided
+        if "method" in kwargs and "args" in kwargs:
+            method = kwargs["method"]
+            args = kwargs["args"]
+            response_context.update({
+                "method": method,
+                "args": args,
+            })
+        # Check if 'property' and 'value' are provided
+        elif "property" in kwargs and "value" in kwargs:
+            property = kwargs["property"]
+            value = kwargs["value"]
+            response_context.update({
+                "property": property,
+                "value": value,
+            })
+        else:
+            raise ValueError(
+                "Invalid arguments: Please provide either 'method' and 'args' or 'property' and 'value'"
+            )
+
+        # Add result or error to context
+        if error:
+            response_context.update({
+                "success": False,
+                "error": str(error),
+                "error_type": error.__class__.__name__,
+            })
+        else:
+            response_context.update({"success": True, "result": result})
+
         try:
-            # Build response context
-            response_context = {
-                "bus_name": bus_name,
-                "path": path,
-                "interface": interface_config.interface,
-                "timestamp": datetime.now().isoformat(),
-            }
-
-            # Check if 'method' and 'args' are provided
-            if "method" in kwargs and "args" in kwargs:
-                method = kwargs["method"]
-                args = kwargs["args"]
-                response_context.update({
-                    "method": method,
-                    "args": args,
-                })
-            # Check if 'property' and 'value' are provided
-            elif "property" in kwargs and "value" in kwargs:
-                property = kwargs["property"]
-                value = kwargs["value"]
-                response_context.update({
-                    "property": property,
-                    "value": value,
-                })
-            else:
-                return "Invalid arguments: Please provide either 'method' and 'args' or 'property' and 'value'"
-
-            # Add result or error to context
-            if error:
-                response_context.update({
-                    "success": False,
-                    "error": str(error),
-                    "error_type": error.__class__.__name__,
-                })
-            else:
-                response_context.update({"success": True, "result": result})
-
             # Render response topic
             response_topic = interface_config.render_mqtt_response_topic(
                 self.templating, response_context

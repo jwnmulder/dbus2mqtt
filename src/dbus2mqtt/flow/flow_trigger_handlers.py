@@ -40,8 +40,8 @@ class FlowTriggerDbusSignalHandler(FlowTriggerHandler):
         matches = self.signal == trigger_config.signal
 
         # dbus_signal triggers might have an interface configured
-        if trigger_config.interface:
-            matches &= self.interface == trigger_config.interface
+        if matches and trigger_config.interface:
+            matches = self.interface == trigger_config.interface
 
         return matches
 
@@ -69,8 +69,8 @@ class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
         matches = trigger_config.topic == self.topic
 
         # mqtt_message triggers might have a filter configured
-        if trigger_config.filter is not None:
-            matches &= trigger_config.matches_filter(templating, self.context)
+        if matches and trigger_config.filter is not None:
+            matches = trigger_config.matches_filter(templating, self.context)
 
         return matches
 

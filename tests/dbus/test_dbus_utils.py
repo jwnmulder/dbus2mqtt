@@ -2,7 +2,11 @@ import pytest
 
 from dbus_fast import SignatureTree, Variant
 
-from dbus2mqtt.dbus.dbus_util import _convert_and_wrap_in_variant, convert_mqtt_args_to_dbus
+from dbus2mqtt.dbus.dbus_util import (
+    _convert_and_wrap_in_variant,
+    convert_mqtt_args_to_dbus,
+    unwrap_dbus_object,
+)
 
 
 class TestConvertMqttArgsToDbus:
@@ -225,6 +229,30 @@ class TestConvertAndWrapInVariant:
         assert isinstance(result[0], dict)
         assert result[0] == {"a": Variant("q", 1)}
         assert result[1] == {"b": Variant("q", 2)}
+
+
+class TestUnwrapping:
+    """Tests for unwrapping dbus results such as Variants and more complex structures."""
+
+    def test_unwrap_int(self):
+        val = unwrap_dbus_object(1)
+        assert val == 1
+
+    def test_unwrap_list(self):
+        val = unwrap_dbus_object([1, 2, "string"])
+        assert val == [1, 2, "string"]
+
+    def test_unwrap_tuple(self):
+        val = unwrap_dbus_object((1, 2, "string"))
+        assert val == (1, 2, "string")
+
+    def test_unwrap_variant_int(self):
+        val = unwrap_dbus_object(Variant("q", 1))
+        assert val == 1
+
+    def test_unwrap_variant_list(self):
+        val = unwrap_dbus_object(["string", Variant("q", 1)])
+        assert val == ["string", 1]
 
 
 class TestIntegrationScenarios:
