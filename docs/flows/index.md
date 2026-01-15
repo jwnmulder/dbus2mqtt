@@ -8,6 +8,7 @@ Flows can be defined on a global or dbus subscription level and can be triggered
 * `dbus_signal` for when dbus signal occur
 * `object_added` when a new bus_name is registered on dbus
 * `object_removed` when a bus_name is removed from dbus
+* `mqtt_message` for reacting to MQTT messages
 
 Within each flow a set of actions can be configured. These are executed in the order as defined in yaml
 

@@ -982,6 +982,7 @@ class DbusClient:
 
         payload_method = msg.payload.get("method")
         payload_method_args = msg.payload.get("args") or []
+        payload_method_kwargs = msg.payload.get("kwargs") or {}
 
         payload_property = msg.payload.get("property")
         payload_value = msg.payload.get("value")
@@ -993,6 +994,12 @@ class DbusClient:
                 logger.info(
                     f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}"
                 )
+            return
+
+        if payload_method and payload_method_args and payload_method_kwargs:
+            logger.info(
+                f"on_mqtt_msg: Invalid payload, Use either args or kwargs for method calls, got {msg.payload}"
+            )
             return
 
         matched_methods: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, MethodConfig]] = []
@@ -1056,6 +1063,7 @@ class DbusClient:
                 interface.path,
                 method=method.method,
                 args=payload_method_args,
+                kwargs=payload_method_kwargs,
             )
 
         # Set property values on each matched D-Bus interface and publish responses if configured
