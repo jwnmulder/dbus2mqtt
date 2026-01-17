@@ -188,9 +188,15 @@ def kwargs_to_positional_args(
     introspection_args: list[intr.Arg], args: dict[str, Any]
 ) -> list[Any]:
 
-    # TODO: Verify that all args keys are valid
     result: list[Any] = [None] * len(introspection_args)
 
     for idx, arg in enumerate(introspection_args):
+        if not arg.name:
+            raise ValueError(
+                "Unable to convert kwargs due to missing arg names in introspection data"
+            )
+        if arg.name not in args:
+            raise ValueError(f"Missing required arg '{arg.name}'")
+
         result[idx] = args.get(arg.name) if arg.name else None
     return result
