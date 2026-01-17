@@ -30,3 +30,4 @@ class DbusSignalWithState:
     subscription_config: SubscriptionConfig
     signal_config: SignalConfig
     args: list[Any]
+    kwargs: dict[str, Any]

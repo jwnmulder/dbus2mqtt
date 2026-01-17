@@ -45,7 +45,13 @@ class DbusContext:
         return res
 
     async def async_dbus_call_fn(
-        self, bus_name: str, path: str, interface: str, method: str, method_args: list[Any] = []
+        self,
+        bus_name: str,
+        path: str,
+        interface: str,
+        method: str,
+        method_args: list[Any] = [],
+        method_kwargs: dict[str, Any] = {},
     ) -> object:
         """Call a method on a active dbus object that dbus2mqtt is subscribed to.
 
@@ -103,7 +109,9 @@ class DbusContext:
 
         obj_interface = proxy_object.get_interface(interface)
 
-        return await self.dbus_client.call_dbus_interface_method(obj_interface, method, method_args)
+        return await self.dbus_client.call_dbus_interface_method(
+            obj_interface, method, method_args, method_kwargs
+        )
 
     async def async_dbus_property_get_fn(
         self,

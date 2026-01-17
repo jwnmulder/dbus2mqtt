@@ -7,6 +7,7 @@ from typing import Any
 import dbus_fast.signature as dbus_signature
 
 from dbus_fast import Variant
+from dbus_fast import introspection as intr
 
 logger = logging.getLogger(__name__)
 
@@ -171,3 +172,31 @@ def _convert_and_wrap_in_variant(value: Any) -> Any:
     else:
         # Fallback
         return value
+
+
+def positional_args_to_kwargs(
+    introspection_args: list[intr.Arg], args: list[Any]
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for idx, arg in enumerate(introspection_args):
+        if arg.name:
+            result[arg.name] = args[idx]
+    return result
+
+
+def kwargs_to_positional_args(
+    introspection_args: list[intr.Arg], args: dict[str, Any]
+) -> list[Any]:
+
+    result: list[Any] = [None] * len(introspection_args)
+
+    for idx, arg in enumerate(introspection_args):
+        if not arg.name:
+            raise ValueError(
+                "Unable to convert kwargs due to missing arg names in introspection data"
+            )
+        if arg.name not in args:
+            raise ValueError(f"Missing required arg '{arg.name}'")
+
+        result[idx] = args.get(arg.name) if arg.name else None
+    return result
