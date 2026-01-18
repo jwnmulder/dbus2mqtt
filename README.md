@@ -2,31 +2,31 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/jwnmulder/dbus2mqtt/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                                                          |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
-|-------------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
-| src/dbus2mqtt/\_\_init\_\_.py                                 |        8 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/\_\_main\_\_.py                                 |        3 |        1 |        2 |        1 |     60% |         4 |
-| src/dbus2mqtt/config/\_\_init\_\_.py                          |      138 |        7 |       26 |        3 |     91% |21, 66, 187, 315-318 |
-| src/dbus2mqtt/config/jsonarparse.py                           |       16 |        0 |        2 |        0 |    100% |           |
-| src/dbus2mqtt/dbus/dbus\_client.py                            |      543 |      269 |      226 |       29 |     48% |46-48, 71-74, 78-103, 113-141, 145-164, 173, 181-182, 185-195, 198-208, 212-216, 220-229, 233-241, 244, 263->exit, 265->exit, 272-285, 291-309, 337, 339, 342-344, 354-390, 396-438, 442-458, 462-484, 492-519, 525-561, 580->578, 587->585, 595->exit, 606-616, 653-662, 676->695, 679-689, 696->700, 727->730, 769->787, 775->785, 787->765, 808-809, 813-818, 820->823, 833-842, 857-864, 868-875, 879-882, 919-933, 937->936, 939->937, 941, 982, 998-1002, 1027->1031, 1032, 1050-1052, 1077-1079, 1140, 1146, 1160->exit, 1173-1174 |
-| src/dbus2mqtt/dbus/dbus\_types.py                             |       13 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/dbus/dbus\_util.py                              |      105 |       15 |       62 |       10 |     83% |22, 26, 45, 73-76, 89, 105, 108-113, 120, 127, 173 |
-| src/dbus2mqtt/dbus/introspection\_patches/mpris\_playerctl.py |        2 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/dbus/introspection\_patches/mpris\_vlc.py       |        2 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/event\_broker.py                                |       28 |        2 |        0 |        0 |     93% |    43, 52 |
-| src/dbus2mqtt/flow/\_\_init\_\_.py                            |       30 |        2 |        6 |        3 |     86% |50, 51->53, 53->55, 62 |
-| src/dbus2mqtt/flow/actions/context\_set.py                    |       19 |        0 |        4 |        0 |    100% |           |
-| src/dbus2mqtt/flow/actions/log\_action.py                     |       20 |        3 |        0 |        0 |     85% |     29-34 |
-| src/dbus2mqtt/flow/actions/mqtt\_publish.py                   |       34 |       10 |        6 |        1 |     68% |     41-58 |
-| src/dbus2mqtt/flow/flow\_processor.py                         |      156 |       33 |       70 |        7 |     78% |41, 47-53, 59-82, 97-101, 121, 122->125, 136->139, 139->130, 184-207, 222 |
-| src/dbus2mqtt/flow/flow\_trigger\_handlers.py                 |       40 |        0 |        6 |        3 |     93% |43->46, 72->75, 82->85 |
-| src/dbus2mqtt/flow/flow\_trigger\_processor.py                |       54 |        2 |       26 |        1 |     96% |53->52, 79, 87 |
-| src/dbus2mqtt/main.py                                         |       84 |       30 |        4 |        2 |     64% |29-37, 48-62, 67-69, 74-82, 107, 122-123, 144-145, 150-151 |
-| src/dbus2mqtt/mqtt/mqtt\_client.py                            |      136 |       73 |       40 |        2 |     43% |64, 84->83, 92, 98-153, 157-167, 170-175, 180-220, 237-241 |
-| src/dbus2mqtt/template/\_\_init\_\_.py                        |        0 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/template/dbus\_template\_functions.py           |       39 |       26 |       12 |        0 |     25% |16, 40-45, 94-106, 117-129, 134-143 |
-| src/dbus2mqtt/template/templating.py                          |       91 |       11 |       24 |        5 |     86% |49, 90, 103-104, 115-116, 127->exit, 144, 159-160, 171->exit, 177, 188 |
-| **TOTAL**                                                     | **1561** |  **484** |  **516** |   **67** | **66%** |           |
+| Name                                                         |    Stmts |     Miss |   Branch |   BrPart |   Cover |   Missing |
+|------------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: | --------: |
+| src/dbus2mqtt/\_\_init\_\_.py                                |        8 |        0 |        0 |        0 |    100% |           |
+| src/dbus2mqtt/\_\_main\_\_.py                                |        3 |        1 |        2 |        1 |     60% |         4 |
+| src/dbus2mqtt/config/\_\_init\_\_.py                         |      138 |        7 |       26 |        3 |     91% |21, 66, 187, 315-318 |
+| src/dbus2mqtt/config/jsonarparse.py                          |       16 |        0 |        2 |        0 |    100% |           |
+| src/dbus2mqtt/dbus/dbus\_client.py                           |      551 |      260 |      232 |       33 |     50% |47-49, 73-76, 80-105, 115-143, 147-166, 175, 183-184, 187-197, 200-210, 214-218, 222-231, 235-243, 265->exit, 267->exit, 274-287, 293-311, 343, 345, 348-350, 360-396, 402-444, 448-451, 455-477, 485-512, 518-554, 573->571, 580->578, 588->exit, 599-609, 646-655, 669->688, 672-682, 689->693, 720->723, 762->780, 768->778, 780->758, 806, 819-824, 826->829, 841->844, 863-870, 874-881, 885-888, 926-940, 944->943, 946->944, 948, 989, 1006-1010, 1013-1016, 1041->1045, 1046, 1069-1071, 1097-1099, 1146->1148, 1148->1160, 1155, 1161, 1175->exit, 1188-1189 |
+| src/dbus2mqtt/dbus/dbus\_types.py                            |       13 |        0 |        0 |        0 |    100% |           |
+| src/dbus2mqtt/dbus/dbus\_util.py                             |      121 |       17 |       72 |       13 |     82% |23, 27, 46, 74-77, 90, 106, 109-114, 121, 128, 174, 182->181, 195, 199 |
+| src/dbus2mqtt/dbus/introspection/patcher.py                  |       48 |        7 |       32 |       11 |     78% |19, 22->31, 25, 31->35, 44, 55, 59, 61->57, 70, 74, 76->72 |
+| src/dbus2mqtt/dbus/introspection/patches/mpris\_playerctl.py |        2 |        0 |        0 |        0 |    100% |           |
+| src/dbus2mqtt/event\_broker.py                               |       28 |        2 |        0 |        0 |     93% |    43, 52 |
+| src/dbus2mqtt/flow/\_\_init\_\_.py                           |       30 |        2 |        6 |        3 |     86% |50, 51->53, 53->55, 62 |
+| src/dbus2mqtt/flow/actions/context\_set.py                   |       19 |        0 |        4 |        0 |    100% |           |
+| src/dbus2mqtt/flow/actions/log\_action.py                    |       20 |        3 |        0 |        0 |     85% |     29-34 |
+| src/dbus2mqtt/flow/actions/mqtt\_publish.py                  |       34 |       10 |        6 |        1 |     68% |     41-58 |
+| src/dbus2mqtt/flow/flow\_processor.py                        |      156 |       33 |       70 |        7 |     78% |41, 47-53, 59-82, 97-101, 121, 122->125, 136->139, 139->130, 184-207, 222 |
+| src/dbus2mqtt/flow/flow\_trigger\_handlers.py                |       40 |        0 |        6 |        3 |     93% |43->46, 72->75, 82->85 |
+| src/dbus2mqtt/flow/flow\_trigger\_processor.py               |       54 |        2 |       26 |        1 |     96% |53->52, 79, 87 |
+| src/dbus2mqtt/main.py                                        |       84 |       30 |        4 |        2 |     64% |29-37, 48-62, 67-69, 74-82, 107, 122-123, 144-145, 150-151 |
+| src/dbus2mqtt/mqtt/mqtt\_client.py                           |      136 |       73 |       40 |        2 |     43% |64, 84->83, 92, 98-153, 157-167, 170-175, 180-220, 237-241 |
+| src/dbus2mqtt/template/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
+| src/dbus2mqtt/template/dbus\_template\_functions.py          |       39 |        6 |       12 |        3 |     78% |102, 106, 127, 135-137 |
+| src/dbus2mqtt/template/templating.py                         |       91 |       11 |       24 |        5 |     86% |49, 90, 103-104, 115-116, 127->exit, 144, 159-160, 171->exit, 177, 188 |
+| **TOTAL**                                                    | **1631** |  **464** |  **564** |   **88** | **68%** |           |
 
 
 ## Setup coverage badge
