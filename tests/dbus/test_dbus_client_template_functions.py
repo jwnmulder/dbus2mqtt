@@ -41,10 +41,10 @@ async def test_dbus_list():
 async def test_dbus_call():
     """Test dbus template function: dbus_call."""
     app_context = mocked_app_context()
-    dbus_client, mocked_interfaces = mocked_dbus_client_with_dbus_objects(app_context)
+    dbus_client, interfaces = mocked_dbus_client_with_dbus_objects(app_context)
     app_context.templating.add_functions(jinja_custom_dbus_functions(dbus_client))
 
-    mocked_interface = mocked_interfaces["org.mpris.MediaPlayer2.firefox"]
+    mocked_interface = interfaces["org.mpris.MediaPlayer2.firefox"]
     mocked_interface.call_test_method1.return_value = "response-val"
 
     template = "{{ dbus_call('org.mpris.MediaPlayer2.firefox', '/org/mpris/MediaPlayer2', 'any.interface', 'TestMethod1', []) }}"

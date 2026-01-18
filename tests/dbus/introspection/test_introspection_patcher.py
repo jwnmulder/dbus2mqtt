@@ -47,7 +47,7 @@ def test_patch_mpris():
         )
     )
 
-    # the patcher can also return new implementatiosns, e.g. for vlc
+    # the patcher can also return new implementations, e.g. for vlc
     assert introspection.name == "mpris-test-marker"
 
     # method arguments should have been enriched with valid names
