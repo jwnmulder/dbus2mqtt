@@ -79,7 +79,8 @@ When triggered, the following context parameters are available
 | path         | `str`  | path of the object that was registered on dbus |
 | interface    | `str`  | name of interface for which the signal was triggered |
 | signal       | `str`  | name of the signal, e.g. 'Seeked' |
-| args         | `list` | signal arguments, list of objects |
+| args         | `list` | positional signal arguments, list of objects |
+| kwargs       | `dict` | keyworded signal arguments, only available when a D-Bus service provides introspection data with named method arguments |
 
 !!! note
      Take care with `PropertiesChanged` signals. These always originate from `org.freedesktop.DBus.Properties`. They contain the real interface the event originated from as their first argument. To filter on that interface you can use the `conditions` configuration on flows.
@@ -89,7 +90,7 @@ When triggered, the following context parameters are available
          triggers:
            - type: dbus_signal
          conditions:
-           - "{{ args[0] == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+           - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
      ```
 
 ## mqtt_message

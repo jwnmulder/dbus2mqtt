@@ -29,10 +29,11 @@ from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState,
 from dbus2mqtt.dbus.dbus_util import (
     camel_to_snake,
     convert_mqtt_args_to_dbus,
+    kwargs_to_positional_args,
+    positional_args_to_kwargs,
     unwrap_dbus_object,
 )
-from dbus2mqtt.dbus.introspection_patches.mpris_playerctl import mpris_introspection_playerctl
-from dbus2mqtt.dbus.introspection_patches.mpris_vlc import mpris_introspection_vlc
+from dbus2mqtt.dbus.introspection.patcher import IntrospectPatcher
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
@@ -65,6 +66,7 @@ class DbusClient:
         self._trigger_processor = FlowTriggerProcessor(app_context)
 
         self._bus_init_lock = asyncio.Lock()
+        self._introspection_patcher = IntrospectPatcher()
 
     async def _reconnect(self):
         """Initializes a new MessageBus, clears all subscriptions and re-connects to DBus."""
@@ -277,7 +279,7 @@ class DbusClient:
         logger.warning(
             f"Returning temporary proxy_object with an additional introspection call, bus_name={bus_name}, path={path}"
         )
-        introspection = await self._bus.introspect(bus_name=bus_name, path=path)
+        introspection = await self._introspect(bus_name=bus_name, path=path)
         proxy_object = self._bus.get_proxy_object(bus_name, path, introspection)
         if proxy_object:
             return proxy_object
@@ -308,9 +310,12 @@ class DbusClient:
 
         return proxy_object, bus_name_subscriptions
 
-    def _dbus_fast_signal_publisher(self, dbus_signal_state: dict[str, Any], args: list[Any]):
+    def _dbus_fast_signal_publisher(
+        self, signal: dbus_introspection.Signal, dbus_signal_state: dict[str, Any], args: list[Any]
+    ):
         """Publish a dbus signal to the event broker, one for each subscription_config."""
         unwrapped_args = unwrap_dbus_object(args)
+        kwargs = positional_args_to_kwargs(signal.args, unwrapped_args)
 
         signal_subscriptions = dbus_signal_state["signal_subscriptions"]
         for signal_subscription in signal_subscriptions:
@@ -325,6 +330,7 @@ class DbusClient:
                     subscription_config=subscription_config,
                     signal_config=signal_config,
                     args=unwrapped_args,
+                    kwargs=kwargs,
                 )
             )
 
@@ -334,13 +340,13 @@ class DbusClient:
         expected_args = len(signal.args)
 
         if expected_args == 1:
-            return lambda a: self._dbus_fast_signal_publisher(state, [a])
+            return lambda a: self._dbus_fast_signal_publisher(signal, state, [a])
         elif expected_args == 2:
-            return lambda a, b: self._dbus_fast_signal_publisher(state, [a, b])
+            return lambda a, b: self._dbus_fast_signal_publisher(signal, state, [a, b])
         elif expected_args == 3:
-            return lambda a, b, c: self._dbus_fast_signal_publisher(state, [a, b, c])
+            return lambda a, b, c: self._dbus_fast_signal_publisher(signal, state, [a, b, c])
         elif expected_args == 4:
-            return lambda a, b, c, d: self._dbus_fast_signal_publisher(state, [a, b, c, d])
+            return lambda a, b, c, d: self._dbus_fast_signal_publisher(signal, state, [a, b, c, d])
         raise ValueError("Unsupported nr of arguments")
 
     async def _subscribe_interface_signals(
@@ -438,22 +444,9 @@ class DbusClient:
         return []
 
     async def _introspect(self, bus_name: str, path: str) -> dbus_introspection.Node:
-
-        if path == "/org/mpris/MediaPlayer2" and bus_name.startswith("org.mpris.MediaPlayer2.vlc"):
-            # vlc 3.x branch contains an incomplete dbus introspection
-            # https://github.com/videolan/vlc/commit/48e593f164d2bf09b0ca096d88c86d78ec1a2ca0
-            # Until vlc 4.x is out we use the official specification instead
-            introspection = mpris_introspection_vlc
-        else:
-            introspection = await self._bus.introspect(bus_name, path)
-
-        # MPRIS: If no introspection data is available, load a default
-        if (
-            path == "/org/mpris/MediaPlayer2"
-            and bus_name.startswith("org.mpris.MediaPlayer2.")
-            and len(introspection.interfaces) == 0
-        ):
-            introspection = mpris_introspection_playerctl
+        """Like _bus.introspect but with patching logic for incomplete introspection data."""
+        introspection = await self._bus.introspect(bus_name, path)
+        introspection = self._introspection_patcher.patch_if_needed(bus_name, path, introspection)
 
         return introspection
 
@@ -462,7 +455,7 @@ class DbusClient:
         paths: list[str] = []
 
         try:
-            introspection = await self._introspect(bus_name, path)
+            introspection = await self._bus.introspect(bus_name, path)
         except TypeError as e:
             logger.warning(f"bus.introspect failed, bus_name={bus_name}, path={path}: {e}")
             return paths
@@ -794,16 +787,29 @@ class DbusClient:
                         )
 
     async def call_dbus_interface_method(
-        self, interface: dbus_aio.proxy_object.ProxyInterface, method: str, method_args: list[Any]
+        self,
+        interface: dbus_aio.proxy_object.ProxyInterface,
+        method: str,
+        method_args: list[Any],
+        method_kwargs: dict[str, Any],
     ) -> object:
 
-        converted_args = convert_mqtt_args_to_dbus(method_args)
         call_method_name = "call_" + camel_to_snake(method)
 
-        # In case of a payload that doesn't match the dbus signature type, this prints a better error message
         interface_method = next(
             (m for m in interface.introspection.methods if m.name == method), None
         )
+
+        # Convert kwargs to positional args
+        if method_kwargs:
+            if not interface_method:
+                raise ValueError("kwargs provided but missing named introspection data")
+
+            method_args = kwargs_to_positional_args(interface_method.in_args, method_kwargs)
+
+        converted_args = convert_mqtt_args_to_dbus(method_args or [])
+
+        # In case of a payload that doesn't match the dbus signature type, this prints a better error message
         if interface_method:
             in_signature_tree = SignatureTree(interface_method.in_signature)
             in_signature_tree.verify(converted_args)
@@ -902,6 +908,7 @@ class DbusClient:
                 "interface": signal_state.interface_name,
                 "signal": signal_config.signal,
                 "args": signal_state.args,
+                "kwargs": signal_state.kwargs,
             }
             flow_trigger_handler = FlowTriggerDbusSignalHandler(
                 trigger_context=trigger_context,
@@ -987,7 +994,8 @@ class DbusClient:
         payload_path = msg.payload.get("path") or "*"
 
         payload_method = msg.payload.get("method")
-        payload_method_args = msg.payload.get("args") or []
+        payload_method_args = msg.payload.get("args")
+        payload_method_kwargs = msg.payload.get("kwargs")
 
         payload_property = msg.payload.get("property")
         payload_value = msg.payload.get("value")
@@ -999,6 +1007,12 @@ class DbusClient:
                 logger.info(
                     f"on_mqtt_msg: Unsupported payload, missing 'method' or 'property/value', got method={payload_method}, property={payload_property}, value={payload_value} from {msg.payload}"
                 )
+            return
+
+        if payload_method and payload_method_args is not None and payload_method_kwargs is not None:
+            logger.info(
+                f"on_mqtt_msg: Invalid payload, Use either args or kwargs for method calls, got {msg.payload}"
+            )
             return
 
         matched_methods: list[tuple[dbus_aio.ProxyInterface, InterfaceConfig, MethodConfig]] = []
@@ -1036,8 +1050,13 @@ class DbusClient:
 
         # Call the requested method on each matched D-Bus interface and publish responses if configured
         for interface, interface_config, method in matched_methods:
+            args_msg = (
+                f"args={payload_method_args}"
+                if payload_method_args
+                else f"kwargs={payload_method_kwargs}"
+            )
             logger.info(
-                f"on_mqtt_msg: method={method.method}, args={payload_method_args}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}"
+                f"on_mqtt_msg: method={method.method}, {args_msg}, bus_name={interface.bus_name}, path={interface.path}, interface={interface_config.interface}"
             )
 
             result = None
@@ -1045,12 +1064,12 @@ class DbusClient:
 
             try:
                 result = await self.call_dbus_interface_method(
-                    interface, method.method, payload_method_args
+                    interface, method.method, payload_method_args, payload_method_kwargs
                 )
             except Exception as e:
                 error = e
                 logger.warning(
-                    f"on_mqtt_msg: Failed calling method={method.method}, args={payload_method_args}, bus_name={interface.bus_name}, exception={e}"
+                    f"on_mqtt_msg: Failed calling method={method.method}, {args_msg}, bus_name={interface.bus_name}, exception={e}"
                 )
 
             # Send success (or error) response if configured
@@ -1062,6 +1081,7 @@ class DbusClient:
                 path=interface.path,
                 method=method.method,
                 args=payload_method_args,
+                kwargs=payload_method_kwargs,
             )
 
         # Set property values on each matched D-Bus interface and publish responses if configured
@@ -1122,20 +1142,15 @@ class DbusClient:
 
         # Check if 'method' and 'args' are provided
         if "method" in kwargs and "args" in kwargs:
-            method = kwargs["method"]
-            args = kwargs["args"]
-            response_context.update({
-                "method": method,
-                "args": args,
-            })
+            response_context["method"] = kwargs["method"]
+            if "args" in kwargs:
+                response_context["args"] = kwargs["args"]
+            if "kwargs" in kwargs:
+                response_context["kwargs"] = kwargs["kwargs"]
         # Check if 'property' and 'value' are provided
         elif "property" in kwargs and "value" in kwargs:
-            property = kwargs["property"]
-            value = kwargs["value"]
-            response_context.update({
-                "property": property,
-                "value": value,
-            })
+            response_context["property"] = kwargs["property"]
+            response_context["value"] = kwargs["value"]
         else:
             raise ValueError(
                 "Invalid arguments: Please provide either 'method' and 'args' or 'property' and 'value'"
