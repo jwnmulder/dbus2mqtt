@@ -55,8 +55,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff==0.14.10",
-    "pyright==1.1.407",
+    "ruff==0.14.13",
+    "pyright==1.1.408",
     "deptry>=0.24.0",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.0",
@@ -114,34 +114,26 @@ preview = true
 
 [tool.ruff.lint]
 extend-select = [
-
-    # pycodestyle Error, Warnings
-    "E",
-    "W",
-
-    # flake8-builtins (A)
-    # "A",
-
-    # isort
-    "I",
-
-    # pep8-naming
-    "N",
-
-    # pyupgrade
-    "UP",
-
-    # # Enable all `pydocstyle` rules, limiting to those that adhere to the
-    # # Google convention via `convention = "google"`, below.
-    "D"
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # Pyflakes
+    "SIM",   # flake8-simplify
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "D"      # pydocstyle rules
 ]
 ignore = [
-    # line-too-long
-    "E501",
-
-    # # On top of the Google convention, disable `D417`, which requires
-    # # documentation for every function parameter.
-    "D417", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"
+    "E501",  # line-too-long
+    "D417",  # undocumented-param
+    "D100",  # undocumented-public-module
+    "D101",  # undocumented-public-class
+    "D102",  # undocumented-public-method
+    "D103",  # undocumented-public-function
+    "D104",  # undocumented-public-package
+    "D105",  # undocumented-public-package
+    "D106",  # undocumented-public-nested-class
+    "D107",  # undocumented-public-init
 ]
 
 [tool.ruff.lint.isort]

@@ -51,7 +51,7 @@ dbus:
             - type: context_changed
           conditions:
             # For PropertiesChanged signals, only trigger for org.mpris.MediaPlayer2.Player interfaces
-            - "{{ args[0] == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+            - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
             - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
@@ -61,7 +61,7 @@ dbus:
                 available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
-                seeked_position: "{{ args[0] if trigger_type == 'dbus_signal' and signal == 'Seeked' else None }}"
+                seeked_position: "{{ kwargs.Position if trigger_type == 'dbus_signal' and signal == 'Seeked' else None }}"
             - type: context_set
               context:
                 current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"

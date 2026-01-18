@@ -7,26 +7,26 @@ from typing import Any
 import dbus_fast.signature as dbus_signature
 
 from dbus_fast import Variant
+from dbus_fast import introspection as intr
 
 logger = logging.getLogger(__name__)
 
 
-def unwrap_dbus_object(obj):
+def unwrap_dbus_object(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {k: unwrap_dbus_object(v) for k, v in obj.items()}
-    elif isinstance(obj, list | tuple | set):
-        return type(obj)(unwrap_dbus_object(i) for i in obj)
+    elif isinstance(obj, list):
+        return [unwrap_dbus_object(e) for e in obj]
+    elif isinstance(obj, tuple):
+        return tuple(unwrap_dbus_object(e) for e in obj)
+    elif isinstance(obj, set):
+        return {unwrap_dbus_object(e) for e in obj}
     elif isinstance(obj, dbus_signature.Variant):
         return unwrap_dbus_object(obj.value)
     elif isinstance(obj, bytes):
         return base64.b64encode(obj).decode("utf-8")
     else:
         return obj
-
-
-def unwrap_dbus_objects(args):
-    res = [unwrap_dbus_object(o) for o in args]
-    return res
 
 
 def camel_to_snake(name):
@@ -65,20 +65,8 @@ def _convert_value_to_dbus(value: Any) -> Any:
             converted_list.append(_convert_value_to_dbus(item))
         return converted_list
 
-    elif isinstance(value, bool):
-        # Boolean values are fine as-is for D-Bus
-        return value
-
-    elif isinstance(value, int):
-        # Integer values are fine as-is for D-Bus
-        return value
-
-    elif isinstance(value, float):
-        # Float values are fine as-is for D-Bus
-        return value
-
-    elif isinstance(value, str):
-        # String values are fine as-is for D-Bus
+    elif isinstance(value, (bool | int | float | str)):
+        # These typesare fine as-is for D-Bus
         return value
 
     else:
@@ -184,3 +172,31 @@ def _convert_and_wrap_in_variant(value: Any) -> Any:
     else:
         # Fallback
         return value
+
+
+def positional_args_to_kwargs(
+    introspection_args: list[intr.Arg], args: list[Any]
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for idx, arg in enumerate(introspection_args):
+        if arg.name:
+            result[arg.name] = args[idx]
+    return result
+
+
+def kwargs_to_positional_args(
+    introspection_args: list[intr.Arg], args: dict[str, Any]
+) -> list[Any]:
+
+    result: list[Any] = [None] * len(introspection_args)
+
+    for idx, arg in enumerate(introspection_args):
+        if not arg.name:
+            raise ValueError(
+                "Unable to convert kwargs due to missing arg names in introspection data"
+            )
+        if arg.name not in args:
+            raise ValueError(f"Missing required arg '{arg.name}'")
+
+        result[idx] = args.get(arg.name) if arg.name else None
+    return result
