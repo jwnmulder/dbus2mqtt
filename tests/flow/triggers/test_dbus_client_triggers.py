@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock
-
 import pytest
 
 from dbus2mqtt.config import (
@@ -11,9 +9,13 @@ from dbus2mqtt.config import (
     FlowTriggerDbusSignalConfig,
     SignalConfig,
 )
-from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions, DbusSignalWithState, SubscribedInterface
-from tests import mocked_app_context, mocked_dbus_client, mocked_flow_processor
+from tests import (
+    mocked_app_context,
+    mocked_dbus_client,
+    mocked_dbus_client_with_dbus_object,
+    mocked_flow_processor,
+)
 
 
 @pytest.mark.asyncio
@@ -41,7 +43,7 @@ async def test_bus_name_added_trigger():
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
 
-    dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
+    dbus_client, _ = mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
     subscribed_interfaces = [
@@ -92,7 +94,7 @@ async def test_bus_name_removed_trigger():
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
 
-    dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
+    dbus_client, _ = mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
     await dbus_client._handle_bus_name_removed(object_bus_name)
@@ -138,7 +140,7 @@ async def test_object_added_trigger():
     subscription.bus_name = object_bus_name
     subscription.path = object_path
 
-    dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
+    dbus_client, _ = mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
     subscribed_interfaces = [
@@ -189,7 +191,7 @@ async def test_object_removed_trigger():
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
 
-    dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
+    dbus_client, _ = mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     # trigger dbus_client and capture the triggered message
     await dbus_client._handle_interfaces_removed(object_bus_name, object_path)
@@ -239,7 +241,7 @@ async def test_dbus_signal_trigger():
     object_bus_name = "test.bus_name.testapp"
     object_path = "/"
 
-    dbus_client = _mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
+    dbus_client, _ = mocked_dbus_client_with_dbus_object(app_context, object_bus_name, object_path)
 
     signal = DbusSignalWithState(
         bus_name=object_bus_name,
@@ -357,16 +359,3 @@ async def test_dbus_signal_filter():
 
     # no flow trigger messages must exist on the queue as the interface filter did not match
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
-
-
-def _mocked_dbus_client_with_dbus_object(app_context, bus_name: str, path: str) -> DbusClient:
-
-    dbus_client = mocked_dbus_client(app_context)
-
-    dbus_client._subscriptions[bus_name] = BusNameSubscriptions(bus_name, ":1.1")
-    mocked_proxy_object = MagicMock()
-    mocked_proxy_object.get_interface.return_value = MagicMock()
-
-    dbus_client._subscriptions[bus_name].path_objects[path] = mocked_proxy_object
-
-    return dbus_client

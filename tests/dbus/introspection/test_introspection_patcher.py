@@ -30,3 +30,30 @@ def test_enrich_names():
     # signal arguments should have been enriched with valid names
     signal = introspection.interface("org.freedesktop.DBus.Properties").signal("PropertiesChanged")
     assert signal.args[0].name
+
+
+def test_patch_mpris():
+
+    introspection = _introspection_from_xml("introspection_data_vlc_3.xml")
+    introspection.name = "mpris-test-marker"
+
+    patcher = IntrospectPatcher()
+
+    introspection = TestNode(
+        patcher.patch_if_needed(
+            bus_name="org.mpris.MediaPlayer2.test",
+            path="/org/mpris/MediaPlayer2",
+            introspection=introspection,
+        )
+    )
+
+    # the patcher can also return new implementatiosns, e.g. for vlc
+    assert introspection.name == "mpris-test-marker"
+
+    # method arguments should have been enriched with valid names
+    method = introspection.interface("org.freedesktop.DBus.Properties").method("Get")
+    assert method.in_args[0].name
+
+    # signal arguments should have been enriched with valid names
+    signal = introspection.interface("org.freedesktop.DBus.Properties").signal("PropertiesChanged")
+    assert signal.args[0].name
