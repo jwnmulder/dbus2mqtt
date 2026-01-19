@@ -4,16 +4,13 @@ import sys
 import warnings
 
 from contextlib import suppress
-from dataclasses import fields
 
 import colorlog
 import dotenv
 
-from jsonargparse import Namespace
-
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import new_argument_parser
+from dbus2mqtt.config.jsonarparse import new_argument_parser, ns_to_cls
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
@@ -149,10 +146,3 @@ class NamePartsFilter(logging.Filter):
     def filter(self, record):
         record.name_last = record.name.rsplit(".", 1)[-1]
         return True
-
-
-def ns_to_cls(cls, ns: Namespace):
-    ns_dict = vars(ns)
-    allowed_keys = {f.name for f in fields(cls)}
-    filtered = {k: v for k, v in ns_dict.items() if k in allowed_keys}
-    return cls(**filtered)
