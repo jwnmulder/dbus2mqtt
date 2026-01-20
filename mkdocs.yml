@@ -138,7 +138,7 @@ markdown_extensions:
   - footnotes
 
 hooks:
-  - docs/hooks.py
+  - tools/mkdocs_hooks.py
 
 plugins:
   - open-in-new-tab:

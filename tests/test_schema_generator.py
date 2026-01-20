@@ -1,5 +1,5 @@
 from dbus2mqtt import config
-from dbus2mqtt.generate_schema import SchemaGenerator
+from tools.generate_schema import SchemaGenerator
 
 
 def test_schema_generator():
