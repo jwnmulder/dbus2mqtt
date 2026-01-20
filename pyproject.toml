@@ -69,6 +69,8 @@ dev = [
     "pre-commit>=4.2.0",
     "pip>=25.0.1",
     "pytest-cov>=7.0.0",
+    "jsonschema>=4.26.0",
+    "packaging>=25.0",
 ]
 
 [project.urls]
@@ -83,6 +85,9 @@ dbus2mqtt = "dbus2mqtt.main:main"
 branch = true
 relative_files = true
 omit = ["tests/*"]
+
+[tool.deptry]
+exclude = [".venv", ".git", "tests", "tools"]
 
 [tool.deptry.per_rule_ignores]
 DEP003 = ["dbus2mqtt"]

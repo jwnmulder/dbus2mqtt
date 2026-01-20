@@ -1,9 +1,10 @@
+from dataclasses import fields
 from typing import Any
 
 import jsonargparse
 
 from docstring_parser import DocstringStyle
-from jsonargparse import set_parsing_settings
+from jsonargparse import Namespace, set_parsing_settings
 from yaml import YAMLError
 
 default_yaml_loader = jsonargparse.get_loader("yaml")
@@ -42,3 +43,14 @@ def new_argument_parser() -> jsonargparse.ArgumentParser:
     )
 
     return parser
+
+
+def filtered_ns(cls, ns_dict: dict[str, Any]) -> dict[str, Any]:
+    allowed_keys = {f.name for f in fields(cls)}
+    filtered = {k: v for k, v in ns_dict.items() if k in allowed_keys}
+    return filtered
+
+
+def ns_to_cls(cls, ns: Namespace):
+    filtered = filtered_ns(cls, ns.as_dict())
+    return cls(**filtered)
