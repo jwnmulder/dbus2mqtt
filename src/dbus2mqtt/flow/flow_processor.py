@@ -163,12 +163,12 @@ class FlowProcessor:
 
         # register dbus subscription flows
         for subscription in app_context.config.dbus.subscriptions:
-            static_flow_context = {
+            flow_context = {
                 "subscription_bus_name": subscription.bus_name,
                 "subscription_path": subscription.path,
                 "subscription_interfaces": [i.interface for i in subscription.interfaces],
             }
-            self.register_flows(subscription.flows, static_flow_context)
+            self.register_flows(subscription.flows, flow_context)
 
     def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
         """Register flows with the flow processor."""
