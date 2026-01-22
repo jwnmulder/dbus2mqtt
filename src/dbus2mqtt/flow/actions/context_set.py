@@ -6,8 +6,8 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 
 logger = logging.getLogger(__name__)
 
-class ContextSetAction(FlowAction):
 
+class ContextSetAction(FlowAction):
     def __init__(self, config: FlowActionContextSetConfig, app_context: AppContext):
         self.config = config
         self.templating = app_context.templating
@@ -17,19 +17,22 @@ class ContextSetAction(FlowAction):
         aggregated_context = context.get_aggregated_context()
 
         if self.config.global_context:
-            context_new = await self.templating.async_render_template(self.config.global_context, dict, aggregated_context)
+            context_new = await self.templating.async_render_template(
+                self.config.global_context, dict, aggregated_context
+            )
             logger.debug(f"Update global_context with: {context_new}")
-            context.global_context.update(context_new)
+            context.update_global_context(context_new)
 
         if self.config.dbus_object_context:
-            context_new = await self.templating.async_render_template(self.config.dbus_object_context, dict, aggregated_context)
-            if context.dbus_object_context is not None:
-                logger.debug(f"Update dbus_object_context with: {context_new}")
-                context.dbus_object_context.update(context_new)
-            else:
-                raise ValueError("Update dbus_object_context failed, context.dbus_objet_context == None. This is not supported in global flows")
+            context_new = await self.templating.async_render_template(
+                self.config.dbus_object_context, dict, aggregated_context
+            )
+            logger.debug(f"Update dbus_object_context with: {context_new}")
+            context.update_dbus_object_context(context_new)
 
         if self.config.context:
-            context_new = await self.templating.async_render_template(self.config.context, dict, aggregated_context)
+            context_new = await self.templating.async_render_template(
+                self.config.context, dict, aggregated_context
+            )
             logger.debug(f"Update context with: {context_new}")
-            context.context.update(context_new)
+            context.update_context(context_new)

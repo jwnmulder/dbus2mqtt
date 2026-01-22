@@ -1,0 +1,524 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Config",
+  "type": "object",
+  "properties": {
+    "dbus": {
+      "$ref": "#/$defs/DbusConfig"
+    },
+    "mqtt": {
+      "$ref": "#/$defs/MqttConfig"
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FlowConfig"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "description": "App configuration.",
+  "required": [
+    "dbus"
+  ],
+  "$defs": {
+    "SignalConfig": {
+      "type": "object",
+      "properties": {
+        "signal": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "signal"
+      ]
+    },
+    "MethodConfig": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "method"
+      ]
+    },
+    "PropertyConfig": {
+      "type": "object",
+      "properties": {
+        "property": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "property"
+      ]
+    },
+    "InterfaceConfig": {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "type": "string",
+          "description": "The D-Bus interface that defines the set of methods, signals, and properties available."
+        },
+        "mqtt_command_topic": {
+          "type": "string",
+          "description": "MQTT topic where dbus2mqtt listens for JSON commands. For example 'dbus2mqtt/mpris/command'. Value can be a string or templated string."
+        },
+        "mqtt_response_topic": {
+          "type": "string",
+          "description": "MQTT topic where dbus2mqtt published responses on. For example 'dbus2mqtt/mpris/response'. Value can be a string or templated string."
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SignalConfig"
+          },
+          "description": "List of D-Bus signals to subscribe to."
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MethodConfig"
+          },
+          "description": "List of methods to expose over MQTT."
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PropertyConfig"
+          },
+          "description": "List of properties to expose over MQTT."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Subscription Interface config.",
+      "required": [
+        "interface"
+      ]
+    },
+    "FlowTriggerContextChangedConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "context_changed",
+          "default": "context_changed"
+        },
+        "scope": {
+          "const": "global",
+          "default": "global"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'context_changed' flow trigger."
+    },
+    "FlowTriggerBusNameAddedConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "bus_name_added",
+          "default": "bus_name_added"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'bus_name_adde' flow trigger (DEPRECATED)."
+    },
+    "FlowTriggerBusNameRemovedConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "bus_name_removed",
+          "default": "bus_name_removed"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'bus_name_removed' flow trigger (DEPRECATED)."
+    },
+    "FlowTriggerDbusObjectAddedConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "dbus_object_added",
+            "object_added"
+          ],
+          "default": "dbus_object_added"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'dbus_object_added' flow trigger."
+    },
+    "FlowTriggerDbusObjectRemovedConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "dbus_object_removed",
+            "object_removed"
+          ],
+          "default": "dbus_object_removed"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'dbus_object_removed' flow trigger."
+    },
+    "FlowTriggerDbusSignalConfig": {
+      "type": "object",
+      "properties": {
+        "signal": {
+          "type": "string",
+          "description": "Signal name to filter on, e.g. PropertiesChanged."
+        },
+        "type": {
+          "const": "dbus_signal",
+          "default": "dbus_signal"
+        },
+        "interface": {
+          "type": "string",
+          "description": "Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'."
+        },
+        "bus_name": {
+          "type": "string",
+          "description": "undocumented, not used."
+        },
+        "path": {
+          "type": "string",
+          "description": "undocumented, not used."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'dbus_signal' flow trigger.",
+      "required": [
+        "signal"
+      ]
+    },
+    "FlowTriggerMqttMessageConfig": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "description": "MQTT topic for the trigger."
+        },
+        "type": {
+          "const": "mqtt_message",
+          "default": "mqtt_message"
+        },
+        "content_type": {
+          "enum": [
+            "json",
+            "text"
+          ],
+          "description": "Expected payload format, 'json' or 'text'.",
+          "default": "json"
+        },
+        "filter": {
+          "type": "string",
+          "description": "Optional template expression, trigger only when it evaluates truthy."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'mqtt_message' flow trigger.",
+      "required": [
+        "topic"
+      ]
+    },
+    "FlowTriggerScheduleConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "schedule",
+          "default": "schedule"
+        },
+        "id": {
+          "type": "string"
+        },
+        "cron": {
+          "type": "object"
+        },
+        "interval": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FlowActionMqttPublishConfig": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "description": "MQTT topic the messaage is published to"
+        },
+        "payload_template": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object"
+            }
+          ],
+          "description": "A string, a dict of strings, a templated string or a nested dict of templated strings"
+        },
+        "type": {
+          "const": "mqtt_publish",
+          "default": "mqtt_publish"
+        },
+        "payload_type": {
+          "enum": [
+            "json",
+            "yaml",
+            "text",
+            "binary"
+          ],
+          "description": "Message format for MQTT: json (default), yaml, text or binary. When set to binary, payload_template is expected to return a url formatted string where scheme is either file, http or https",
+          "default": "json"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'mqtt_publish' flow action.",
+      "required": [
+        "topic",
+        "payload_template"
+      ]
+    },
+    "FlowActionContextSetConfig": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "context_set",
+          "default": "context_set"
+        },
+        "context": {
+          "type": "object",
+          "description": "Per flow execution context."
+        },
+        "dbus_object_context": {
+          "type": "object",
+          "description": "Per dbus object context, shared between multiple flow executions."
+        },
+        "global_context": {
+          "type": "object",
+          "description": "Global context, shared between multiple flow executions, over all subscriptions."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'context_set' flow action."
+    },
+    "FlowActionLogConfig": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string",
+          "description": "Message to log, a string or templated string."
+        },
+        "type": {
+          "const": "log",
+          "default": "log"
+        },
+        "level": {
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL"
+          ],
+          "description": "Log level, defaults to INFO.",
+          "default": "INFO"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for 'log' flow action.",
+      "required": [
+        "msg"
+      ]
+    },
+    "FlowConfig": {
+      "type": "object",
+      "properties": {
+        "triggers": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FlowTriggerContextChangedConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerBusNameAddedConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerBusNameRemovedConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerDbusObjectAddedConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerDbusObjectRemovedConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerDbusSignalConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerMqttMessageConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowTriggerScheduleConfig"
+              }
+            ]
+          },
+          "description": "Trigger configurations that start the flow."
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/FlowActionMqttPublishConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowActionContextSetConfig"
+              },
+              {
+                "$ref": "#/$defs/FlowActionLogConfig"
+              }
+            ]
+          },
+          "description": "Actions executed when the flow runs."
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Optional condition or list of conditions that must be met before a flow is executed."
+        },
+        "name": {
+          "type": "string",
+          "description": "Optional human-readable name for the flow."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique flow identifier, automatically generated UUID."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Flow configuration.",
+      "required": [
+        "triggers",
+        "actions"
+      ]
+    },
+    "SubscriptionConfig": {
+      "type": "object",
+      "properties": {
+        "bus_name": {
+          "type": "string",
+          "description": "Bus name pattern, supporting '*' wildcards."
+        },
+        "path": {
+          "type": "string",
+          "description": "Object path pattern, supporting '*' wildcards."
+        },
+        "interfaces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InterfaceConfig"
+          },
+          "description": "List of dbus2mqtt interface configurations."
+        },
+        "flows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FlowConfig"
+          },
+          "description": "List of dbus2mqtt flow configurations."
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique subscription identifier, automatically generated UUID."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Configuration for a D-Bus subscription.",
+      "required": [
+        "bus_name",
+        "path"
+      ]
+    },
+    "DbusConfig": {
+      "type": "object",
+      "properties": {
+        "subscriptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SubscriptionConfig"
+          },
+          "description": "List of SubscriptionConfig."
+        },
+        "bus_type": {
+          "enum": [
+            "SESSION",
+            "SYSTEM"
+          ],
+          "description": "Bus to connect to.",
+          "default": "SESSION"
+        }
+      },
+      "additionalProperties": false,
+      "description": "D-Bus configuration.",
+      "required": [
+        "subscriptions"
+      ]
+    },
+    "MqttConfig": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "MQTT broker hostname or IP address."
+        },
+        "username": {
+          "type": "string",
+          "description": "Username for broker authentication."
+        },
+        "password": {
+          "type": "string",
+          "description": "Password for broker authentication."
+        },
+        "port": {
+          "type": "integer",
+          "description": "MQTT broker TCP port.",
+          "default": 1883
+        },
+        "subscription_topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of MQTT topics to subscribe to. Wildcard characters '#' and '+' are supported."
+        }
+      },
+      "additionalProperties": false,
+      "description": "MQTT configuration.",
+      "required": [
+        "host",
+        "username",
+        "password"
+      ]
+    }
+  }
+}

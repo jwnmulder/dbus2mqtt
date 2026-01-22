@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-from datetime import datetime
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -13,101 +12,116 @@ from dbus2mqtt.config import (
     FlowActionMqttPublishConfig,
     FlowConfig,
     FlowTriggerConfig,
+    FlowTriggerContextChangedConfig,
+    FlowTriggerDbusObjectAddedConfig,
+    FlowTriggerDbusObjectRemovedConfig,
     FlowTriggerDbusSignalConfig,
-    FlowTriggerObjectAddedConfig,
-    FlowTriggerObjectRemovedConfig,
+    FlowTriggerScheduleConfig,
 )
 from dbus2mqtt.event_broker import FlowTriggerMessage
 from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
+from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.template.templating import TemplateEngine
 
 logger = logging.getLogger(__name__)
 
-class FlowScheduler:
 
+class FlowScheduler:
     def __init__(self, app_context: AppContext):
         self.config = app_context.config
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
+        self._trigger_processor = FlowTriggerProcessor(app_context)
 
-    async def _schedule_flow_strigger(self, flow, trigger_config: FlowTriggerConfig, dbus_object_context: dict[str, Any] | None):
-        trigger = FlowTriggerMessage(
-            flow,
-            trigger_config,
-            datetime.now(),
-            dbus_object_context=dbus_object_context
+    async def _schedule_flow_trigger(self, flow, trigger_config: FlowTriggerConfig):
+        await self._trigger_processor.trigger_flow(
+            flow, trigger_config, FlowTriggerHandler(trigger_config.type, {})
         )
-        await self.event_broker.flow_trigger_queue.async_q.put(trigger)
 
     async def scheduler_task(self):
 
         self.scheduler.start()
 
         # configure global flow trigger
-        self.start_flow_set(
-            self.config.flows,
-            dbus_object_context=None
-        )
+        self.start_flow_set(self.config.flows)
 
         while True:
             await asyncio.sleep(1000)
 
-    def start_flow_set(self, flows: list[FlowConfig], dbus_object_context: dict[str, Any] | None):
+    def start_flow_set(self, flows: list[FlowConfig]):
         for flow in flows:
             for trigger in flow.triggers:
                 if trigger.type == "schedule":
                     existing_job = self.scheduler.get_job(trigger.id)
                     if existing_job:
-                        logger.debug(f"Skipping creation, flow scheduler already exists, id={trigger.id}")
+                        logger.debug(
+                            f"Skipping creation, flow scheduler already exists, id={trigger.id}"
+                        )
                     if not existing_job and trigger.type == "schedule":
                         logger.info(f"Starting scheduler[{trigger.id}] for flow {flow.id}")
                         if trigger.interval:
                             trigger_args: dict[str, Any] = trigger.interval
                             # Each schedule gets its own job
                             self.scheduler.add_job(
-                                self._schedule_flow_strigger,
+                                self._schedule_flow_trigger,
                                 "interval",
                                 id=trigger.id,
                                 max_instances=1,
                                 misfire_grace_time=5,
                                 coalesce=True,
-                                args=[flow, trigger, dbus_object_context],
-                                **trigger_args
+                                args=[flow, trigger],
+                                **trigger_args,
                             )
                         elif trigger.cron:
                             trigger_args: dict[str, Any] = trigger.cron
                             # Each schedule gets its own job
                             self.scheduler.add_job(
-                                self._schedule_flow_strigger,
+                                self._schedule_flow_trigger,
                                 "cron",
                                 id=trigger.id,
                                 max_instances=1,
                                 misfire_grace_time=5,
                                 coalesce=True,
-                                args=[flow, trigger, dbus_object_context],
-                                **trigger_args
+                                args=[flow, trigger],
+                                **trigger_args,
                             )
 
-    def stop_flow_set(self, flows):
+    def stop_flow_set(self, flows: list[FlowConfig]):
         for flow in flows:
             for trigger in flow.triggers:
                 if trigger.type == "schedule":
                     logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
-                    self.scheduler.remove_job(trigger.id)
+                    try:
+                        self.scheduler.remove_job(trigger.id)
+                    except Exception as e:
+                        logger.error(
+                            f"Error removing scheduled job {trigger.id}, job likely removed before: {e}"
+                        )
 
-class _FlowActionsExecutor:
 
-    def __init__(self, app_context: AppContext, flow_config: FlowConfig, global_context: dict[str, Any], static_flow_context: dict[str, Any]):
+class FlowActionContext:
+    def __init__(
+        self,
+        app_context: AppContext,
+        flow_config: FlowConfig,
+        global_flows_context: dict[str, Any],
+        flow_context: dict[str, Any],
+    ):
+
         self.app_context = app_context
+        self.global_flows_context = global_flows_context
+        self.flow_context = flow_context
         self.flow_config = flow_config
 
-        self.global_context = global_context
-        """Updatable global context which is shared across all flows."""
-
-        self.static_flow_context = static_flow_context
-        """Immutable context that is passed to each flow execution."""
+        self.flow_conditions: list[str] = []
+        if isinstance(flow_config.conditions, str):
+            self.flow_conditions.append(flow_config.conditions)
+        elif isinstance(flow_config.conditions, list):
+            self.flow_conditions.extend(flow_config.conditions)
 
         self.flow_actions = self._setup_flow_actions()
 
@@ -128,37 +142,21 @@ class _FlowActionsExecutor:
 
         return res
 
-    async def execute_actions(self, trigger_type: str, dbus_object_context: dict[str, Any] | None, trigger_context: dict[str, Any] | None):
-
-        # per flow execution context
-        flow_execution_context = FlowExecutionContext(
-            name=self.flow_config.name,
-            global_context=self.global_context,
-            dbus_object_context=dbus_object_context
-        )
-        flow_execution_context.context["trigger_type"] = trigger_type
-
-        # non updatable trigger_context, add it to context to avoid dict processing for each action
-        if trigger_context:
-            flow_execution_context.context.update(trigger_context)
-
-        # non updatable static_flow_context, add it to context to avoid dict processing for each action
-        # static_flow_context is None for global flows
-        if self.static_flow_context:
-            flow_execution_context.context.update(self.static_flow_context)
+    async def execute_actions(self, flow_execution_context: FlowExecutionContext):
 
         for action in self.flow_actions:
             await action.execute(flow_execution_context)
 
-class FlowProcessor:
 
+class FlowProcessor:
     def __init__(self, app_context: AppContext):
         self.app_context = app_context
         self.event_broker = app_context.event_broker
 
         self._global_context: dict[str, Any] = {}
+        self._trigger_processor = FlowTriggerProcessor(app_context)
 
-        self._flows: dict[str, _FlowActionsExecutor] = {}
+        self._flows: dict[str, FlowActionContext] = {}
 
         # register global flows
         self.register_flows(app_context.config.flows)
@@ -172,25 +170,21 @@ class FlowProcessor:
             }
             self.register_flows(subscription.flows, static_flow_context)
 
-    def register_flows(self, flows: list[FlowConfig], static_flow_context: dict[str, Any] = {}):
+    def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
         """Register flows with the flow processor."""
-
         for flow_config in flows:
-            flow_action_context = _FlowActionsExecutor(
-                self.app_context,
-                flow_config,
-                self._global_context,
-                static_flow_context
+            flow_action_context = FlowActionContext(
+                self.app_context, flow_config, self._global_context, flow_context
             )
             self._flows[flow_config.id] = flow_action_context
 
     async def flow_processor_task(self):
         """Continuously processes messages from the async queue."""
-
         # logger.info(f"flow_processor_task: configuring flows={[f.name for f in self.app_context.config.flows]}")
 
         while True:
-            flow_trigger_message = await self.event_broker.flow_trigger_queue.async_q.get()  # Wait for a message
+            flow_trigger_message = await self.event_broker.flow_trigger_queue.async_q.get()
+
             try:
                 await self._process_flow_trigger(flow_trigger_message)
 
@@ -205,7 +199,11 @@ class FlowProcessor:
                 if "was not provided by any .service files" in str(e):
                     log_level = logging.DEBUG
 
-                logger.log(log_level, f"flow_processor_task: Exception {e}", exc_info=logger.isEnabledFor(logging.DEBUG))
+                logger.log(
+                    log_level,
+                    f"flow_processor_task: Exception during flow execution triggered by '{flow_trigger_message.flow_trigger_config.type}': {e}",
+                    exc_info=logger.isEnabledFor(logging.DEBUG),
+                )
             finally:
                 self.event_broker.flow_trigger_queue.async_q.task_done()
 
@@ -213,10 +211,16 @@ class FlowProcessor:
         config = msg.flow_trigger_config
         if isinstance(config, FlowTriggerDbusSignalConfig):
             return f"{config.type}({config.signal})"
-        elif isinstance(config, FlowTriggerObjectAddedConfig) or isinstance(config, FlowTriggerObjectRemovedConfig):
-            path = msg.trigger_context.get('path') if msg.trigger_context else None
+        elif isinstance(
+            config, (FlowTriggerDbusObjectAddedConfig, FlowTriggerDbusObjectRemovedConfig)
+        ):
+            path = msg.trigger_context.get("path") if msg.trigger_context else None
             if path:
                 return f"{config.type}({path})"
+        elif isinstance(config, FlowTriggerContextChangedConfig):
+            scope = msg.trigger_context.get("scope") if msg.trigger_context else None
+            if scope:
+                return f"{config.type}({scope})"
         return config.type
 
     async def _process_flow_trigger(self, flow_trigger_message: FlowTriggerMessage):
@@ -225,21 +229,78 @@ class FlowProcessor:
         trigger_str = self._trigger_config_to_str(flow_trigger_message)
         flow_str = flow_trigger_message.flow_config.name or flow_trigger_message.flow_config.id
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
-
-        if flow_trigger_message.flow_trigger_config.type != "schedule":
-            logger.info(log_message)
-        else:
-            logger.debug(log_message)
-
         flow_id = flow_trigger_message.flow_config.id
 
         flow = self._flows[flow_id]
 
-        # need dbus_object_context
-        # need trigger_context
-        await flow.execute_actions(
-            trigger_type=trigger_type,
-            dbus_object_context=flow_trigger_message.dbus_object_context,
-            trigger_context=flow_trigger_message.trigger_context
+        # Each flow executed gets its own execution context
+        flow_execution_context = self._flow_execution_context(flow, flow_trigger_message)
+
+        # Check if any actions should run based on flow conditions
+        should_execute_actions = self._evaluate_flow_conditions(
+            flow, flow_execution_context, self.app_context.templating
         )
+
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        if not should_execute_actions:
+            log_message = f"{log_message} - conditions not met, skipping actions"
+
+        if should_execute_actions and trigger_type != FlowTriggerScheduleConfig.type:
+            logger.info(log_message)
+        else:
+            logger.debug(log_message)
+
+        if should_execute_actions:
+            await flow.execute_actions(flow_execution_context)
+
+        # Check if global context was updated during flow execution to trigger context_changed flows
+        if flow_execution_context.global_context_updated:
+            # Check if this flow was not triggered by a context_changed trigger to avoid looping
+            if trigger_type == FlowTriggerContextChangedConfig.type:
+                logger.debug("Skip firing context_change trigger to avoid looping")
+            else:
+                trigger_context = {"scope": "global"}
+                await self._trigger_processor.trigger_all_flows(
+                    FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context)
+                )
+
+    def _flow_execution_context(
+        self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage
+    ) -> FlowExecutionContext:
+        """Per flow execution context allows for updates during flow execution without affecting other executions.
+
+        Initialized with global and flow context
+        """
+        flow_execution_context = FlowExecutionContext(
+            flow.flow_config.name,
+            global_flows_context=flow.global_flows_context,
+            flow_context=flow.flow_context,
+            dbus_object_context=flow_trigger_message.dbus_object_context or {},
+        )
+
+        trigger_type = flow_trigger_message.flow_trigger_config.type
+        flow_execution_context.update_context({"trigger_type": trigger_type})
+
+        if flow_trigger_message.trigger_context:
+            flow_execution_context.update_context(flow_trigger_message.trigger_context)
+
+        return flow_execution_context
+
+    def _evaluate_flow_conditions(
+        self,
+        flow: FlowActionContext,
+        context: FlowExecutionContext,
+        template_engine: TemplateEngine,
+    ) -> bool:
+
+        if len(flow.flow_conditions) == 0:
+            return True
+
+        render_context = context.get_aggregated_context()
+
+        for condition in flow.flow_conditions:
+            res = template_engine.render_template(condition, bool, render_context)
+            if not res:
+                return False
+
+        return True

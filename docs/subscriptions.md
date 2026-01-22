@@ -57,10 +57,11 @@ Methods are invoked after publishing a specific JSON message to the `dbus2mqtt/o
 
 | key          | type   | description  |
 |--------------|--------|--------------|
-| method       | str    | Method name  |
-| args         | list   | Optional list of arguments that matches the methods D-Bus signature |
-| bus_name     | str    | Only invoke on dbus objects where bus_name matches, defaults to `*` |
-| path         | str    | Only invoke on dbus objects where path matches, defaults to `*`     |
+| method       | `str`  | Method name  |
+| args         | `list` | Optional list of positional arguments that match the methods D-Bus signature |
+| kwargs       | `dict` | Optional list of keyworded arguments that match the methods D-Bus signature. Only available when a D-Bus service provides introspection data with named method arguments |
+| bus_name     | `str`  | Only invoke on dbus objects where bus_name matches, defaults to `*` |
+| path         | `str`  | Only invoke on dbus objects where path matches, defaults to `*`     |
 
 !!! note
     If no `bus_name` and `path` is given, commands are executed against all matching
@@ -80,6 +81,19 @@ Example 2, invoking `Seek` with arguments and targeting only the VLC MPRIS playe
 {
     "method": "Seek",
     "args": [60000000],
+    "bus_name": "*.vlc",
+    "path": "/org/mpris/MediaPlayer2"
+}
+```
+
+Or when using keyworded arguments
+
+```json
+{
+    "method": "Seek",
+    "kwargs": {
+      "Offset": 6000000
+    },
     "bus_name": "*.vlc",
     "path": "/org/mpris/MediaPlayer2"
 }
@@ -109,7 +123,7 @@ Example, setting `Volume` to 1.0 for Firefox MPRIS player only
 
 ### Command responses
 
-If set, D-Bus responses to commands will be published the configured `mqtt_response_topic` MQTT topic.
+If set, D-Bus responses to commands will be published on the configured `mqtt_response_topic` MQTT topic.
 
 !!! note
     `dbus2mqtt` publishes one response per targeted dbus object.

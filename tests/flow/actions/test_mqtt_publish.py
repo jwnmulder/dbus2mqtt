@@ -13,12 +13,15 @@ async def test_mqtt_publish_action():
     app_context = mocked_app_context()
 
     trigger_config = FlowTriggerScheduleConfig()
-    processor, flow_config = mocked_flow_processor(app_context, trigger_config, actions=[
-        FlowActionMqttPublishConfig(
-            topic="dbus2mqtt/test",
-            payload_template='{"test-key": "test-value"}'
-        )
-    ])
+    processor, flow_config = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[
+            FlowActionMqttPublishConfig(
+                topic="dbus2mqtt/test", payload_template='{"test-key": "test-value"}'
+            )
+        ],
+    )
 
     await processor._process_flow_trigger(
         FlowTriggerMessage(flow_config, trigger_config, datetime.now())

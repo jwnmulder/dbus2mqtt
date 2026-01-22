@@ -8,12 +8,13 @@ Flows can be defined on a global or dbus subscription level and can be triggered
 * `dbus_signal` for when dbus signal occur
 * `object_added` when a new bus_name is registered on dbus
 * `object_removed` when a bus_name is removed from dbus
+* `mqtt_message` for reacting to MQTT messages
 
 Within each flow a set of actions can be configured. These are executed in the order as defined in yaml
 
 * `log` for logging message
 * `context_set` to set variables
-* `mqtt_publish` to publish a mqtt message
+* `mqtt_publish` to publish a MQTT message
 
 Global flows are started even when dbus2mqtt is not subscribed to any dbus objects. An example for global flows:
 
@@ -28,7 +29,7 @@ flows:
         msg: hello from example flow
 ```
 
-Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the amount of dbus objects subscribed, there is at most one flow instance running.
+Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the number of dbus objects subscribed, there is at most one flow instance running.
 
 ```yaml title="Subscription based flows"
 dbus:
@@ -45,6 +46,27 @@ dbus:
               msg: hello from example flow
 ```
 
-Some action parameters allow the use of Jinja templating. dbus2mqtt supports both builtin jinja filters and comes with additional filters. See [templating](../templating/index.md) for details. When supported, it is documented for each individual trigger and action.
+Some action parameters allow the use of templating. When supported, it is documented for each individual trigger and action. See [templating](../templating/index.md) for further templating details.
+
+## Contional flows
+
+Flow actions can be conditionally executed. The `conditions` parameter accepts either a templated string or list of strings.
+When using a list of templated strings, all expressions must evaluate to `True` for actions to be executed.
+
+```yaml title="Subscription based flows"
+dbus:
+  subscriptions:
+    - bus_name: org.mpris.MediaPlayer2.*
+      path: /org/mpris/MediaPlayer2
+      flows:
+        - name: Example conditional flow
+          triggers:
+            - type: dbus_object_added
+          conditions:
+            - "{{ 'vlc' in bus_name }}"
+          actions:
+            - type: log
+              msg: VLC player registered
+```
 
 Next: [flow actions](flow_actions.md) & [flow triggers](flow_triggers.md)

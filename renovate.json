@@ -1,6 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>jwnmulder/renovate-config"],
+  "extends": [
+    "local>jwnmulder/renovate-config",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
+  ],
 
   "labels": ["dependencies"],
 
@@ -11,6 +15,28 @@
   "packageRules": [
     {
       "matchFileNames": [".pre-commit-config.yaml"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies", "dependency-groups"],
+      "rangeStrategy": "update-lockfile"
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["dependency-groups"],
+      "matchJsonata": [
+        "managerData.depGroup = 'dev'"
+      ],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
       "addLabels": ["automerge"]

@@ -18,17 +18,20 @@ class MqttMessage:
     payload: Any
     payload_serialization_type: str = "json"
 
+
 @dataclass
 class MqttReceiveHints:
     log_unmatched_message: bool = True
+
 
 @dataclass
 class FlowTriggerMessage:
     flow_config: FlowConfig
     flow_trigger_config: FlowTriggerConfig
     timestamp: datetime
-    dbus_object_context: dict[str, Any] | None = None
     trigger_context: dict[str, Any] | None = None
+    dbus_object_context: dict[str, Any] | None = None
+
 
 class EventBroker:
     def __init__(self):
@@ -42,7 +45,7 @@ class EventBroker:
             self.mqtt_receive_queue.aclose(),
             self.mqtt_publish_queue.aclose(),
             self.flow_trigger_queue.aclose(),
-            return_exceptions=True
+            return_exceptions=True,
         )
 
     def on_mqtt_receive(self, msg: MqttMessage, hints: MqttReceiveHints):
