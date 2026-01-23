@@ -212,7 +212,13 @@ if __name__ == "__main__":
     schema = generator.build(cfg.Config)
 
     # patch the generated schema
+    # some properties are also set via environment variables and not in yaml
     required_properties: list[str] = schema["required"]
     required_properties.remove("mqtt")
+
+    mqtt_required_properties: list[str] = schema["$defs"]["MqttConfig"]["required"]
+    mqtt_required_properties.remove("host")
+    mqtt_required_properties.remove("username")
+    mqtt_required_properties.remove("password")
 
     print(json.dumps(schema, indent=2))

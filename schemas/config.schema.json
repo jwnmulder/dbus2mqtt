@@ -510,11 +510,7 @@
       },
       "additionalProperties": false,
       "description": "MQTT configuration.",
-      "required": [
-        "host",
-        "username",
-        "password"
-      ]
+      "required": []
     }
   }
 }
