@@ -65,6 +65,28 @@
       "automerge": true,
       "addLabels": ["automerge"],
       "extends": ["schedule:weekly"]
+    },
+    {
+      "matchPackageNames": [
+        "pyright",
+        "RobertCraigie/pyright-python"
+      ],
+      "groupName": "pyright"
+    },
+    {
+      "matchPackageNames": [
+        "ruff",
+        "astral-sh/ruff-pre-commit"
+      ],
+      "groupName": "ruff"
+    },
+    {
+      "matchPackageNames": [
+        "uv",
+        "ghcr.io/astral-sh/uv",
+        "astral-sh/uv-pre-commit"
+      ],
+      "groupName": "uv"
     }
   ]
 }
