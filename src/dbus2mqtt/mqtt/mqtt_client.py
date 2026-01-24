@@ -233,7 +233,9 @@ class MqttClient:
 
         flow_triggered = False
         try:
-            flow_triggered = self._trigger_processor.trigger_all_flows_sync(flow_trigger_handler)
+            flow_triggered = self._trigger_processor.trigger_all_flows_sync(
+                flow_trigger_handler, None
+            )
         except Exception as e:
             logger.warning(
                 f"_trigger_flows: Error while triggering flow, topic={topic}, payload={payload}, error={e}"

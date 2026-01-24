@@ -39,7 +39,7 @@ class FlowScheduler:
 
     async def _schedule_flow_trigger(self, flow, trigger_config: FlowTriggerConfig):
         await self._trigger_processor.trigger_flow(
-            flow, trigger_config, FlowTriggerHandler(trigger_config.type, {})
+            flow, trigger_config, FlowTriggerHandler(trigger_config.type, {}), None
         )
 
     async def scheduler_task(self):
@@ -201,7 +201,7 @@ class FlowProcessor:
 
                 logger.log(
                     log_level,
-                    f"flow_processor_task: Exception during flow execution triggered by '{flow_trigger_message.flow_trigger_config.type}': {e}",
+                    f"flow_processor_task: Exception during flow execution triggered by '{flow_trigger_message.flow_trigger_config.type}': {type(e).__name__}: {e}",
                     exc_info=logger.isEnabledFor(logging.DEBUG),
                 )
             finally:
@@ -261,7 +261,7 @@ class FlowProcessor:
             else:
                 trigger_context = {"scope": "global"}
                 await self._trigger_processor.trigger_all_flows(
-                    FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context)
+                    FlowTriggerHandler(FlowTriggerContextChangedConfig.type, trigger_context), None
                 )
 
     def _flow_execution_context(
@@ -271,11 +271,18 @@ class FlowProcessor:
 
         Initialized with global and flow context
         """
+        dbus_object_ref = None
+        if flow_trigger_message.trigger_context and flow_trigger_message.dbus_object_context:
+            dbus_object_ref = (
+                flow_trigger_message.trigger_context["bus_name"],
+                flow_trigger_message.trigger_context["path"],
+            )
         flow_execution_context = FlowExecutionContext(
             flow.flow_config.name,
             global_flows_context=flow.global_flows_context,
             flow_context=flow.flow_context,
-            dbus_object_context=flow_trigger_message.dbus_object_context or {},
+            dbus_object_ref=dbus_object_ref,
+            dbus_object_context=flow_trigger_message.dbus_object_context,
         )
 
         trigger_type = flow_trigger_message.flow_trigger_config.type
