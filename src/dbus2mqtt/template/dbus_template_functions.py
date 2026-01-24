@@ -11,11 +11,11 @@ from dbus2mqtt.dbus.dbus_client import DbusClient
 logger = logging.getLogger(__name__)
 
 
-class DbusContext:
+class DbusTemplateFunctionsContext:
     def __init__(self, dbus_client: DbusClient):
         self.dbus_client = dbus_client
 
-    def async_dbus_list_fn(self, bus_name_pattern: str) -> list[str]:
+    def dbus_list_fn(self, bus_name_pattern: str) -> list[str]:
         """This function is used to access active bus_names which dbus2mqtt is subscribed to.
 
         Args:
@@ -41,6 +41,22 @@ class DbusContext:
         for bus_name in self.dbus_client.get_subscribed_bus_names():
             if fnmatch.fnmatchcase(bus_name, bus_name_pattern):
                 res.append(bus_name)
+
+        return res
+
+    def dbus_contexts_fn(self, bus_name_pattern: str, path_pattern: str) -> dict[tuple[str], Any]:
+        res = {}
+        for bus_name in self.dbus_client.get_subscribed_bus_names():
+            if not fnmatch.fnmatchcase(bus_name, bus_name_pattern):
+                continue
+
+            bus_name_subscription = self.dbus_client.get_bus_name_subscriptions(bus_name)
+            if not bus_name_subscription:
+                continue
+
+            # TODO: Path filter
+            dbus_object_ref = bus_name
+            res[dbus_object_ref] = bus_name_subscription.dbus_object_context
 
         return res
 
@@ -139,11 +155,12 @@ class DbusContext:
 
 def jinja_custom_dbus_functions(dbus_client: DbusClient) -> dict[str, Any]:
 
-    dbus_context = DbusContext(dbus_client)
+    dbus_context = DbusTemplateFunctionsContext(dbus_client)
 
     custom_functions: dict[str, Any] = {}
     custom_functions.update({
-        "dbus_list": dbus_context.async_dbus_list_fn,
+        "dbus_list": dbus_context.dbus_list_fn,
+        "dbus_contexts": dbus_context.dbus_contexts_fn,
         "dbus_call": dbus_context.async_dbus_call_fn,
         "dbus_property_get": dbus_context.async_dbus_property_get_fn,
     })

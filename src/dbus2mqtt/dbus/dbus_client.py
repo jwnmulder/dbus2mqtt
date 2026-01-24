@@ -611,6 +611,10 @@ class DbusClient:
             # Cleanup all dbus2mqtt subscriptions for this bus_name
             del self._subscriptions[bus_name]
 
+            # TODO: pass to triggers
+            # TODO: instead of passing the context, lookup by dbus_name and path later on
+            # dbus_object_context = bus_name_subscriptions.dbus_object_context
+
             # Fire object_removed triggers for all flows
             for path in bus_name_subscriptions.path_objects:
                 subscription_configs = self.config.get_subscription_configs(
@@ -623,6 +627,7 @@ class DbusClient:
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
                         FlowTriggerHandler(FlowTriggerBusNameRemovedConfig.type, trigger_context),
+                        bus_name_subscriptions.dbus_object_context,
                     )
 
                     # Trigger flows that have an object_removed trigger configured
@@ -631,6 +636,7 @@ class DbusClient:
                         FlowTriggerHandler(
                             FlowTriggerDbusObjectRemovedConfig.type, trigger_context
                         ),
+                        bus_name_subscriptions.dbus_object_context,
                     )
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
@@ -686,6 +692,13 @@ class DbusClient:
 
         # Cleanup the entire BusNameSubscriptions if no more objects are subscribed
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
+
+        # TODO: pass by bus_name and path?
+        # Will that work when deleting state before triggering?
+        # dbus_object_context = (
+        #     bus_name_subscriptions.dbus_object_context if bus_name_subscriptions else None
+        # )
+
         if bus_name_subscriptions and len(bus_name_subscriptions.path_objects) == 0:
             del self._subscriptions[bus_name]
 
@@ -696,6 +709,7 @@ class DbusClient:
             await self._trigger_processor.trigger_subscription_flows(
                 subscription_config,
                 FlowTriggerHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context),
+                bus_name_subscriptions.dbus_object_context if bus_name_subscriptions else None,
             )
 
     async def _start_subscription_flows(
@@ -750,7 +764,7 @@ class DbusClient:
         # for each bus_name
         for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
             paths = list(path_interfaces_map.keys())
-
+            bus_name_subscripions = self.get_bus_name_subscriptions(bus_name)
             # for each path in the bus_name
             for object_path in paths:
                 # For each subscription_config that matches the bus_name and object_path
@@ -773,10 +787,16 @@ class DbusClient:
                                 FlowTriggerHandler(
                                     FlowTriggerBusNameAddedConfig.type, trigger_context
                                 ),
+                                bus_name_subscripions.dbus_object_context
+                                if bus_name_subscripions
+                                else None,
                             )
 
                         processed_new_subscriptions.add(subscription_config.id)
 
+                    # TODO: lookup by bus_name and path
+                    # bus_name_subscriptions = self._subscriptions[bus_name]
+                    # dbus_object_context = bus_name_subscriptions.dbus_object_context
                     if trigger_flows:
                         # Trigger flows that have a object_added trigger configured
                         await self._trigger_processor.trigger_subscription_flows(
@@ -784,6 +804,9 @@ class DbusClient:
                             FlowTriggerHandler(
                                 FlowTriggerDbusObjectAddedConfig.type, trigger_context
                             ),
+                            bus_name_subscripions.dbus_object_context
+                            if bus_name_subscripions
+                            else None,
                         )
 
     async def call_dbus_interface_method(
@@ -916,9 +939,11 @@ class DbusClient:
                 interface=signal_state.interface_name,
             )
 
+            bus_name_subscripions = self.get_bus_name_subscriptions(signal_state.bus_name)
             await self._trigger_processor.trigger_subscription_flows(
                 signal_state.subscription_config,
                 flow_trigger_handler,
+                bus_name_subscripions.dbus_object_context if bus_name_subscripions else None,
             )
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):

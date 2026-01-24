@@ -299,6 +299,10 @@
           "type": "object",
           "description": "Per flow execution context."
         },
+        "dbus_object_context": {
+          "type": "object",
+          "description": "Per dbus object context, shared between multiple flow executions."
+        },
         "global_context": {
           "type": "object",
           "description": "Global context, shared between multiple flow executions, over all subscriptions."
