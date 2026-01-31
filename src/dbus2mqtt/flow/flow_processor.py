@@ -8,6 +8,8 @@ from dbus2mqtt.config import (
     FlowActionLogConfig,
     FlowActionMqttPublishConfig,
     FlowConfig,
+    FlowTriggerBusNameAddedConfig,
+    FlowTriggerBusNameRemovedConfig,
     FlowTriggerContextChangedConfig,
     FlowTriggerDbusObjectAddedConfig,
     FlowTriggerDbusObjectRemovedConfig,
@@ -34,7 +36,6 @@ class _FlowActionContext:
         global_flows_context: dict[str, Any],
         flow_context: dict[str, Any],
     ):
-
         self.app_context = app_context
         self.global_flows_context = global_flows_context
         self.flow_context = flow_context
@@ -135,10 +136,16 @@ class FlowProcessor:
     def _object_context_ref_from_trigger(
         self, flow_trigger_message: FlowTriggerMessage
     ) -> str | None:
-        # TODO: Check for flow_trigger_massage.flow_trigger_config.type to assert on
-        # existence of bus_name and path
-        trigger_context = flow_trigger_message.trigger_context
-        if "bus_name" in trigger_context and "path" in trigger_context:
+
+        trigger_type = flow_trigger_message.flow_trigger_config.type
+        if trigger_type in [
+            FlowTriggerDbusSignalConfig.type,
+            FlowTriggerBusNameAddedConfig.type,
+            FlowTriggerBusNameRemovedConfig.type,
+            FlowTriggerDbusObjectAddedConfig.type,
+            FlowTriggerDbusObjectRemovedConfig.type,
+        ]:
+            trigger_context = flow_trigger_message.trigger_context
             return f"{trigger_context['bus_name']}:{trigger_context['path']}"
 
         return None

@@ -787,9 +787,6 @@ class DbusClient:
 
                         processed_new_subscriptions.add(subscription_config.id)
 
-                    # TODO: lookup by bus_name and path
-                    # bus_name_subscriptions = self._subscriptions[bus_name]
-                    # dbus_object_context = bus_name_subscriptions.dbus_object_context
                     if trigger_flows:
                         # Trigger flows that have a object_added trigger configured
                         await self._trigger_processor.trigger_subscription_flows(
