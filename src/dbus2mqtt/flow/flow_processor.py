@@ -183,12 +183,12 @@ class FlowProcessor:
             == FlowTriggerDbusObjectRemovedConfig.type
         )
 
-        try:
-            # Each flow executed gets its own execution context
-            flow_execution_context = self._flow_execution_context(
-                flow, flow_trigger_message, object_context_ref
-            )
+        # Each flow executed gets its own execution context
+        flow_execution_context = self._flow_execution_context(
+            flow, flow_trigger_message, object_context_ref
+        )
 
+        try:
             # Check if any actions should run based on flow conditions
             should_execute_actions = self._evaluate_flow_conditions(
                 flow, flow_execution_context, self.app_context.templating
@@ -206,7 +206,11 @@ class FlowProcessor:
             if should_execute_actions:
                 await flow.execute_actions(flow_execution_context)
         finally:
-            if object_context_ref and clear_object_context_after_flow:
+            if (
+                object_context_ref
+                and flow_execution_context.has_updatable_object_context()
+                and clear_object_context_after_flow
+            ):
                 del self._object_contexts[object_context_ref]
 
         # Check if global context was updated during flow execution to trigger context_changed flows

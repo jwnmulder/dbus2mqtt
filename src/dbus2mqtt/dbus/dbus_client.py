@@ -611,10 +611,6 @@ class DbusClient:
             # Cleanup all dbus2mqtt subscriptions for this bus_name
             del self._subscriptions[bus_name]
 
-            # TODO: pass to triggers
-            # TODO: instead of passing the context, lookup by dbus_name and path later on
-            # dbus_object_context = bus_name_subscriptions.dbus_object_context
-
             # Fire object_removed triggers for all flows
             for path in bus_name_subscriptions.path_objects:
                 subscription_configs = self.config.get_subscription_configs(
@@ -691,12 +687,6 @@ class DbusClient:
         # Cleanup the entire BusNameSubscriptions if no more objects are subscribed
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
 
-        # TODO: pass by bus_name and path?
-        # Will that work when deleting state before triggering?
-        # dbus_object_context = (
-        #     bus_name_subscriptions.dbus_object_context if bus_name_subscriptions else None
-        # )
-
         if bus_name_subscriptions and len(bus_name_subscriptions.path_objects) == 0:
             del self._subscriptions[bus_name]
 
@@ -761,6 +751,7 @@ class DbusClient:
         # for each bus_name
         for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
             paths = list(path_interfaces_map.keys())
+
             # for each path in the bus_name
             for object_path in paths:
                 # For each subscription_config that matches the bus_name and object_path
