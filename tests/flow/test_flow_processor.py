@@ -29,7 +29,7 @@ async def test_schedule_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "scheduler"
@@ -48,7 +48,7 @@ async def test_bus_name_added_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "added"
@@ -67,7 +67,7 @@ async def test_bus_name_removed_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "removed"
@@ -86,7 +86,7 @@ async def test_object_added_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "added"
@@ -105,7 +105,7 @@ async def test_object_removed_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "removed"
@@ -137,7 +137,7 @@ async def test_dbus_signal_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == {
@@ -163,7 +163,7 @@ async def test_context_changed_trigger():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert processor._global_context["res"] == "triggered_by_context_changed"
@@ -185,7 +185,7 @@ async def test_flow_conditions_should_execute():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert "res" in processor._global_context
@@ -207,7 +207,33 @@ async def test_flow_conditions_should_not_execute():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     assert "res" not in processor._global_context
+
+
+@pytest.mark.asyncio
+async def test_cleanup_object_context():
+    """Test handling of object_removed_trigger and context cleanup."""
+    app_context = mocked_app_context()
+
+    trigger_context = {"bus_name": "test_bus_name", "path": "/"}
+    trigger_config = FlowTriggerDbusObjectRemovedConfig()
+    processor, flow_config = mocked_flow_processor(
+        app_context,
+        [trigger_config],
+        actions=[],
+    )
+
+    flow_trigger_messsage = FlowTriggerMessage(
+        flow_config, trigger_config, datetime.now(), trigger_context
+    )
+    object_context_ref = processor._object_context_ref_from_trigger(flow_trigger_messsage)
+
+    assert object_context_ref
+
+    processor._object_contexts[object_context_ref] = {"existing_var": "val"}
+    await processor._process_flow_trigger(flow_trigger_messsage)
+
+    assert object_context_ref not in processor._object_contexts

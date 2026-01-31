@@ -13,7 +13,8 @@ from dbus2mqtt.config import Config
 from dbus2mqtt.config.jsonarparse import new_argument_parser, ns_to_cls
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
-from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
+from dbus2mqtt.flow.flow_processor import FlowProcessor
+from dbus2mqtt.flow.flow_scheduler import FlowScheduler
 from dbus2mqtt.mqtt.mqtt_client import MqttClient
 from dbus2mqtt.template.dbus_template_functions import jinja_custom_dbus_functions
 from dbus2mqtt.template.templating import TemplateEngine

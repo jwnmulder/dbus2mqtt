@@ -24,7 +24,7 @@ async def test_mqtt_publish_action():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     mqtt_message = app_context.event_broker.mqtt_publish_queue.sync_q.get_nowait()

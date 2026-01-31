@@ -24,14 +24,14 @@ class ContextSetAction(FlowAction):
             context.update_global_context(context_new)
 
         if self.config.dbus_object_context is not None:
-            if context._dbus_object_context is not None:
+            if context.has_updatable_object_context():
                 context_new = await self.templating.async_render_template(
                     self.config.dbus_object_context, dict, aggregated_context
                 )
                 logger.debug(
-                    f"Update dbus_object_context[{context._dbus_object_ref}] with: {context_new}"
+                    f"Update dbus_object_context[{context._object_context_ref}] with: {context_new}"
                 )
-                context.update_dbus_object_context(context_new)
+                context.update_object_context(context_new)
             else:
                 logger.warning(
                     "Skipped updating dbus_object_context, not in a valid dbus_object_context"

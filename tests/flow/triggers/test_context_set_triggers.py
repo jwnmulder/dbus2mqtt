@@ -34,7 +34,7 @@ async def test_context_changed():
     # Flow will be first triggered by the schedule trigger
     # Afterwards, we expect a context_changed trigger to be prepared for the same flow
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
     # First execution should be triggered by schedule

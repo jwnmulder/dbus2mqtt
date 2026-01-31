@@ -35,7 +35,7 @@ from dbus2mqtt.dbus.dbus_util import (
 )
 from dbus2mqtt.dbus.introspection.patcher import IntrospectPatcher
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
-from dbus2mqtt.flow.flow_processor import FlowScheduler
+from dbus2mqtt.flow.flow_scheduler import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 
@@ -627,7 +627,6 @@ class DbusClient:
                     await self._trigger_processor.trigger_subscription_flows(
                         subscription_config,
                         FlowTriggerHandler(FlowTriggerBusNameRemovedConfig.type, trigger_context),
-                        bus_name_subscriptions.dbus_object_context,
                     )
 
                     # Trigger flows that have an object_removed trigger configured
@@ -636,7 +635,6 @@ class DbusClient:
                         FlowTriggerHandler(
                             FlowTriggerDbusObjectRemovedConfig.type, trigger_context
                         ),
-                        bus_name_subscriptions.dbus_object_context,
                     )
 
     async def _handle_interfaces_added(self, bus_name: str, path: str) -> None:
@@ -709,7 +707,6 @@ class DbusClient:
             await self._trigger_processor.trigger_subscription_flows(
                 subscription_config,
                 FlowTriggerHandler(FlowTriggerDbusObjectRemovedConfig.type, trigger_context),
-                bus_name_subscriptions.dbus_object_context if bus_name_subscriptions else None,
             )
 
     async def _start_subscription_flows(
@@ -764,7 +761,6 @@ class DbusClient:
         # for each bus_name
         for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
             paths = list(path_interfaces_map.keys())
-            bus_name_subscripions = self.get_bus_name_subscriptions(bus_name)
             # for each path in the bus_name
             for object_path in paths:
                 # For each subscription_config that matches the bus_name and object_path
@@ -787,9 +783,6 @@ class DbusClient:
                                 FlowTriggerHandler(
                                     FlowTriggerBusNameAddedConfig.type, trigger_context
                                 ),
-                                bus_name_subscripions.dbus_object_context
-                                if bus_name_subscripions
-                                else None,
                             )
 
                         processed_new_subscriptions.add(subscription_config.id)
@@ -804,9 +797,6 @@ class DbusClient:
                             FlowTriggerHandler(
                                 FlowTriggerDbusObjectAddedConfig.type, trigger_context
                             ),
-                            bus_name_subscripions.dbus_object_context
-                            if bus_name_subscripions
-                            else None,
                         )
 
     async def call_dbus_interface_method(
@@ -939,11 +929,8 @@ class DbusClient:
                 interface=signal_state.interface_name,
             )
 
-            bus_name_subscripions = self.get_bus_name_subscriptions(signal_state.bus_name)
             await self._trigger_processor.trigger_subscription_flows(
-                signal_state.subscription_config,
-                flow_trigger_handler,
-                bus_name_subscripions.dbus_object_context if bus_name_subscripions else None,
+                signal_state.subscription_config, flow_trigger_handler
             )
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):

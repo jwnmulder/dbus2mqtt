@@ -8,14 +8,22 @@ class FlowExecutionContext:
         name: str | None,
         global_flows_context: dict[str, Any],
         flow_context: dict[str, Any],
-        dbus_object_ref: tuple[str, str] | None,
-        dbus_object_context: dict[str, Any] | None,
+        object_context_ref: str | None,
+        object_context: dict[str, Any] | None,
     ):
         self.name = name
 
-        self._global_context = global_flows_context
+        self._updatable_global_context = global_flows_context
         """
         Global flows context which is shared across all flows.
+        Modifiable by user.
+        **Not** cleaned up after flow execution.
+        """
+
+        self._object_context_ref = object_context_ref
+        self._updatable_object_context = object_context
+        """
+        D-Bus object context which is shared across all flows.
         Modifiable by user.
         **Not** cleaned up after flow execution.
         """
@@ -27,10 +35,7 @@ class FlowExecutionContext:
         **Not** cleaned up after flow execution.
         """
 
-        self._dbus_object_ref = dbus_object_ref
-        self._dbus_object_context = dbus_object_context
-
-        self._context: dict[str, Any] = {}
+        self._updatable_context: dict[str, Any] = {}
         """
         Per flow execution context.
         Modifiable by user.
@@ -41,17 +46,20 @@ class FlowExecutionContext:
 
     def update_global_context(self, context: dict[str, Any]):
         """Update the global context with the given context update."""
-        self._global_context.update(context)
+        self._updatable_global_context.update(context)
         self.global_context_updated = True
 
-    def update_dbus_object_context(self, context: dict[str, Any]):
+    def has_updatable_object_context(self) -> bool:
+        return self._updatable_object_context is not None
+
+    def update_object_context(self, context: dict[str, Any]):
         """Update the dbus object context with the given context update."""
-        assert self._dbus_object_context is not None, "dbus_object_context is not None"
-        self._dbus_object_context.update(context)
+        assert self._updatable_object_context is not None, "has_updatable_dbus_object_context"
+        self._updatable_object_context.update(context)
 
     def update_context(self, context: dict[str, Any]):
         """Update the flow execution context with the given context update."""
-        self._context.update(context)
+        self._updatable_context.update(context)
 
     def get_aggregated_context(self) -> dict[str, Any]:
         """Get the aggregated context for the flow execution.
@@ -59,14 +67,14 @@ class FlowExecutionContext:
         This includes global flows context, flow context, and local context.
         """
         context = {}
-        if self._global_context:
-            context.update(self._global_context)
+        if self._updatable_global_context:
+            context.update(self._updatable_global_context)
+        if self._updatable_object_context:
+            context.update(self._updatable_object_context)
         if self._flow_context:
             context.update(self._flow_context)
-        if self._dbus_object_context:
-            context.update(self._dbus_object_context)
-        if self._context:
-            context.update(self._context)
+        if self._updatable_context:
+            context.update(self._updatable_context)
         return context
 
 
