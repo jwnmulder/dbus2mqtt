@@ -18,6 +18,7 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 | `urldecode`         | function  | Decodes a URL-encoded string.                                               |
 | `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
 | `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
+| `dbus_property_get` | function  | |
 
 ## now()
 
@@ -35,14 +36,28 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 ## dbus_list()
 
-::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_list_fn
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.dbus_list_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_contexts  ()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.dbus_contexts_fn
     options:
       show_root_toc_entry: false
       show_docstring_raises: false
 
 ## dbus_call()
 
-::: dbus2mqtt.template.dbus_template_functions.DbusContext.async_dbus_call_fn
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.async_dbus_call_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_property_get()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.async_dbus_property_get_fn
     options:
       show_root_toc_entry: false
       show_docstring_raises: false
