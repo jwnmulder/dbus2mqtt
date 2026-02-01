@@ -32,7 +32,7 @@ async def test_schedule_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
-    assert processor._global_context["res"] == "scheduler"
+    assert app_context.flow_state.global_context["res"] == "scheduler"
 
 
 @pytest.mark.asyncio
@@ -52,7 +52,7 @@ async def test_bus_name_added_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert processor._global_context["res"] == "added"
+    assert app_context.flow_state.global_context["res"] == "added"
 
 
 @pytest.mark.asyncio
@@ -72,7 +72,7 @@ async def test_bus_name_removed_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert processor._global_context["res"] == "removed"
+    assert app_context.flow_state.global_context["res"] == "removed"
 
 
 @pytest.mark.asyncio
@@ -92,7 +92,7 @@ async def test_object_added_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert processor._global_context["res"] == "added"
+    assert app_context.flow_state.global_context["res"] == "added"
 
 
 @pytest.mark.asyncio
@@ -112,7 +112,7 @@ async def test_object_removed_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert processor._global_context["res"] == "removed"
+    assert app_context.flow_state.global_context["res"] == "removed"
 
 
 @pytest.mark.asyncio
@@ -145,7 +145,7 @@ async def test_dbus_signal_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger": "dbus_signal",
         "subscription_bus_name": "test.bus_name.*",
         "subscription_path": "/",
@@ -171,7 +171,7 @@ async def test_context_changed_trigger():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
-    assert processor._global_context["res"] == "triggered_by_context_changed"
+    assert app_context.flow_state.global_context["res"] == "triggered_by_context_changed"
 
 
 @pytest.mark.asyncio
@@ -194,7 +194,7 @@ async def test_flow_conditions_should_execute():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert "res" in processor._global_context
+    assert "res" in app_context.flow_state.global_context
 
 
 @pytest.mark.asyncio
@@ -217,7 +217,7 @@ async def test_flow_conditions_should_not_execute():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), trigger_context)
     )
 
-    assert "res" not in processor._global_context
+    assert "res" not in app_context.flow_state.global_context
 
 
 @pytest.mark.asyncio
@@ -240,7 +240,7 @@ async def test_cleanup_object_context():
 
     assert object_context_ref
 
-    processor._object_contexts[object_context_ref] = {"existing_var": "val"}
+    app_context.flow_state.object_contexts[object_context_ref] = {"existing_var": "val"}
     await processor._process_flow_trigger(flow_trigger_messsage)
 
-    assert object_context_ref not in processor._object_contexts
+    assert object_context_ref not in app_context.flow_state.object_contexts

@@ -38,7 +38,7 @@ async def test_context_changed():
     )
 
     # First execution should be triggered by schedule
-    assert processor._global_context["res"] == {"trigger_type": "schedule"}
+    assert app_context.flow_state.global_context["res"] == {"trigger_type": "schedule"}
 
     # Global context changed, so a new trigger message must be on the event_broker
     context_changed_trigger = app_context.event_broker.flow_trigger_queue.sync_q.get_nowait()

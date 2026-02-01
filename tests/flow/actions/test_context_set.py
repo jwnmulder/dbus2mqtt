@@ -57,7 +57,7 @@ async def test_global_context():
         FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )
 
-    assert processor._global_context["var1"] == "test.bus_name.*"
+    assert app_context.flow_state.global_context["var1"] == "test.bus_name.*"
 
 
 @pytest.mark.asyncio
@@ -84,6 +84,6 @@ async def test_dbus_object_context():
 
     await processor._process_flow_trigger(flow_trigger_message)
 
-    dbus_object_context = processor._object_contexts[object_context_ref]
+    dbus_object_context = app_context.flow_state.object_contexts[object_context_ref]
 
     assert dbus_object_context["var1"] == "test.bus_name.*"

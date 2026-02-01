@@ -21,6 +21,7 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.flow.flow_state import to_object_context_ref
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
@@ -76,9 +77,7 @@ class FlowProcessor:
     def __init__(self, app_context: AppContext):
         self.app_context = app_context
         self.event_broker = app_context.event_broker
-
-        self._global_context: dict[str, Any] = {}
-        self._object_contexts: dict[str, dict[str, Any]] = {}
+        self.flow_state = app_context.flow_state
 
         self._trigger_processor = FlowTriggerProcessor(app_context)
 
@@ -100,7 +99,7 @@ class FlowProcessor:
         """Register flows with the flow processor."""
         for flow_config in flows:
             flow_action_context = _FlowActionContext(
-                self.app_context, flow_config, self._global_context, flow_context
+                self.app_context, flow_config, self.flow_state.global_context, flow_context
             )
             self._flows[flow_config.id] = flow_action_context
 
@@ -146,7 +145,7 @@ class FlowProcessor:
             FlowTriggerDbusObjectRemovedConfig.type,
         ]:
             trigger_context = flow_trigger_message.trigger_context
-            return f"{trigger_context['bus_name']}:{trigger_context['path']}"
+            return to_object_context_ref(trigger_context["bus_name"], trigger_context["path"])
 
         return None
 
@@ -211,7 +210,7 @@ class FlowProcessor:
                 and flow_execution_context.has_updatable_object_context()
                 and clear_object_context_after_flow
             ):
-                del self._object_contexts[object_context_ref]
+                del self.flow_state.object_contexts[object_context_ref]
 
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
@@ -237,10 +236,10 @@ class FlowProcessor:
         # Each dbus_object gets it's own object context
         object_context = None
         if object_context_ref:
-            object_context = self._object_contexts.get(object_context_ref)
+            object_context = self.flow_state.object_contexts.get(object_context_ref)
             if not object_context:
                 object_context = {}
-                self._object_contexts[object_context_ref] = object_context
+                self.flow_state.object_contexts[object_context_ref] = object_context
 
         flow_execution_context = FlowExecutionContext(
             flow.flow_config.name,
