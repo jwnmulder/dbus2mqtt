@@ -213,13 +213,13 @@ class FlowActionContextSetConfig:
 
     Attributes:
         context: Per flow execution context.
-        dbus_object_context: Per dbus object context, shared between multiple flow executions.
+        object_context: Per dbus object context, shared between multiple flow executions.
         global_context: Global context, shared between multiple flow executions, over all subscriptions.
     """
 
     type: Literal["context_set"] = "context_set"
     context: dict[str, Any] | None = None
-    dbus_object_context: dict[str, Any] | None = None
+    object_context: dict[str, Any] | None = None
     global_context: dict[str, Any] | None = None
 
 
@@ -266,6 +266,7 @@ class FlowConfig:
         actions: Actions executed when the flow runs.
         conditions: Optional condition or list of conditions that must be met before a flow is executed.
         id: Unique flow identifier, automatically generated UUID.
+        object_context_ref: Use a specific (dbus) object context for accessing object_context variables. Defaults to `dbus:{bus_name}:{path}` for dbus related flow triggers.
     """
 
     triggers: list[FlowTriggerConfig]
@@ -273,6 +274,7 @@ class FlowConfig:
     conditions: str | list[str] = field(default_factory=list)
     name: str | None = None
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    object_context_ref: str | None = None
 
 
 @dataclass

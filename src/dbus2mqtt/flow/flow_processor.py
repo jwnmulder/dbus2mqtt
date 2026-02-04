@@ -132,12 +132,26 @@ class FlowProcessor:
             finally:
                 self.event_broker.flow_trigger_queue.async_q.task_done()
 
-    def _object_context_ref_from_trigger(
-        self, flow_trigger_message: FlowTriggerMessage
+    def _execution_object_context_ref(
+        self, flow_config: FlowConfig, flow_trigger_message: FlowTriggerMessage
     ) -> str | None:
+        """Determines object_context_ref.
 
+        Evaluates flow_config.object_context_ref (a template)
+        Defaults to `dbus:{bus_name}:{path}` for dbus related flow triggers
+        """
+        object_context_ref = flow_config.object_context_ref
+        if object_context_ref is not None:
+            context = {}
+            context.update(self.flow_state.global_context)
+            context.update(flow_trigger_message.trigger_context)
+            object_context_ref = self.app_context.templating.render_template(
+                object_context_ref, str, context
+            )
+
+        # default if object_context_ref is not configured
         trigger_type = flow_trigger_message.flow_trigger_config.type
-        if trigger_type in [
+        if object_context_ref is None and trigger_type in [
             FlowTriggerDbusSignalConfig.type,
             FlowTriggerBusNameAddedConfig.type,
             FlowTriggerBusNameRemovedConfig.type,
@@ -145,9 +159,11 @@ class FlowProcessor:
             FlowTriggerDbusObjectRemovedConfig.type,
         ]:
             trigger_context = flow_trigger_message.trigger_context
-            return to_object_context_ref(trigger_context["bus_name"], trigger_context["path"])
+            object_context_ref = to_object_context_ref(
+                "dbus", trigger_context["bus_name"], trigger_context["path"]
+            )
 
-        return None
+        return object_context_ref
 
     def _trigger_config_to_str(self, msg: FlowTriggerMessage) -> str:
         config = msg.flow_trigger_config
@@ -175,11 +191,20 @@ class FlowProcessor:
 
         flow = self._flows[flow_id]
 
-        object_context_ref = self._object_context_ref_from_trigger(flow_trigger_message)
+        object_context_ref = self._execution_object_context_ref(
+            flow.flow_config, flow_trigger_message
+        )
+
+        # To ensure that memory is released, clear the object_context state when
+        # a dbus_object is removed.
+        # Because object_context_ref is user configurable, we only do this when bus_name matches
         clear_object_context_after_flow = (
-            object_context_ref
+            object_context_ref is not None
             and flow_trigger_message.flow_trigger_config.type
             == FlowTriggerDbusObjectRemovedConfig.type
+            and object_context_ref.startswith(
+                f"dbus:{flow_trigger_message.trigger_context['bus_name']}"
+            )
         )
 
         # Each flow executed gets its own execution context
@@ -193,7 +218,7 @@ class FlowProcessor:
                 flow, flow_execution_context, self.app_context.templating
             )
 
-            log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+            log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}, object_context_ref={object_context_ref}"
             if not should_execute_actions:
                 log_message = f"{log_message} - conditions not met, skipping actions"
 
@@ -210,6 +235,8 @@ class FlowProcessor:
                 and flow_execution_context.has_updatable_object_context()
                 and clear_object_context_after_flow
             ):
+                # TODO: This will occur once for each flow that has a dbus_object_removed trigger configured
+                # Does it make sense to clear memory more than once?
                 del self.flow_state.object_contexts[object_context_ref]
 
         # Check if global context was updated during flow execution to trigger context_changed flows

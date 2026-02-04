@@ -236,7 +236,7 @@ async def test_cleanup_object_context():
     flow_trigger_messsage = FlowTriggerMessage(
         flow_config, trigger_config, datetime.now(), trigger_context
     )
-    object_context_ref = processor._object_context_ref_from_trigger(flow_trigger_messsage)
+    object_context_ref = processor._execution_object_context_ref(flow_config, flow_trigger_messsage)
 
     assert object_context_ref
 

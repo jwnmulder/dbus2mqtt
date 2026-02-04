@@ -54,7 +54,7 @@ class FlowExecutionContext:
 
     def update_object_context(self, context: dict[str, Any]):
         """Update the dbus object context with the given context update."""
-        assert self._updatable_object_context is not None, "has_updatable_dbus_object_context"
+        assert self._updatable_object_context is not None, "has_updatable_object_context"
         self._updatable_object_context.update(context)
 
     def update_context(self, context: dict[str, Any]):

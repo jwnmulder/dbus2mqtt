@@ -61,7 +61,7 @@ async def test_global_context():
 
 
 @pytest.mark.asyncio
-async def test_dbus_object_context():
+async def test_object_context():
 
     app_context = mocked_app_context()
 
@@ -71,19 +71,19 @@ async def test_dbus_object_context():
         app_context,
         triggers=[trigger_config],
         actions=[
-            FlowActionContextSetConfig(dbus_object_context={"var1": "{{ subscription_bus_name }}"})
+            FlowActionContextSetConfig(object_context={"var1": "{{ subscription_bus_name }}"})
         ],
     )
 
     flow_trigger_message = FlowTriggerMessage(
         flow_config, trigger_config, datetime.now(), trigger_context
     )
-    object_context_ref = processor._object_context_ref_from_trigger(flow_trigger_message)
+    object_context_ref = processor._execution_object_context_ref(flow_config, flow_trigger_message)
 
     assert object_context_ref
 
     await processor._process_flow_trigger(flow_trigger_message)
 
-    dbus_object_context = app_context.flow_state.object_contexts[object_context_ref]
+    object_context = app_context.flow_state.object_contexts[object_context_ref]
 
-    assert dbus_object_context["var1"] == "test.bus_name.*"
+    assert object_context["var1"] == "test.bus_name.*"

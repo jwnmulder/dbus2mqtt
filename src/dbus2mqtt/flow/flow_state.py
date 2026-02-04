@@ -7,5 +7,5 @@ class FlowState:
         self.object_contexts: dict[str, dict[str, Any]] = {}
 
 
-def to_object_context_ref(*args) -> str:
-    return ":".join(args)
+def to_object_context_ref(namespace: str, *args) -> str:
+    return f"{namespace}:{':'.join(args)}"
