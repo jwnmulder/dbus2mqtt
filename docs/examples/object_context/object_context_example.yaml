@@ -1,0 +1,27 @@
+dbus:
+  subscriptions:
+    - bus_name: org.mpris.MediaPlayer2.*
+      path: /org/mpris/MediaPlayer2
+      interfaces:
+        - interface: org.freedesktop.DBus.Properties
+          signals:
+            - signal: PropertiesChanged
+      flows:
+        - name: player added
+          triggers:
+            - type: dbus_object_added
+          actions:
+            - type: context_set
+              global_context:
+                active_player_bus_name: "{{ bus_name }}"
+              object_context:
+                player: "{{ dbus_call(bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}"
+        - name: player schedule flow
+          triggers:
+            - type: context_changed
+            - type: schedule
+              interval: {seconds: 5}
+          object_context_ref: "dbus:{{ active_player_bus_name }}:/org/mpris/MediaPlayer2"
+          actions:
+            - type: log
+              msg: "Active player: {{ player.Identity }} ({{ active_player_bus_name | replace('org.mpris.MediaPlayer2.', '') }})"

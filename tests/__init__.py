@@ -9,7 +9,9 @@ from dbus2mqtt.config import FlowActionConfig, FlowConfig, FlowTriggerConfig, In
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.dbus.dbus_types import BusNameSubscriptions
 from dbus2mqtt.event_broker import EventBroker
-from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
+from dbus2mqtt.flow.flow_processor import FlowProcessor
+from dbus2mqtt.flow.flow_scheduler import FlowScheduler
+from dbus2mqtt.flow.flow_state import FlowState
 from dbus2mqtt.mqtt.mqtt_client import MqttClient
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -32,7 +34,8 @@ def mocked_app_context():
 
     event_broker = EventBroker()
     template_engine = TemplateEngine()
-    app_context = AppContext(test_config, event_broker, template_engine)
+    flow_state = FlowState()
+    app_context = AppContext(test_config, event_broker, template_engine, flow_state)
 
     return app_context
 
