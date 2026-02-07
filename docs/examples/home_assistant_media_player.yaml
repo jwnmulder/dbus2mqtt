@@ -113,7 +113,7 @@ dbus:
                 current_muted: |
                   {{ muted | default(False) }}
             - type: context_set
-              dbus_object_context:
+              object_context:
                 muted: |
                   {{ not current_muted }}
                 unmuted_volume: >
