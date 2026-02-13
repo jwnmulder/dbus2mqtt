@@ -20,5 +20,5 @@ async def test_context():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, datetime.now(), {})
     )

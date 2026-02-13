@@ -299,6 +299,10 @@
           "type": "object",
           "description": "Per flow execution context."
         },
+        "object_context": {
+          "type": "object",
+          "description": "Per dbus object context, shared between multiple flow executions."
+        },
         "global_context": {
           "type": "object",
           "description": "Global context, shared between multiple flow executions, over all subscriptions."
@@ -409,6 +413,10 @@
         "id": {
           "type": "string",
           "description": "Unique flow identifier, automatically generated UUID."
+        },
+        "object_context_ref": {
+          "type": "string",
+          "description": "Use a specific (dbus) object context for accessing object_context variables. Defaults to `dbus:{bus_name}:{path}` for dbus related flow triggers."
         }
       },
       "additionalProperties": false,

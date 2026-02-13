@@ -2,7 +2,6 @@ import pytest
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import FlowActionContextSetConfig, FlowTriggerMqttMessageConfig
-from dbus2mqtt.flow.flow_processor import FlowProcessor
 from tests import mocked_app_context, mocked_flow_processor, mocked_mqtt_client
 
 
@@ -27,7 +26,7 @@ async def test_mqtt_message_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_bus_name_added
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "mqtt_message",
         "topic": test_topic,
         "payload": test_payload,
@@ -70,9 +69,7 @@ async def test_mqtt_message_trigger_filter_false():
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
 
 
-def _mocked_flow_processor(
-    app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig
-) -> FlowProcessor:
+def _mocked_flow_processor(app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig):
     processor, _ = mocked_flow_processor(
         app_context,
         [trigger_config],

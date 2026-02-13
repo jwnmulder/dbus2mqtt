@@ -7,15 +7,17 @@ from dbus_fast.constants import ErrorType
 from dbus_fast.errors import DBusError
 
 from dbus2mqtt.dbus.dbus_client import DbusClient
+from dbus2mqtt.flow.flow_state import FlowState, to_object_context_ref
 
 logger = logging.getLogger(__name__)
 
 
-class DbusContext:
-    def __init__(self, dbus_client: DbusClient):
+class DbusTemplateFunctionsContext:
+    def __init__(self, dbus_client: DbusClient, flow_state: FlowState):
         self.dbus_client = dbus_client
+        self.flow_state = flow_state
 
-    def async_dbus_list_fn(self, bus_name_pattern: str) -> list[str]:
+    def dbus_list_fn(self, bus_name_pattern: str) -> list[str]:
         """This function is used to access active bus_names which dbus2mqtt is subscribed to.
 
         Args:
@@ -136,16 +138,45 @@ class DbusContext:
             if e.type == ErrorType.NOT_SUPPORTED.value and default_unsupported is not None:
                 return default_unsupported
 
+    def dbus_contexts_fn(self, bus_name_pattern: str, path_pattern: str) -> dict[tuple[str], Any]:
+        """Get active dbus object contexts.
 
-def jinja_custom_dbus_functions(dbus_client: DbusClient) -> dict[str, Any]:
+        This function looks up an active subscribed dbus object for the
+        given bus name and object path and returns its context.
 
-    dbus_context = DbusContext(dbus_client)
+        Args:
+            bus_name_pattern (str): Glob pattern to filter on, e.g. '*' or 'org.mpris.MediaPlayer2.*'
+            path_pattern (str): Glob pattern to filter on, e.g. '*' or '/org/mpris/MediaPlayer2'
+
+        Returns:
+            A dict where each matching dbus_object has a corresponding entry,
+        """
+        res = {}
+        for bus_name, path in self.dbus_client.get_subscribed_dbus_objects():
+            if not fnmatch.fnmatchcase(bus_name, bus_name_pattern):
+                continue
+
+            if not fnmatch.fnmatchcase(path, path_pattern):
+                continue
+
+            object_context_ref = to_object_context_ref(bus_name, path)
+            object_context = self.flow_state.object_contexts.get(object_context_ref, {})
+
+            res[object_context_ref] = object_context
+
+        return res
+
+
+def jinja_custom_dbus_functions(dbus_client: DbusClient, flow_state: FlowState) -> dict[str, Any]:
+
+    dbus_context = DbusTemplateFunctionsContext(dbus_client, flow_state)
 
     custom_functions: dict[str, Any] = {}
     custom_functions.update({
-        "dbus_list": dbus_context.async_dbus_list_fn,
+        "dbus_list": dbus_context.dbus_list_fn,
         "dbus_call": dbus_context.async_dbus_call_fn,
         "dbus_property_get": dbus_context.async_dbus_property_get_fn,
+        "dbus_contexts": dbus_context.dbus_contexts_fn,
     })
 
     return custom_functions
