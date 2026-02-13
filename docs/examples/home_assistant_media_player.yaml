@@ -1,3 +1,7 @@
+mqtt:
+  subscription_topics:
+    - dbus2mqtt/#
+    - homeassistant/status
 dbus:
   subscriptions:
 
@@ -44,21 +48,26 @@ dbus:
               signal: PropertiesChanged
             - type: dbus_signal
               signal: Seeked
+            - type: context_changed
           conditions:
             # For PropertiesChanged signals, only trigger for org.mpris.MediaPlayer2.Player interfaces
             - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+            - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
               context:
-                mpris_bus_name: "{{ dbus_list('org.mpris.MediaPlayer2.*') | first }}"
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
                 mpris_path: /org/mpris/MediaPlayer2
+                available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
                 seeked_position: "{{ kwargs.Position if trigger_type == 'dbus_signal' and signal == 'Seeked' else None }}"
             - type: context_set
               context:
+                current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                updated_at: "{{ now().isoformat() }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
@@ -66,43 +75,87 @@ dbus:
                 {% set metadata = player_properties.get('Metadata') or {} %}
                 {% set metadata_xesam_url = metadata.get('xesam:url', '') | urldecode %}
                 {{
-                    { 'bus_name': mpris_bus_name }
+                    {
+                      'current_bus_name': mpris_bus_name,
+                      'current_player': current_player,
+                      'available_players': available_players,
+                      'updated_at': updated_at
+                    }
                     | combine(player_properties)
                     | combine({ 'Position': seeked_position } if seeked_position else {})
                     | combine({ 'Metadata': { 'xesam:url': metadata_xesam_url } }, recursive=True)
                 }}
 
+        # mpris:artUrl can have a file:// or http:// schema
+        # Home Assistant is unable to access file:// so we use MQTT for that
         - name: publish local art image
-          # mpris:artUrl can have a file:// or http:// schema
-          # Home Assistant is unable to access file:// so we use MQTT for that
           triggers:
             - type: dbus_object_added
             - type: dbus_signal
               signal: PropertiesChanged
+            - type: context_changed
+          conditions:
+            - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
               context:
-                artUrl: "{{ (dbus_property_get(bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') }}"
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
+                mpris_path: /org/mpris/MediaPlayer2
+            - type: context_set
+              context:
+                artUrl: "{{ (dbus_property_get(mpris_bus_name, mpris_path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') if mpris_bus_name else None }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
               payload_type: binary
               payload_template: |
                 {{ artUrl if artUrl and artUrl.startswith('file://') else None }}
 
+        # When the last MPRIS player is gone, publish off state and reset image
         - name: player removed
           triggers:
             - type: dbus_object_removed
-            # filter: # TODO: Check if this is the last or inactive one #
+          conditions:
+            - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length == 0 }}"
           actions:
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
               payload_type: json
               payload_template:
                 PlaybackStatus: "Off"
+            - type: mqtt_publish
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+              payload_type: binary
+              payload_template: "{{ None }}"
+
+        - name: Set current player
+          triggers:
+            - type: mqtt_message
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/custom_command
+              filter: "{{ payload.get('action') == 'set_current_player' }}"
+            - type: dbus_object_removed
+          actions:
+            - type: context_set
+              context:
+                preferred_player: >-
+                  {% set preferred_player = current_player_bus_name | default(None) -%}
+                  {% if trigger_type == 'mqtt_message' -%}
+                  {%   set preferred_player = 'org.mpris.MediaPlayer2.' + payload.get('player') -%}
+                  {% endif -%}
+                  {{ preferred_player }}
+            - type: context_set
+              global_context:
+                current_player_bus_name: >-
+                  {{ preferred_player if preferred_player in dbus_list('org.mpris.MediaPlayer2.*') else None }}
+            - type: log
+              msg: Changed preferred player to '{{ current_player_bus_name }}', requested '{{ preferred_player }}'
 
         - name: Home Assistant Discovery
           triggers:
             - type: dbus_object_added
+            - type: mqtt_message
+              topic: homeassistant/status
+              content_type: text
+              filter: "{{ payload == 'online' }}"
           actions:
             - type: mqtt_publish
               topic: homeassistant/device/mpris-E8EB9686/config
@@ -121,7 +174,7 @@ dbus:
                   player_state:
                     platform: sensor
                     name: State
-                    unique_id: e8eb9686-f947-46e1-80d4-fc1e812e39a2
+                    unique_id: 94b97e45-251a-4741-b479-6b48576f2f53
                     state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     value_template: >-
                       {% raw %}
@@ -153,19 +206,53 @@ dbus:
                       {% endif %}
 
                       {{
-                        value_json | combine({
-                          "MediaDuration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
-                          "MediaPosition": ((value_json.get('Position') or 0) / 1000000) | int,
-                          "MediaTitle": title,
-                          "MediaAlbum": metadata.get('xesam:album', ''),
-                          "MediaArtists": artists | join(', '),
-                          "MediaImageUrl": media_image_url,
-                          "VolumeMuted": value_json.get('Volume') == 0
-                        }) | to_json
+                        {
+                          "media_content_type": "music",
+                          "media_duration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
+                          "media_position": ((value_json.get('Position') or 0) / 1000000) | int,
+                          "media_position_updated_at": value_json.get('updated_at'),
+                          "media_title": title,
+                          "media_album_name": metadata.get('xesam:album', ''),
+                          "media_artist": artists | join(', '),
+                          "media_image_url": media_image_url,
+                          "volume_level": value_json.get('Volume'),
+                          "is_volume_muted": value_json.get('Volume') == 0,
+                          "source_list": value_json.get('available_players'),
+                          "source": value_json.get('current_player'),
+                          "mqtt_data": value_json
+                        } | to_json
                       }}
                       {% endraw %}
-                  image:
+                  image_mqtt:
                     platform: image
-                    name: Image
+                    name: Image MQTT
                     unique_id: 22c9206e-4af3-47d8-ac01-c23d62e43177
                     image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+                    availability_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
+                  image_url:
+                    platform: sensor
+                    name: Image Url
+                    unique_id: 6e06850b-3209-443c-bec7-2c47021ba607
+                    state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+                    value_template: >-
+                      {% raw %}
+                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% if media_image_url.startswith('file://') %}
+                        mqtt
+                      {% elif media_image_url.startswith('https://') or media_image_url.startswith('http://') %}
+                        remote
+                      {% else %}
+                        {{ None }}
+                      {% endif %}
+                      {%  endraw %}
+                    json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+                    json_attributes_template: >
+                      {% raw %}
+                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% if media_image_url.startswith('file://') %}
+                      {%   set media_image_url = state_attr('image.mpris_media_player_image_mqtt', 'entity_picture') %}
+                      {% endif %}
+                        {{ {
+                          "media_image_url": media_image_url
+                        } | to_json }}
+                      {% endraw %}
