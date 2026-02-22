@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo-dark-img.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
@@ -1180,7 +1180,12 @@ Scheduling is based on the APScheduler library and allows the following configur
 <tr>
 <td>args</td>
 <td><code>list</code></td>
-<td>signal arguments, list of objects</td>
+<td>positional signal arguments, list of objects</td>
+</tr>
+<tr>
+<td>kwargs</td>
+<td><code>dict</code></td>
+<td>keyworded signal arguments, only available when a D-Bus service provides introspection data with named method arguments</td>
 </tr>
 </tbody>
 </table>
@@ -1192,7 +1197,7 @@ Scheduling is based on the APScheduler library and allows the following configur
 <span class="w">    </span><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dbus_signal</span>
 <span class="w">    </span><span class="nt">conditions</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">args[0]</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;org.mpris.MediaPlayer2.Player&#39;</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">trigger_type</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;dbus_signal&#39;</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">signal</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;PropertiesChanged&#39;</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">True</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">kwargs.interface_name</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;org.mpris.MediaPlayer2.Player&#39;</span><span class="nv"> </span><span class="s">if</span><span class="nv"> </span><span class="s">trigger_type</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;dbus_signal&#39;</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">signal</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">&#39;PropertiesChanged&#39;</span><span class="nv"> </span><span class="s">else</span><span class="nv"> </span><span class="s">True</span><span class="nv"> </span><span class="s">}}&quot;</span>
 </code></pre></div></p>
 </div>
 <h2 id="mqtt_message">mqtt_message</h2>

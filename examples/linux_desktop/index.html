@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/logo-dark-img.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
@@ -975,16 +975,16 @@
 <p>Example notification with actions and hints, that automatically disappears after 5 seconds</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Notify&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;dbus2mqtt&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;dialog-information&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;dbus2mqtt&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;Message from &lt;b&gt;&lt;i&gt;dbus2mqtt&lt;/i&gt;&lt;/b&gt;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cancel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Cancel&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;urgency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;device&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="mi">5000</span>
-<span class="w">  </span><span class="p">]</span>
+<span class="w">  </span><span class="nt">&quot;kwargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;app_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbus2mqtt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;replaces_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;app_icon&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dialog-information&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dbus2mqtt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Message from &lt;b&gt;&lt;i&gt;dbus2mqtt&lt;/i&gt;&lt;/b&gt;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;actions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;OK&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;cancel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Cancel&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;hints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;urgency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;device&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;expire_timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>Further references:</p>

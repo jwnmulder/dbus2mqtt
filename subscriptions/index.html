@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/logo-dark-img.svg">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
     
     
       
@@ -1041,7 +1041,7 @@
 </div>
 <h2 id="mqtt-commands">MQTT commands</h2>
 <p>Any D-Bus method (when configured) can be called by publishing a MQTT message to the configured <code>mqtt_command_topic</code>.</p>
-<p>The example configuration below expose 3 methods and one property.</p>
+<p>The example configuration below exposes 3 methods and one property.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">dbus</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">subscriptions</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">bus_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">org.mpris.MediaPlayer2.*</span>
@@ -1070,22 +1070,27 @@
 <tbody>
 <tr>
 <td>method</td>
-<td>str</td>
+<td><code>str</code></td>
 <td>Method name</td>
 </tr>
 <tr>
 <td>args</td>
-<td>list</td>
-<td>Optional list of arguments that matches the methods D-Bus signature</td>
+<td><code>list</code></td>
+<td>Optional list of positional arguments that match the methods D-Bus signature</td>
+</tr>
+<tr>
+<td>kwargs</td>
+<td><code>dict</code></td>
+<td>Optional list of keyworded arguments that match the methods D-Bus signature. Only available when a D-Bus service provides introspection data with named method arguments</td>
 </tr>
 <tr>
 <td>bus_name</td>
-<td>str</td>
+<td><code>str</code></td>
 <td>Only invoke on dbus objects where bus_name matches, defaults to <code>*</code></td>
 </tr>
 <tr>
 <td>path</td>
-<td>str</td>
+<td><code>str</code></td>
 <td>Only invoke on dbus objects where path matches, defaults to <code>*</code></td>
 </tr>
 </tbody>
@@ -1104,6 +1109,16 @@ dbus objects. To target specific dbus objects make sure to set both keys.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seek&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">60000000</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.vlc&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Or when using keyworded arguments</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seek&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;kwargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6000000</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nt">&quot;bus_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.vlc&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/org/mpris/MediaPlayer2&quot;</span>
 <span class="p">}</span>
