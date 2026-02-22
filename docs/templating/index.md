@@ -16,9 +16,11 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 | `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package.                             |
 | `now`               | function  | Returns the current date and time as a `datetime` object.                   |
 | `urldecode`         | function  | Decodes a URL-encoded string.                                               |
-| `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
+| `dbus_list`         | function  | Returns a list of active subscribed bus_names |
 | `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
 | `dbus_property_get` | function  | |
+| `dbus_context`      | function  | Get a single dbus object context, defaults to `{}` |
+| `dbus_contexts`     | function  | Returns multiple dbus object contexts |
 
 ## now()
 
@@ -41,13 +43,6 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
       show_root_toc_entry: false
       show_docstring_raises: false
 
-## dbus_contexts  ()
-
-::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.dbus_contexts_fn
-    options:
-      show_root_toc_entry: false
-      show_docstring_raises: false
-
 ## dbus_call()
 
 ::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.async_dbus_call_fn
@@ -58,6 +53,20 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 ## dbus_property_get()
 
 ::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.async_dbus_property_get_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_context()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.dbus_context_fn
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## dbus_contexts()
+
+::: dbus2mqtt.template.dbus_template_functions.DbusTemplateFunctionsContext.dbus_contexts_fn
     options:
       show_root_toc_entry: false
       show_docstring_raises: false

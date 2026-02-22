@@ -138,18 +138,60 @@ class DbusTemplateFunctionsContext:
             if e.type == ErrorType.NOT_SUPPORTED.value and default_unsupported is not None:
                 return default_unsupported
 
-    def dbus_contexts_fn(self, bus_name_pattern: str, path_pattern: str) -> dict[tuple[str], Any]:
-        """Get active dbus object contexts.
+    def dbus_context_fn(self, bus_name: str, path: str) -> dict[str, Any]:
+        """Get a single dbus object context.
 
         This function looks up an active subscribed dbus object for the
         given bus name and object path and returns its context.
 
         Args:
-            bus_name_pattern (str): Glob pattern to filter on, e.g. '*' or 'org.mpris.MediaPlayer2.*'
-            path_pattern (str): Glob pattern to filter on, e.g. '*' or '/org/mpris/MediaPlayer2'
+            bus_name: bus_name, e.g. 'org.mpris.MediaPlayer2.firefox'
+            path: path, e.g. '/org/mpris/MediaPlayer2'
 
         Returns:
-            A dict where each matching dbus_object has a corresponding entry,
+            dbus_object context or an empty dict if no matching dbus object was found
+
+        Example:
+            Template
+            ```yaml
+            firefox_player_context: "{{ dbus_context('org.mpris.MediaPlayer2.firefox', '/org/mpris/MediaPlayer2') }}"
+            ```
+
+            Result
+            ```yaml
+            firefox_player_context: {'current_volume': '0'}
+            ```
+        """
+        object_context_ref = to_object_context_ref(bus_name, path)
+        object_context = self.flow_state.object_contexts.get(object_context_ref, {})
+
+        return object_context
+
+    def dbus_contexts_fn(
+        self, bus_name_pattern: str, path_pattern: str
+    ) -> dict[str, dict[str, Any]]:
+        """Get matching dbus object contexts.
+
+        This function looks up active subscribed dbus objects for the
+        given patterns and returns their contexts.
+
+        Args:
+            bus_name_pattern: Glob pattern to filter on, e.g. '*' or 'org.mpris.MediaPlayer2.*'
+            path_pattern: Glob pattern to filter on, e.g. '*' or '/org/mpris/MediaPlayer2'
+
+        Returns:
+            A dict where each matching dbus_object has a corresponding context.
+
+        Example:
+            Template
+            ```yaml
+            player_contexts: "{{ dbus_context('org.mpris.MediaPlayer2.*', '*') }}"
+            ```
+
+            Result
+            ```yaml
+            player_contexts: {'dbus:org.mpris.MediaPlayer2.firefox:/org/mpris/MediaPlayer2': 'current_volume': '0'}
+            ```
         """
         res = {}
         for bus_name, path in self.dbus_client.get_subscribed_dbus_objects():
@@ -159,7 +201,7 @@ class DbusTemplateFunctionsContext:
             if not fnmatch.fnmatchcase(path, path_pattern):
                 continue
 
-            object_context_ref = to_object_context_ref(bus_name, path)
+            object_context_ref = to_object_context_ref("dbus", bus_name, path)
             object_context = self.flow_state.object_contexts.get(object_context_ref, {})
 
             res[object_context_ref] = object_context
@@ -176,6 +218,7 @@ def jinja_custom_dbus_functions(dbus_client: DbusClient, flow_state: FlowState) 
         "dbus_list": dbus_context.dbus_list_fn,
         "dbus_call": dbus_context.async_dbus_call_fn,
         "dbus_property_get": dbus_context.async_dbus_property_get_fn,
+        "dbus_context": dbus_context.dbus_context_fn,
         "dbus_contexts": dbus_context.dbus_contexts_fn,
     })
 
