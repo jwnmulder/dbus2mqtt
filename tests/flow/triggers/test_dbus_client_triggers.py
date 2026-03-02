@@ -62,7 +62,7 @@ async def test_bus_name_added_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_bus_name_added
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "bus_name_added",
         "bus_name": object_bus_name,
         "path": object_path,
@@ -104,7 +104,7 @@ async def test_bus_name_removed_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_bus_name_removed
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "bus_name_removed",
         "bus_name": object_bus_name,
         "path": object_path,
@@ -159,7 +159,7 @@ async def test_object_added_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_object_added
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "dbus_object_added",
         "bus_name": object_bus_name,
         "path": object_path,
@@ -202,7 +202,7 @@ async def test_object_removed_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_object_removed
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "dbus_object_removed",
         "bus_name": object_bus_name,
         "path": object_path,
@@ -261,7 +261,7 @@ async def test_dbus_signal_trigger():
     await processor._process_flow_trigger(trigger)
 
     # validate results
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "dbus_signal",
         "bus_name": object_bus_name,
         "path": "/",
