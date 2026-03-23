@@ -28,4 +28,4 @@ jobs:
       - name: Uv sync
         run: uv sync
 
-      - uses: j178/prek-action@v1
+      - uses: j178/prek-action@v2
