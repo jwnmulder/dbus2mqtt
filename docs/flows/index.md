@@ -69,4 +69,42 @@ dbus:
               msg: VLC player registered
 ```
 
+## Flow state
+
+Flows have three state contexts to store variables.
+
+* `context` - per execution context
+* `global_context` - stateful context, shared over all flows and all dbus_objects
+* `object_context` - per dbus_object stateful context, shared over all flows, not shared with other dbus_objects
+
+As `object_context` cannot automatically be determined for non-dbus triggers like `schedule`, flows have a `object_context_ref` configuration options which allows one to select the active object_context depending on certain scenarios.
+
+An example of using `object_context` and `object_context_ref` is shown below.
+
+```yaml title="Subscription based flows using object_context_ref"
+dbus:
+  subscriptions:
+    - bus_name: org.mpris.MediaPlayer2.*
+      path: /org/mpris/MediaPlayer2
+      flows:
+        - name: player added
+          triggers:
+            - type: dbus_object_added
+          actions:
+            - type: context_set
+              global_context:
+                active_player_bus_name: "{{ bus_name }}"
+              object_context:
+                player: "{{ dbus_call(bus_name, path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}"
+        - name: print current player identity
+          triggers:
+            - type: context_changed
+            - type: schedule
+              interval: {seconds: 5}
+          object_context_ref: "dbus:{{ active_player_bus_name }}:/org/mpris/MediaPlayer2"
+          actions:
+            - type: log
+              msg: "Active player: {{ player.Identity }} ({{ active_player_bus_name | replace('org.mpris.MediaPlayer2.', '') }})"
+```
+
 Next: [flow actions](flow_actions.md) & [flow triggers](flow_triggers.md)

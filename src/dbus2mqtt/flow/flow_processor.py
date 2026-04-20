@@ -1,9 +1,6 @@
-import asyncio
 import logging
 
 from typing import Any
-
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import (
@@ -11,7 +8,8 @@ from dbus2mqtt.config import (
     FlowActionLogConfig,
     FlowActionMqttPublishConfig,
     FlowConfig,
-    FlowTriggerConfig,
+    FlowTriggerBusNameAddedConfig,
+    FlowTriggerBusNameRemovedConfig,
     FlowTriggerContextChangedConfig,
     FlowTriggerDbusObjectAddedConfig,
     FlowTriggerDbusObjectRemovedConfig,
@@ -23,6 +21,7 @@ from dbus2mqtt.flow import FlowAction, FlowExecutionContext
 from dbus2mqtt.flow.actions.context_set import ContextSetAction
 from dbus2mqtt.flow.actions.log_action import LogAction
 from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
+from dbus2mqtt.flow.flow_state import to_object_context_ref
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
@@ -30,80 +29,7 @@ from dbus2mqtt.template.templating import TemplateEngine
 logger = logging.getLogger(__name__)
 
 
-class FlowScheduler:
-    def __init__(self, app_context: AppContext):
-        self.config = app_context.config
-        self.event_broker = app_context.event_broker
-        self.scheduler = AsyncIOScheduler()
-        self._trigger_processor = FlowTriggerProcessor(app_context)
-
-    async def _schedule_flow_trigger(self, flow, trigger_config: FlowTriggerConfig):
-        await self._trigger_processor.trigger_flow(
-            flow, trigger_config, FlowTriggerHandler(trigger_config.type, {})
-        )
-
-    async def scheduler_task(self):
-
-        self.scheduler.start()
-
-        # configure global flow trigger
-        self.start_flow_set(self.config.flows)
-
-        while True:
-            await asyncio.sleep(1000)
-
-    def start_flow_set(self, flows: list[FlowConfig]):
-        for flow in flows:
-            for trigger in flow.triggers:
-                if trigger.type == "schedule":
-                    existing_job = self.scheduler.get_job(trigger.id)
-                    if existing_job:
-                        logger.debug(
-                            f"Skipping creation, flow scheduler already exists, id={trigger.id}"
-                        )
-                    if not existing_job and trigger.type == "schedule":
-                        logger.info(f"Starting scheduler[{trigger.id}] for flow {flow.id}")
-                        if trigger.interval:
-                            trigger_args: dict[str, Any] = trigger.interval
-                            # Each schedule gets its own job
-                            self.scheduler.add_job(
-                                self._schedule_flow_trigger,
-                                "interval",
-                                id=trigger.id,
-                                max_instances=1,
-                                misfire_grace_time=5,
-                                coalesce=True,
-                                args=[flow, trigger],
-                                **trigger_args,
-                            )
-                        elif trigger.cron:
-                            trigger_args: dict[str, Any] = trigger.cron
-                            # Each schedule gets its own job
-                            self.scheduler.add_job(
-                                self._schedule_flow_trigger,
-                                "cron",
-                                id=trigger.id,
-                                max_instances=1,
-                                misfire_grace_time=5,
-                                coalesce=True,
-                                args=[flow, trigger],
-                                **trigger_args,
-                            )
-
-    def stop_flow_set(self, flows: list[FlowConfig]):
-        for flow in flows:
-            for trigger in flow.triggers:
-                if trigger.type == "schedule":
-                    logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
-                    try:
-                        self.scheduler.remove_job(trigger.id)
-                    except Exception as e:
-                        logger.error(
-                            f"Error removing scheduled job {trigger.id}, job likely removed before: {e}"
-                        )
-
-
-class FlowActionContext:
+class _FlowActionContext:
     def __init__(
         self,
         app_context: AppContext,
@@ -151,11 +77,11 @@ class FlowProcessor:
     def __init__(self, app_context: AppContext):
         self.app_context = app_context
         self.event_broker = app_context.event_broker
+        self.flow_state = app_context.flow_state
 
-        self._global_context: dict[str, Any] = {}
         self._trigger_processor = FlowTriggerProcessor(app_context)
 
-        self._flows: dict[str, FlowActionContext] = {}
+        self._flows: dict[str, _FlowActionContext] = {}
 
         # register global flows
         self.register_flows(app_context.config.flows)
@@ -172,8 +98,8 @@ class FlowProcessor:
     def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
         """Register flows with the flow processor."""
         for flow_config in flows:
-            flow_action_context = FlowActionContext(
-                self.app_context, flow_config, self._global_context, flow_context
+            flow_action_context = _FlowActionContext(
+                self.app_context, flow_config, self.flow_state.global_context, flow_context
             )
             self._flows[flow_config.id] = flow_action_context
 
@@ -200,11 +126,44 @@ class FlowProcessor:
 
                 logger.log(
                     log_level,
-                    f"flow_processor_task: Exception during flow execution triggered by '{flow_trigger_message.flow_trigger_config.type}': {e}",
+                    f"flow_processor_task: Exception during flow execution triggered by '{flow_trigger_message.flow_trigger_config.type}': {type(e).__name__}: {e}",
                     exc_info=logger.isEnabledFor(logging.DEBUG),
                 )
             finally:
                 self.event_broker.flow_trigger_queue.async_q.task_done()
+
+    def _execution_object_context_ref(
+        self, flow_config: FlowConfig, flow_trigger_message: FlowTriggerMessage
+    ) -> str | None:
+        """Determines object_context_ref.
+
+        Evaluates flow_config.object_context_ref (a template)
+        Defaults to `dbus:{bus_name}:{path}` for dbus related flow triggers
+        """
+        object_context_ref = flow_config.object_context_ref
+        if object_context_ref is not None:
+            context = {}
+            context.update(self.flow_state.global_context)
+            context.update(flow_trigger_message.trigger_context)
+            object_context_ref = self.app_context.templating.render_template(
+                object_context_ref, str, context
+            )
+
+        # default if object_context_ref is not configured
+        trigger_type = flow_trigger_message.flow_trigger_config.type
+        if object_context_ref is None and trigger_type in [
+            FlowTriggerDbusSignalConfig.type,
+            FlowTriggerBusNameAddedConfig.type,
+            FlowTriggerBusNameRemovedConfig.type,
+            FlowTriggerDbusObjectAddedConfig.type,
+            FlowTriggerDbusObjectRemovedConfig.type,
+        ]:
+            trigger_context = flow_trigger_message.trigger_context
+            object_context_ref = to_object_context_ref(
+                "dbus", trigger_context["bus_name"], trigger_context["path"]
+            )
+
+        return object_context_ref
 
     def _trigger_config_to_str(self, msg: FlowTriggerMessage) -> str:
         config = msg.flow_trigger_config
@@ -232,25 +191,53 @@ class FlowProcessor:
 
         flow = self._flows[flow_id]
 
-        # Each flow executed gets its own execution context
-        flow_execution_context = self._flow_execution_context(flow, flow_trigger_message)
-
-        # Check if any actions should run based on flow conditions
-        should_execute_actions = self._evaluate_flow_conditions(
-            flow, flow_execution_context, self.app_context.templating
+        object_context_ref = self._execution_object_context_ref(
+            flow.flow_config, flow_trigger_message
         )
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
-        if not should_execute_actions:
-            log_message = f"{log_message} - conditions not met, skipping actions"
+        # To ensure that memory is released, clear the object_context state when
+        # a dbus_object is removed.
+        # Because object_context_ref is user configurable, we only do this when bus_name matches
+        clear_object_context_after_flow = (
+            object_context_ref is not None
+            and flow_trigger_message.flow_trigger_config.type
+            == FlowTriggerDbusObjectRemovedConfig.type
+            and object_context_ref.startswith(
+                f"dbus:{flow_trigger_message.trigger_context['bus_name']}"
+            )
+        )
 
-        if should_execute_actions and trigger_type != FlowTriggerScheduleConfig.type:
-            logger.info(log_message)
-        else:
-            logger.debug(log_message)
+        # Each flow executed gets its own execution context
+        flow_execution_context = self._flow_execution_context(
+            flow, flow_trigger_message, object_context_ref
+        )
 
-        if should_execute_actions:
-            await flow.execute_actions(flow_execution_context)
+        try:
+            # Check if any actions should run based on flow conditions
+            should_execute_actions = self._evaluate_flow_conditions(
+                flow, flow_execution_context, self.app_context.templating
+            )
+
+            log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}, object_context_ref={object_context_ref}"
+            if not should_execute_actions:
+                log_message = f"{log_message} - conditions not met, skipping actions"
+
+            if should_execute_actions and trigger_type != FlowTriggerScheduleConfig.type:
+                logger.info(log_message)
+            else:
+                logger.debug(log_message)
+
+            if should_execute_actions:
+                await flow.execute_actions(flow_execution_context)
+        finally:
+            if (
+                object_context_ref
+                and flow_execution_context.has_updatable_object_context()
+                and clear_object_context_after_flow
+            ):
+                # TODO: This will occur once for each flow that has a dbus_object_removed trigger configured
+                # Does it make sense to clear memory more than once?
+                del self.flow_state.object_contexts[object_context_ref]
 
         # Check if global context was updated during flow execution to trigger context_changed flows
         if flow_execution_context.global_context_updated:
@@ -264,16 +251,29 @@ class FlowProcessor:
                 )
 
     def _flow_execution_context(
-        self, flow: FlowActionContext, flow_trigger_message: FlowTriggerMessage
+        self,
+        flow: _FlowActionContext,
+        flow_trigger_message: FlowTriggerMessage,
+        object_context_ref: str | None,
     ) -> FlowExecutionContext:
         """Per flow execution context allows for updates during flow execution without affecting other executions.
 
         Initialized with global and flow context
         """
+        # Each dbus_object gets it's own object context
+        object_context = None
+        if object_context_ref:
+            object_context = self.flow_state.object_contexts.get(object_context_ref)
+            if not object_context:
+                object_context = {}
+                self.flow_state.object_contexts[object_context_ref] = object_context
+
         flow_execution_context = FlowExecutionContext(
             flow.flow_config.name,
             global_flows_context=flow.global_flows_context,
             flow_context=flow.flow_context,
+            object_context_ref=object_context_ref,
+            object_context=object_context,
         )
 
         trigger_type = flow_trigger_message.flow_trigger_config.type
@@ -286,7 +286,7 @@ class FlowProcessor:
 
     def _evaluate_flow_conditions(
         self,
-        flow: FlowActionContext,
+        flow: _FlowActionContext,
         context: FlowExecutionContext,
         template_engine: TemplateEngine,
     ) -> bool:

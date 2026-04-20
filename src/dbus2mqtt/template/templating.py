@@ -1,3 +1,4 @@
+import asyncio
 import urllib.parse
 
 from datetime import datetime, tzinfo
@@ -83,7 +84,15 @@ class TemplateEngine:
         self.jinja2_async_env.filters.update(engine_filters)
 
     def add_functions(self, custom_functions: dict[str, Any]):
-        self.jinja2_env.globals.update(custom_functions)
+
+        # Filter out coroutine functions/objects for the sync environment
+        custom_sync_only_functions: dict[str, Any] = {
+            name: obj
+            for name, obj in custom_functions.items()
+            if not (asyncio.iscoroutinefunction(obj) or asyncio.iscoroutine(obj))
+        }
+
+        self.jinja2_env.globals.update(custom_sync_only_functions)
         self.jinja2_async_env.globals.update(custom_functions)
 
     def update_app_context(self, context: dict[str, Any]):

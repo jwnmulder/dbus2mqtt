@@ -13,7 +13,9 @@ from dbus2mqtt.config import Config
 from dbus2mqtt.config.jsonarparse import new_argument_parser, ns_to_cls
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
-from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
+from dbus2mqtt.flow.flow_processor import FlowProcessor
+from dbus2mqtt.flow.flow_scheduler import FlowScheduler
+from dbus2mqtt.flow.flow_state import FlowState
 from dbus2mqtt.mqtt.mqtt_client import MqttClient
 from dbus2mqtt.template.dbus_template_functions import jinja_custom_dbus_functions
 from dbus2mqtt.template.templating import TemplateEngine
@@ -24,7 +26,9 @@ logger = logging.getLogger(__name__)
 async def dbus_processor_task(app_context: AppContext, flow_scheduler: FlowScheduler):
 
     dbus_client = DbusClient(app_context, flow_scheduler)
-    app_context.templating.add_functions(jinja_custom_dbus_functions(dbus_client))
+    app_context.templating.add_functions(
+        jinja_custom_dbus_functions(dbus_client, app_context.flow_state)
+    )
 
     await dbus_client.connect()
 
@@ -70,8 +74,9 @@ async def run(app_config: Config):
 
     event_broker = EventBroker()
     template_engine = TemplateEngine()
+    flow_state = FlowState()
 
-    app_context = AppContext(app_config, event_broker, template_engine)
+    app_context = AppContext(app_config, event_broker, template_engine, flow_state)
 
     flow_scheduler = FlowScheduler(app_context)
 
