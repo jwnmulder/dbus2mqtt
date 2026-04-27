@@ -24,9 +24,9 @@
 | src/dbus2mqtt/main.py                                        |       77 |       30 |        4 |        2 |     60% |26-34, 45-59, 64-66, 71-79, 104, 119-120, 141-142, 147-148 |
 | src/dbus2mqtt/mqtt/mqtt\_client.py                           |      136 |       73 |       40 |        2 |     43% |64, 84-\>83, 92, 98-153, 157-167, 170-175, 180-220, 237-241 |
 | src/dbus2mqtt/template/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/template/dbus\_template\_functions.py          |       39 |        6 |       12 |        3 |     78% |102, 106, 127, 135-137 |
-| src/dbus2mqtt/template/templating.py                         |       91 |       11 |       24 |        5 |     86% |49, 90, 103-104, 115-116, 127-\>exit, 144, 159-160, 171-\>exit, 177, 188 |
-| **TOTAL**                                                    | **1632** |  **464** |  **564** |   **88** | **68%** |           |
+| src/dbus2mqtt/template/dbus\_template\_functions.py          |       41 |        7 |       14 |        4 |     76% |102, 106, 110, 131, 139-141 |
+| src/dbus2mqtt/template/templating.py                         |      100 |        7 |       22 |        3 |     92% |49, 56-57, 98, 111-112, 131-\>exit, 155-\>exit, 161 |
+| **TOTAL**                                                    | **1643** |  **461** |  **564** |   **87** | **69%** |           |
 
 
 ## Setup coverage badge
