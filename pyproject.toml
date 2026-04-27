@@ -81,6 +81,9 @@ Issues = "https://github.com/jwnmulder/dbus2mqtt/issues"
 [project.scripts]
 dbus2mqtt = "dbus2mqtt.main:main"
 
+[tool.uv]
+exclude-newer = "3 days"
+
 [tool.coverage.run]
 branch = true
 relative_files = true
