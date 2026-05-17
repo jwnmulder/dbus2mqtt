@@ -29,7 +29,10 @@
           "type": "string"
         },
         "filter": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "additionalProperties": false,
@@ -69,11 +72,17 @@
           "description": "The D-Bus interface that defines the set of methods, signals, and properties available."
         },
         "mqtt_command_topic": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "MQTT topic where dbus2mqtt listens for JSON commands. For example 'dbus2mqtt/mpris/command'. Value can be a string or templated string."
         },
         "mqtt_response_topic": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "MQTT topic where dbus2mqtt published responses on. For example 'dbus2mqtt/mpris/response'. Value can be a string or templated string."
         },
         "signals": {
@@ -181,15 +190,24 @@
           "default": "dbus_signal"
         },
         "interface": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'."
         },
         "bus_name": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "undocumented, not used."
         },
         "path": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "undocumented, not used."
         }
       },
@@ -219,7 +237,10 @@
           "default": "json"
         },
         "filter": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Optional template expression, trigger only when it evaluates truthy."
         }
       },
@@ -240,10 +261,16 @@
           "type": "string"
         },
         "cron": {
-          "type": "object"
+          "type": [
+            "object",
+            "null"
+          ]
         },
         "interval": {
-          "type": "object"
+          "type": [
+            "object",
+            "null"
+          ]
         }
       },
       "additionalProperties": false
@@ -296,11 +323,17 @@
           "default": "context_set"
         },
         "context": {
-          "type": "object",
+          "type": [
+            "object",
+            "null"
+          ],
           "description": "Per flow execution context."
         },
         "global_context": {
-          "type": "object",
+          "type": [
+            "object",
+            "null"
+          ],
           "description": "Global context, shared between multiple flow executions, over all subscriptions."
         }
       },
@@ -403,7 +436,10 @@
           "description": "Optional condition or list of conditions that must be met before a flow is executed."
         },
         "name": {
-          "type": "string",
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Optional human-readable name for the flow."
         },
         "id": {
@@ -506,6 +542,35 @@
             "type": "string"
           },
           "description": "List of MQTT topics to subscribe to. Wildcard characters '#' and '+' are supported."
+        },
+        "tls_enabled": {
+          "type": "boolean",
+          "description": "Enable TLS/SSL for the MQTT connection (MQTTS). Defaults to False."
+        },
+        "tls_ca_certs": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Path to CA certificate file for server verification. Uses system CAs if not set."
+        },
+        "tls_certfile": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Path to client certificate file for mutual TLS authentication."
+        },
+        "tls_keyfile": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Path to client private key file for mutual TLS authentication."
+        },
+        "tls_insecure": {
+          "type": "boolean",
+          "description": "Disable server certificate hostname verification. Use only for testing with self-signed certs."
         }
       },
       "additionalProperties": false,
