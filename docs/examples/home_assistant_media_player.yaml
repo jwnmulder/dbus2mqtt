@@ -236,10 +236,15 @@ dbus:
                     state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     value_template: >-
                       {% raw %}
-                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% set metadata = value_json.get('Metadata') or {} %}
+                      {% set media_image_url = metadata.get('mpris:artUrl', '') %}
+                      {% set xesam_url = metadata.get('xesam:url', '') %}
+
                       {% if media_image_url.startswith('file://') %}
                         mqtt
                       {% elif media_image_url.startswith('https://') or media_image_url.startswith('http://') %}
+                        remote
+                      {% elif xesam_url.startswith('https://www.youtube.com/watch?v=') %}
                         remote
                       {% else %}
                         {{ None }}
@@ -248,7 +253,17 @@ dbus:
                     json_attributes_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     json_attributes_template: >
                       {% raw %}
-                      {% set media_image_url = value_json.get('Metadata', {}).get('mpris:artUrl', '') %}
+                      {% set metadata = value_json.get('Metadata') or {} %}
+                      {% set media_image_url = metadata.get('mpris:artUrl', '') %}
+
+                      {% set xesam_url = metadata.get('xesam:url') %}
+                      {% if xesam_url.startswith('https://www.youtube.com/watch?v=') %}
+                      {%    set media_image_url = xesam_url | regex_replace(
+                              find='https:\/\/www\\.youtube\\.com\/watch\\?v=([^&]+).*',
+                              replace='https://img.youtube.com/vi/\\1/maxresdefault.jpg'
+                            ) %}
+                      {% endif %}
+
                       {% if media_image_url.startswith('file://') %}
                       {%   set media_image_url = state_attr('image.mpris_media_player_image_mqtt', 'entity_picture') %}
                       {% endif %}
