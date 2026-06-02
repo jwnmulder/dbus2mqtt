@@ -49,7 +49,7 @@ def _parse_and_validate_config(file: str) -> Config:
     jsonschema.validate(config_dict, CONFIG_JSON_SCHEMA)
 
     # Validate by instantiating Config object
-    cfg = parser.instantiate_classes(cfg)
+    cfg = parser.instantiate(cfg)
     config = ns_to_cls(Config, cfg)
 
     return config

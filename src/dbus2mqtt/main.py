@@ -131,7 +131,7 @@ def main():
 
     setup_logging(cfg.verbose)
 
-    cfg = parser.instantiate_classes(cfg)
+    cfg = parser.instantiate(cfg)
     app_config = ns_to_cls(Config, cfg)
 
     logger.debug(f"config: {app_config}")
