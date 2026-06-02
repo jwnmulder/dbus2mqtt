@@ -421,7 +421,7 @@ requires-dist = [
     { name = "janus", specifier = ">=2.0.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "jinja2-ansible-filters", specifier = "==1.3.2" },
-    { name = "jsonargparse", extras = ["ruamel", "signatures"], specifier = "==4.48.0" },
+    { name = "jsonargparse", extras = ["ruamel", "signatures"], specifier = "==4.49.0" },
     { name = "paho-mqtt", specifier = "==2.1.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -582,14 +582,14 @@ wheels = [
 
 [[package]]
 name = "jsonargparse"
-version = "4.48.0"
+version = "4.49.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/03/fb33f57f4987eb5eef2f221dbeccb482b6b221ae97161498ff2e4ce41c55/jsonargparse-4.48.0.tar.gz", hash = "sha256:128f0897951190a08820c282b92408e2e9a508ef6d439f02bdb87244171e77d8", size = 122074, upload-time = "2026-04-10T06:52:40.309Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/0b/f012466077d803b546955bf827ab30a320ad1550e3167195432cc2d6bfad/jsonargparse-4.49.0.tar.gz", hash = "sha256:9e691a09d937fb4c6bc1f6d3bf6c3546efa03381ea1e64ee10759095f1b14da7", size = 125237, upload-time = "2026-05-15T06:48:44.807Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/e9/c922101c1e80455d4b44b766b353dafc990da350228fc2515790e5949dd5/jsonargparse-4.48.0-py3-none-any.whl", hash = "sha256:c6a92fd71eb256437371750bb11f436b9c3294da2535f1b0406346816f04be16", size = 131277, upload-time = "2026-04-10T06:52:37.394Z" },
+    { url = "https://files.pythonhosted.org/packages/61/64/51cbc9044f5b1ee4fb9894fe791f50dfdb52dc080acfafb5818ba19e8c27/jsonargparse-4.49.0-py3-none-any.whl", hash = "sha256:2025880765fd792f6fb9861aa93f26da5f6c350be5d7656321369b22b0d2538e", size = 134834, upload-time = "2026-05-15T06:48:40.76Z" },
 ]
 
 [package.optional-dependencies]
