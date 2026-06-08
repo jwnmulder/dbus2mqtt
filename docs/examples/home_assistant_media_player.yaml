@@ -134,7 +134,7 @@ dbus:
                       {% set metadata = value_json.get('Metadata') or {} %}
                       {% set mpris_art_url = metadata.get('mpris:artUrl', '') %}
                       {% set xesam_artists = metadata.get('xesam:artist', ['']) %}
-                      {% set xesam_url = metadata.get('xesam:url') %}
+                      {% set xesam_url = metadata.get('xesam:url', '') %}
 
                       {% set artists = [xesam_artists] if xesam_artists is string else xesam_artists %}
 
