@@ -70,7 +70,8 @@ class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
 
         # mqtt_message triggers might have a filter configured
         if matches and trigger_config.filter is not None:
-            matches = trigger_config.matches_filter(templating, self.context)
+            trigger_context = self.final_trigger_context(trigger_config)
+            matches = trigger_config.matches_filter(templating, trigger_context)
 
         return matches
 
