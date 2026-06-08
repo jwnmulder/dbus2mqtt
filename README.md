@@ -19,14 +19,14 @@
 | src/dbus2mqtt/flow/actions/log\_action.py                    |       20 |        3 |        0 |        0 |     85% |     29-34 |
 | src/dbus2mqtt/flow/actions/mqtt\_publish.py                  |       34 |       10 |        6 |        1 |     68% |     41-58 |
 | src/dbus2mqtt/flow/flow\_processor.py                        |      156 |       33 |       70 |        7 |     78% |41, 47-53, 59-82, 97-101, 121, 122-\>125, 136-\>139, 139-\>130, 184-207, 222 |
-| src/dbus2mqtt/flow/flow\_trigger\_handlers.py                |       40 |        0 |        6 |        3 |     93% |43-\>46, 72-\>75, 82-\>85 |
+| src/dbus2mqtt/flow/flow\_trigger\_handlers.py                |       41 |        0 |        6 |        2 |     96% |43-\>46, 72-\>76 |
 | src/dbus2mqtt/flow/flow\_trigger\_processor.py               |       54 |        2 |       26 |        1 |     96% |53-\>52, 79, 87 |
 | src/dbus2mqtt/main.py                                        |       77 |       30 |        4 |        2 |     60% |26-34, 45-59, 64-66, 71-79, 104, 119-120, 141-142, 147-148 |
 | src/dbus2mqtt/mqtt/mqtt\_client.py                           |      136 |       73 |       40 |        2 |     43% |64, 84-\>83, 92, 98-153, 157-167, 170-175, 180-220, 237-241 |
 | src/dbus2mqtt/template/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
 | src/dbus2mqtt/template/dbus\_template\_functions.py          |       41 |        7 |       14 |        4 |     76% |102, 106, 110, 131, 139-141 |
 | src/dbus2mqtt/template/templating.py                         |      100 |        7 |       22 |        3 |     92% |49, 56-57, 98, 111-112, 131-\>exit, 155-\>exit, 161 |
-| **TOTAL**                                                    | **1643** |  **461** |  **564** |   **87** | **69%** |           |
+| **TOTAL**                                                    | **1644** |  **461** |  **564** |   **86** | **69%** |           |
 
 
 ## Setup coverage badge
