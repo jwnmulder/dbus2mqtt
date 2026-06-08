@@ -11,10 +11,10 @@ from jinja2 import (
     TemplateRuntimeError,
     UndefinedError,
 )
-from jinja2.nativetypes import NativeEnvironment
+from jinja2.nativetypes import NativeEnvironment, NativeTemplate
 from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
-TemplateResultType = TypeVar("TemplateResultType")
+R = TypeVar("R")
 
 
 def now(tz: tzinfo | None = None) -> datetime:
@@ -47,6 +47,14 @@ def urldecode(string: str) -> str:
         ```
     """
     return urllib.parse.unquote(string)
+
+
+def _compile_template(environment: NativeEnvironment, templatable: str) -> NativeTemplate:
+    try:
+        template: NativeTemplate = environment.from_string(templatable)  # type: ignore
+        return template
+    except TemplateError as e:
+        raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
 
 
 class TemplateEngine:
@@ -89,7 +97,7 @@ class TemplateEngine:
     def update_app_context(self, context: dict[str, Any]):
         self.app_context.update(context)
 
-    def _convert_value(self, res: Any, res_type: type[TemplateResultType]) -> TemplateResultType:
+    def _convert_value(self, res: object | None, res_type: type[R]) -> R | None:
 
         if res is None:
             return res
@@ -106,15 +114,11 @@ class TemplateEngine:
             ) from e
 
     def _render_template_nested(
-        self, templatable: str | dict[str, Any], context: dict[str, Any] = {}
-    ) -> Any:
+        self, templatable: str | dict[str, Any], context: dict[str, Any]
+    ) -> object | None:
 
         if isinstance(templatable, str):
-            try:
-                template = self.jinja2_env.from_string(templatable)
-            except TemplateError as e:
-                raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
-
+            template = _compile_template(self.jinja2_env, templatable)
             try:
                 res = template.render(**context)
                 str(res)  # access value to trigger jinja UndefinedError
@@ -133,32 +137,12 @@ class TemplateEngine:
                     res[k] = v
             return res
 
-    def render_template(
-        self,
-        templatable: str | dict[str, Any],
-        res_type: type[TemplateResultType],
-        context: dict[str, Any] = {},
-    ) -> TemplateResultType:
-
-        if isinstance(templatable, dict) and res_type is not dict:
-            raise ValueError(
-                f"res_type should dict for dictionary templates, templatable={templatable}"
-            )
-
-        res = self._render_template_nested(templatable, context)
-        res = self._convert_value(res, res_type)
-        return res
-
     async def _async_render_template_nested(
-        self, templatable: str | dict[str, Any], context: dict[str, Any] = {}
-    ) -> Any:
+        self, templatable: str | dict[str, Any], context: dict[str, Any]
+    ) -> object | None:
 
         if isinstance(templatable, str):
-            try:
-                template = self.jinja2_async_env.from_string(templatable)
-            except TemplateError as e:
-                raise TemplateError(f"Error compiling template, template={templatable}: {e}") from e
-
+            template = _compile_template(self.jinja2_async_env, templatable)
             try:
                 res = await template.render_async(**context)
                 str(res)  # access value to trigger jinja UndefinedError
@@ -177,18 +161,57 @@ class TemplateEngine:
                     res[k] = v
             return res
 
-    async def async_render_template(
+    def _assert_template_res_type(
         self,
         templatable: str | dict[str, Any],
-        res_type: type[TemplateResultType],
-        context: dict[str, Any] = {},
-    ) -> TemplateResultType:
-
+        res_type: type[R],
+    ):
         if isinstance(templatable, dict) and res_type is not dict:
             raise ValueError(
                 f"res_type should be dict for dictionary templates, templatable={templatable}"
             )
 
-        res = await self._async_render_template_nested(templatable, context)
+    def render_template_optional(
+        self,
+        templatable: str | dict[str, Any],
+        res_type: type[R],
+        context: dict[str, Any] | None = None,
+    ) -> R | None:
+
+        self._assert_template_res_type(templatable, res_type)
+        res = self._render_template_nested(templatable, context or {})
         res = self._convert_value(res, res_type)
+        return res
+
+    def render_template(
+        self,
+        templatable: str | dict[str, Any],
+        res_type: type[R],
+        context: dict[str, Any] | None = None,
+    ) -> R:
+        res = self.render_template_optional(templatable, res_type, context)
+        assert res is not None
+        return res
+
+    async def async_render_template_optional(
+        self,
+        templatable: str | dict[str, Any],
+        res_type: type[R],
+        context: dict[str, Any] | None = None,
+    ) -> R | None:
+
+        self._assert_template_res_type(templatable, res_type)
+        res = await self._async_render_template_nested(templatable, context or {})
+        res = self._convert_value(res, res_type)
+
+        return res
+
+    async def async_render_template(
+        self,
+        templatable: str | dict[str, Any],
+        res_type: type[R],
+        context: dict[str, Any] | None = None,
+    ) -> R:
+        res = await self.async_render_template_optional(templatable, res_type, context)
+        assert res is not None
         return res

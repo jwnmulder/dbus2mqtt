@@ -61,7 +61,7 @@ def test_str_template_int_result_as_str():
 
 def test_none_result():
     templating = TemplateEngine()
-    res = templating.render_template("{{ None }}", str)
+    res = templating.render_template_optional("{{ None }}", str)
     assert res is None
 
 
@@ -175,3 +175,12 @@ async def test_async_strict_undefined_error_handling():
     templating = TemplateEngine()
     with pytest.raises(TemplateError):
         await templating.async_render_template(template, dict)
+
+
+def test_require_dict_type_for_dict():
+
+    template = {"key": "val"}
+
+    templating = TemplateEngine()
+    with pytest.raises(ValueError):
+        templating.render_template(template, str)

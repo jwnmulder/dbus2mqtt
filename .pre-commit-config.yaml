@@ -21,7 +21,7 @@ repos:
   #     - id: shellcheck
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
 
@@ -33,7 +33,7 @@ repos:
           - --strict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.13
+    rev: v0.15.16
     hooks:
       - id: ruff
         args:
@@ -43,37 +43,43 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.9.26
+    rev: 0.11.19
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.408
+    rev: v1.1.410
     hooks:
       - id: pyright
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.20.0
+    rev: v0.22.1
     hooks:
       - id: markdownlint-cli2
 
   - repo: local
     hooks:
+      - id: generate_json_schema
+        name: generate_json_schema
+        # Ensures config.schema.json is always up-to-date
+        entry: bash -c 'uv run --active tools/generate_schema.py > schemas/config.schema.json'
+        language: python
+        additional_dependencies: ["uv"]
+        always_run: true
+        pass_filenames: false
+
       - id: check-mkdocs
         name: check-mkdocs
         entry: uv run --active mkdocs build --strict
         language: python
-        additional_dependencies:
-          - uv
+        additional_dependencies: ["uv"]
         always_run: true
         pass_filenames: false
-  - repo: local
-    hooks:
+
       - id: deptry
         name: deptry
         entry: uv run --active deptry .
         language: python
-        additional_dependencies:
-          - uv
+        additional_dependencies: ["uv"]
         always_run: true
         pass_filenames: false

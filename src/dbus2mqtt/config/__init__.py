@@ -350,6 +350,6 @@ class MqttConfig:
 class Config:
     """App configuration."""
 
-    mqtt: MqttConfig
     dbus: DbusConfig
+    mqtt: MqttConfig
     flows: list[FlowConfig] = field(default_factory=list)

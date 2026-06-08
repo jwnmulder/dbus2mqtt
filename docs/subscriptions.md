@@ -32,7 +32,7 @@ For each subscription, you can configure the behavior of `dbus2mqtt` using any o
 
 Any D-Bus method (when configured) can be called by publishing a MQTT message to the configured `mqtt_command_topic`.
 
-The example configuration below expose 3 methods and one property.
+The example configuration below exposes 3 methods and one property.
 
 ```yaml
 dbus:

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: dbus2mqtt
 site_description: General purpose DBus to MQTT bridge
 site_url: https://jwnmulder.github.io/dbus2mqtt
@@ -137,7 +138,7 @@ markdown_extensions:
   - footnotes
 
 hooks:
-  - docs/hooks.py
+  - tools/mkdocs_hooks.py
 
 plugins:
   - open-in-new-tab:
