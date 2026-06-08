@@ -70,6 +70,64 @@ async def test_mqtt_message_trigger_filter_false():
     assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 0
 
 
+@pytest.mark.asyncio
+async def test_mqtt_message_trigger_filter_topic():
+
+    test_topic = "dbus2mqtt/test-topic"
+    test_payload = {
+        "action": "test-action",
+    }
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, filter="{{ topic == 'dbus2mqtt/test-topic' }}")
+
+    app_context = mocked_app_context()
+    _ = _mocked_flow_processor(app_context, trigger_config)
+    mqtt_client = mocked_mqtt_client(app_context)
+
+    mqtt_client._trigger_flows(topic=test_topic, payload="", json_payload=test_payload)
+
+    assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 1
+
+
+@pytest.mark.asyncio
+async def test_mqtt_message_trigger_filter_text_payload():
+
+    test_topic = "dbus2mqtt/test-topic"
+    test_content_type = "text"
+    test_payload = "online"
+    test_json_payload = None
+
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, content_type=test_content_type, filter="{{ payload == 'online' }}")
+
+    app_context = mocked_app_context()
+    _ = _mocked_flow_processor(app_context, trigger_config)
+    mqtt_client = mocked_mqtt_client(app_context)
+
+    mqtt_client._trigger_flows(topic=test_topic, payload=test_payload, json_payload=test_json_payload)
+
+    assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 1
+
+
+@pytest.mark.asyncio
+async def test_mqtt_message_trigger_filter_json_payload():
+
+    test_topic = "dbus2mqtt/test-topic"
+    test_content_type = "json"
+    test_payload = ""
+    test_json_payload = {
+        "status": "online"
+    }
+
+    trigger_config = FlowTriggerMqttMessageConfig(topic=test_topic, content_type=test_content_type, filter="{{ payload.status == 'online' }}")
+
+    app_context = mocked_app_context()
+    _ = _mocked_flow_processor(app_context, trigger_config)
+    mqtt_client = mocked_mqtt_client(app_context)
+
+    mqtt_client._trigger_flows(topic=test_topic, payload=test_payload, json_payload=test_json_payload)
+
+    assert app_context.event_broker.flow_trigger_queue.sync_q.qsize() == 1
+
+
 def _mocked_flow_processor(
     app_context: AppContext, trigger_config: FlowTriggerMqttMessageConfig
 ) -> FlowProcessor:
