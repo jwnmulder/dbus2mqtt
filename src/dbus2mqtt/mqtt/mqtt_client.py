@@ -49,6 +49,15 @@ class MqttClient:
             username=self.config.username, password=self.config.password.get_secret_value()
         )
 
+        if self.config.tls_enabled:
+            self.client.tls_set(
+                ca_certs=self.config.tls_ca_certs,
+                certfile=self.config.tls_certfile,
+                keyfile=self.config.tls_keyfile,
+            )
+            if self.config.tls_insecure:
+                self.client.tls_insecure_set(True)
+
         self.client.on_connect = self._on_connect
         self.client.on_message = self._on_message_safe
 
