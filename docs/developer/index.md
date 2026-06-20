@@ -24,10 +24,10 @@ source .venv/bin/activate
 
 ```bash
 # run pre-commit linters
-uv run pre-commit run --all-files
+uv run prek run --all-files
 
 # setup pre-commit to automatically run linters via git hooks
-uv run pre-commit install
+uv run prek install
 ```
 
 ## Publishing and subscribing to MQTT messages

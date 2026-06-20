@@ -593,7 +593,7 @@ class DbusClient:
             await self.event_broker.flow_trigger_queue.async_q.join()
 
             # Cleanup dbus_fast message handlers and matchrules
-            for path, proxy_object in bus_name_subscriptions.path_objects.items():
+            for _, proxy_object in bus_name_subscriptions.path_objects.items():
                 # clean up all dbus matchrules
                 for interface in proxy_object._interfaces.values():
                     proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
@@ -791,8 +791,8 @@ class DbusClient:
         self,
         interface: dbus_aio.proxy_object.ProxyInterface,
         method: str,
-        method_args: list[Any],
-        method_kwargs: dict[str, Any],
+        method_args: list[Any] | None,
+        method_kwargs: dict[str, Any] | None,
     ) -> object:
 
         call_method_name = "call_" + camel_to_snake(method)
@@ -965,8 +965,8 @@ class DbusClient:
                 subscription_configs = self.config.get_subscription_configs(
                     bus_name=bus_name_subscription.bus_name, path=path
                 )
-                for subscription_configs in subscription_configs:
-                    for interface_config in subscription_configs.interfaces:
+                for subscription_config in subscription_configs:
+                    for interface_config in subscription_config.interfaces:
                         mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
                         topic_matches = mqtt_topic == topic
 

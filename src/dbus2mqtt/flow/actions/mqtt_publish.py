@@ -32,7 +32,7 @@ class MqttPublishAction(FlowAction):
             else:
                 res_type = dict
 
-            payload = await self.templating.async_render_template(
+            payload = await self.templating.async_render_template_optional(
                 self.config.payload_template, res_type, render_context
             )
 

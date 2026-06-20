@@ -95,11 +95,11 @@ class FlowProcessor:
             }
             self.register_flows(subscription.flows, flow_context)
 
-    def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] = {}):
+    def register_flows(self, flows: list[FlowConfig], flow_context: dict[str, Any] | None = None):
         """Register flows with the flow processor."""
         for flow_config in flows:
             flow_action_context = _FlowActionContext(
-                self.app_context, flow_config, self.flow_state.global_context, flow_context
+                self.app_context, flow_config, self.flow_state.global_context, flow_context or {}
             )
             self._flows[flow_config.id] = flow_action_context
 

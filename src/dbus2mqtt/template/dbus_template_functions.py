@@ -52,8 +52,8 @@ class DbusTemplateFunctionsContext:
         path: str,
         interface: str,
         method: str,
-        method_args: list[Any] = [],
-        method_kwargs: dict[str, Any] = {},
+        method_args: list[Any] | None = None,
+        method_kwargs: dict[str, Any] | None = None,
     ) -> object:
         """Call a method on a active dbus object that dbus2mqtt is subscribed to.
 
@@ -99,9 +99,13 @@ class DbusTemplateFunctionsContext:
               Although it can be used call methods that change state,
               it's a bad practice todo so from a template rendering perspective.
         """
-        if not isinstance(method_args, list):
+        if method_args is not None and not isinstance(method_args, list):
             # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
             raise ValueError("method_args must be a list")
+
+        if method_kwargs is not None and not isinstance(method_kwargs, dict):
+            # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
+            raise ValueError("method_kwargs must be a dict")
 
         proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:

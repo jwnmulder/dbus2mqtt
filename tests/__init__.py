@@ -44,10 +44,10 @@ def mocked_flow_processor(
     app_context: AppContext,
     triggers: list[FlowTriggerConfig],
     actions: list[FlowActionConfig],
-    conditions: list[str] = [],
+    conditions: list[str] | None = None,
 ):
 
-    flow_config = FlowConfig(triggers=triggers, actions=actions, conditions=conditions)
+    flow_config = FlowConfig(triggers=triggers, actions=actions, conditions=conditions or [])
 
     app_context.config.dbus.subscriptions[0].flows = [flow_config]
 
