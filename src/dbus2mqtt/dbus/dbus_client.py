@@ -35,7 +35,7 @@ from dbus2mqtt.dbus.dbus_util import (
 )
 from dbus2mqtt.dbus.introspection.patcher import IntrospectPatcher
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
-from dbus2mqtt.flow.flow_processor import FlowScheduler
+from dbus2mqtt.flow.flow_scheduler import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 
@@ -686,6 +686,7 @@ class DbusClient:
 
         # Cleanup the entire BusNameSubscriptions if no more objects are subscribed
         bus_name_subscriptions = self.get_bus_name_subscriptions(bus_name)
+
         if bus_name_subscriptions and len(bus_name_subscriptions.path_objects) == 0:
             del self._subscriptions[bus_name]
 
@@ -917,8 +918,7 @@ class DbusClient:
             )
 
             await self._trigger_processor.trigger_subscription_flows(
-                signal_state.subscription_config,
-                flow_trigger_handler,
+                signal_state.subscription_config, flow_trigger_handler
             )
 
     async def _handle_dbus_object_lifecycle_signal(self, message: dbus_message.Message):
