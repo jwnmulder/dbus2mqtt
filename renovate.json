@@ -64,7 +64,8 @@
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true,
       "addLabels": ["automerge"],
-      "extends": ["schedule:weekly"]
+      "extends": ["schedule:weekly"],
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchPackageNames": [
