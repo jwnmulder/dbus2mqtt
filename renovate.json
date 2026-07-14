@@ -64,8 +64,13 @@
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "automerge": true,
       "addLabels": ["automerge"],
-      "extends": ["schedule:weekly"],
-      "minimumReleaseAge": "3 days"
+      "extends": ["schedule:weekly"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["pin", "digest"],
+      "minimumReleaseAge": null
     },
     {
       "matchPackageNames": [
