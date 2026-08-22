@@ -17,12 +17,14 @@
 ```yaml
 - type: context_set
   context: {}
+  object_context: {}
   global_context: {}
 ```
 
 | Name             | Type   | Description  | Default |
 |------------------|--------|--------------|---------|
 | context          | `dict` | Per flow execution context. Value can be a `dict of strings` or `dict of templated strings` | `{}` |
+| object_context | `dict` | Per (dbus) object context, shared between multiple flow executions. Value can be a `dict of strings` or `dict of templated strings` | `{}`|
 | global_context   | `dict` | Global context, shared between multiple flow executions, over all subscriptions. Value can be a `dict of strings` or `dict of templated strings` | `{}` |
 
 ## mqtt_publish

@@ -16,10 +16,7 @@ class FlowTriggerProcessor:
         self.event_broker = app_context.event_broker
         self.templating = app_context.templating
 
-    async def trigger_all_flows(
-        self,
-        flow_trigger_handler: FlowTriggerHandler,
-    ):
+    async def trigger_all_flows(self, flow_trigger_handler: FlowTriggerHandler):
         """Trigger all flows that have a corresponding trigger defined.
 
         Global scope changes are triggered to all global and subscription specific flows
@@ -34,10 +31,7 @@ class FlowTriggerProcessor:
                 if trigger.type == flow_trigger_handler.trigger_type:
                     await self._execute_flow(flow, trigger, flow_trigger_handler)
 
-    def trigger_all_flows_sync(
-        self,
-        flow_trigger_handler: FlowTriggerHandler,
-    ) -> bool:
+    def trigger_all_flows_sync(self, flow_trigger_handler: FlowTriggerHandler) -> bool:
         """Trigger all flows that have a corresponding trigger defined.
 
         Global scope changes are triggered to all global and subscription specific flows
@@ -57,9 +51,7 @@ class FlowTriggerProcessor:
         return flow_triggered
 
     async def trigger_subscription_flows(
-        self,
-        subscription_config: SubscriptionConfig,
-        flow_trigger_handler: FlowTriggerHandler,
+        self, subscription_config: SubscriptionConfig, flow_trigger_handler: FlowTriggerHandler
     ):
         """Trigger subscription specific flows that have a corresponding trigger_type defined.
 

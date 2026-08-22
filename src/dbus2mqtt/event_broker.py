@@ -29,7 +29,7 @@ class FlowTriggerMessage:
     flow_config: FlowConfig
     flow_trigger_config: FlowTriggerConfig
     timestamp: datetime
-    trigger_context: dict[str, Any] | None = None
+    trigger_context: dict[str, Any]
 
 
 class EventBroker:
@@ -37,7 +37,6 @@ class EventBroker:
         self.mqtt_receive_queue = janus.Queue[tuple[MqttMessage, MqttReceiveHints]]()
         self.mqtt_publish_queue = janus.Queue[MqttMessage]()
         self.flow_trigger_queue = janus.Queue[FlowTriggerMessage]()
-        # self.dbus_send_queue: janus.Queue
 
     async def close(self):
         await asyncio.gather(

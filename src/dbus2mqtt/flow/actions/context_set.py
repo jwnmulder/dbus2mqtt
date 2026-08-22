@@ -23,6 +23,18 @@ class ContextSetAction(FlowAction):
             logger.debug(f"Update global_context with: {context_new}")
             context.update_global_context(context_new)
 
+        if self.config.object_context is not None:
+            if context.has_updatable_object_context():
+                context_new = await self.templating.async_render_template(
+                    self.config.object_context, dict, aggregated_context
+                )
+                logger.debug(
+                    f"Update object_context[{context._object_context_ref}] with: {context_new}"
+                )
+                context.update_object_context(context_new)
+            else:
+                logger.warning("Skipped updating object_context, not in a valid object_context")
+
         if self.config.context:
             context_new = await self.templating.async_render_template(
                 self.config.context, dict, aggregated_context

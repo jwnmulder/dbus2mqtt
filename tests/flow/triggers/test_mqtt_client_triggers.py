@@ -27,7 +27,7 @@ async def test_mqtt_message_trigger():
     await processor._process_flow_trigger(trigger)
 
     # expected context from _trigger_bus_name_added
-    assert processor._global_context["res"] == {
+    assert app_context.flow_state.global_context["res"] == {
         "trigger_type": "mqtt_message",
         "topic": test_topic,
         "payload": test_payload,
