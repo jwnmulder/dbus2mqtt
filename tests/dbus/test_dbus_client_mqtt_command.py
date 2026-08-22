@@ -3,9 +3,7 @@ import pytest
 from dbus_fast import ArgDirection
 from dbus_fast import introspection as intr
 
-import dbus2mqtt.config as config
-
-from dbus2mqtt import AppContext
+from dbus2mqtt import AppContext, config
 from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from tests import mocked_app_context, mocked_dbus_client_with_dbus_objects
 
