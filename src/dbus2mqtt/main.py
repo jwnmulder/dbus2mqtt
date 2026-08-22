@@ -10,7 +10,7 @@ import dotenv
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import new_argument_parser, ns_to_cls
+from dbus2mqtt.config.jsonargparse import new_argument_parser, ns_to_cls
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler

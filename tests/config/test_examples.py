@@ -1,6 +1,7 @@
 import json
 
 from pathlib import Path
+from typing import Any
 
 import dotenv
 import jsonschema
@@ -8,7 +9,7 @@ import jsonschema
 from jsonargparse.typing import SecretStr
 
 from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import filtered_ns, new_argument_parser, ns_to_cls
+from dbus2mqtt.config.jsonargparse import filtered_ns, new_argument_parser, ns_to_cls
 
 FILE_DIR = Path(__file__).resolve().parent
 CONFIG_JSON_SCHEMA = {}
@@ -34,6 +35,20 @@ def _replace_secretstr(obj):
     return obj
 
 
+def _remove_dict_entries_with_none_values(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _remove_dict_entries_with_none_values(item)
+            for key, item in value.items()
+            if item is not None
+        }
+
+    if isinstance(value, list):
+        return [_remove_dict_entries_with_none_values(item) for item in value]
+
+    return value
+
+
 def _parse_and_validate_config(file: str) -> Config:
 
     dotenv.load_dotenv(".env.example")
@@ -46,6 +61,12 @@ def _parse_and_validate_config(file: str) -> Config:
     # Validate with json schema
     config_dict = filtered_ns(Config, cfg.as_dict())
     config_dict = _replace_secretstr(config_dict)
+
+    # jsonargeparse v4.49 did not output entries with null values
+    # jsonargeparse v4.50 does output entries with null values due to a new
+    # way of working with default unset values
+    config_dict = _remove_dict_entries_with_none_values(config_dict)
+
     jsonschema.validate(config_dict, CONFIG_JSON_SCHEMA)
 
     # Validate by instantiating Config object
