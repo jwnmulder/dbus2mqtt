@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 from packaging import version
+from packaging.version import InvalidVersion
 
 
 def get_versions_from_git_tags() -> list[version.Version]:
@@ -16,7 +17,7 @@ def get_versions_from_git_tags() -> list[version.Version]:
         try:
             parsed = version.parse(v)
             parsed_versions.append(parsed)
-        except Exception as e:
+        except InvalidVersion as e:
             print(f"Error parsing version {v}: {e}")
 
     return parsed_versions

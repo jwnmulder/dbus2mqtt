@@ -85,7 +85,7 @@ class DbusClient:
             disconnect_err = "DBus disconnected"
             try:
                 await self._bus.wait_for_disconnect()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 disconnect_err = f"DBus disconnected, connection terminated unexpectedly: {type(e)}"
 
             logger.warning(f"wait_for_disconnect: {disconnect_err}, reconnecting...")
@@ -1042,7 +1042,7 @@ class DbusClient:
                 result = await self.call_dbus_interface_method(
                     interface, method.method, payload_method_args, payload_method_kwargs
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 error = e
                 logger.warning(
                     f"on_mqtt_msg: Failed calling method={method.method}, {args_msg}, bus_name={interface.bus_name}, exception={e}"
@@ -1070,7 +1070,7 @@ class DbusClient:
 
             try:
                 await self.set_dbus_interface_property(interface, property.property, payload_value)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 error = e
                 logger.warning(
                     f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={interface.bus_name} failed, exception={e}"
@@ -1161,5 +1161,5 @@ class DbusClient:
                     f"Sent MQTT response: topic={response_topic}, success={response_context['success']}"
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to send MQTT response: {e}")

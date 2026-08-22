@@ -97,7 +97,7 @@ class FlowScheduler:
                     logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
                     try:
                         self.scheduler.remove_job(trigger.id)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.error(
                             f"Error removing scheduled job {trigger.id}, job likely removed before: {e}"
                         )
