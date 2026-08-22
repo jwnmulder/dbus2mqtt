@@ -708,29 +708,16 @@ class DbusClient:
           2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
           3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
         """
-        # TODO: This method is currently called once per unique busname and has been adapted to avoid starting
-        # more than one scheduler. This method can be simplified by adding an assertion and then
-        # removing all bus_name specific loops. Afterwards, remove noqa: PLR1704
-        # for si in subscribed_interfaces:
-        #     assert bus_name == si.bus_name
-
-        bus_name_object_paths = {}
-        bus_name_object_path_interfaces = {}
         for si in subscribed_interfaces:
-            bus_name_object_paths.setdefault(si.bus_name, [])
-            bus_name_object_path_interfaces.setdefault(si.bus_name, {}).setdefault(si.path, [])
+            assert bus_name == si.bus_name
 
-            if si.path not in bus_name_object_paths[si.bus_name]:
-                bus_name_object_paths[si.bus_name].append(si.path)
+        # determine which dbus_objects the subscribed interfaces belong to
+        dbus_object_paths = []
+        for si in subscribed_interfaces:
+            if si.path not in dbus_object_paths:
+                dbus_object_paths.append(si.path)
 
-            bus_name_object_path_interfaces[si.bus_name][si.path].append(si.interface_name)
-
-        logger.debug(
-            f"_start_subscription_flows: new_subscriptions: {list(bus_name_object_paths.keys())}"
-        )
-        logger.debug(
-            f"_start_subscription_flows: new_bus_name_object_paths: {bus_name_object_paths}"
-        )
+        logger.debug(f"_start_subscription_flows: bus_name: {bus_name}, paths: {dbus_object_paths}")
 
         # setup and process triggers for each flow in each subscription
         # just once per subscription_config
@@ -744,44 +731,36 @@ class DbusClient:
         # Maybe use queues to communicate from here with the FlowProcessor?
         # e.g.: StartFlows, StopFlows,
 
-        # for each bus_name
-        for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():  # noqa: PLR1704
-            paths = list(path_interfaces_map.keys())
+        # Process each unique object path for bus_name
+        for dbus_object_path in dbus_object_paths:
+            # For each subscription_config that matches the bus_name and object_path
+            subscription_configs = self.config.get_subscription_configs(bus_name, dbus_object_path)
+            for subscription_config in subscription_configs:
+                trigger_context = {"bus_name": bus_name, "path": dbus_object_path}
 
-            # for each path in the bus_name
-            for object_path in paths:
-                # For each subscription_config that matches the bus_name and object_path
-                subscription_configs = self.config.get_subscription_configs(bus_name, object_path)
-                for subscription_config in subscription_configs:
-                    trigger_context = {"bus_name": bus_name, "path": object_path}
+                # Only process subscription_config once, no matter how many paths it matches
+                if subscription_config.id not in processed_new_subscriptions:
+                    # Ensure all schedulers are started
+                    # If a scheduler is already active for this subscription flow, it will be reused
+                    self.flow_scheduler.start_flow_set(subscription_config.flows)
 
-                    # Only process subscription_config once, no matter how many paths it matches
-                    if subscription_config.id not in processed_new_subscriptions:
-                        # Ensure all schedulers are started
-                        # If a scheduler is already active for this subscription flow, it will be reused
-                        self.flow_scheduler.start_flow_set(subscription_config.flows)
-
-                        # Trigger flows that have a bus_name_added trigger configured
-                        if trigger_flows:
-                            # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
-                            # leaving it now for backwards compatibility
-                            await self._trigger_processor.trigger_subscription_flows(
-                                subscription_config,
-                                FlowTriggerHandler(
-                                    FlowTriggerBusNameAddedConfig.type, trigger_context
-                                ),
-                            )
-
-                        processed_new_subscriptions.add(subscription_config.id)
-
+                    # Trigger flows that have a bus_name_added trigger configured
                     if trigger_flows:
-                        # Trigger flows that have a object_added trigger configured
+                        # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
+                        # leaving it now for backwards compatibility
                         await self._trigger_processor.trigger_subscription_flows(
                             subscription_config,
-                            FlowTriggerHandler(
-                                FlowTriggerDbusObjectAddedConfig.type, trigger_context
-                            ),
+                            FlowTriggerHandler(FlowTriggerBusNameAddedConfig.type, trigger_context),
                         )
+
+                    processed_new_subscriptions.add(subscription_config.id)
+
+                if trigger_flows:
+                    # Trigger flows that have an object_added trigger configured
+                    await self._trigger_processor.trigger_subscription_flows(
+                        subscription_config,
+                        FlowTriggerHandler(FlowTriggerDbusObjectAddedConfig.type, trigger_context),
+                    )
 
     async def call_dbus_interface_method(
         self,
