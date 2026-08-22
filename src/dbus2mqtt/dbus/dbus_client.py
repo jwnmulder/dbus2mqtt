@@ -135,10 +135,10 @@ class DbusClient:
             await self._add_match_rule(
                 "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
             )
-        except Exception as e:
+        except Exception:
             # Disconnect if setup of listeners didn't succeed
             self._bus.disconnect()
-            raise e
+            raise
 
         await self._subscribe_on_connect(reconnect)
 
@@ -164,7 +164,7 @@ class DbusClient:
 
         if not reconnect:
             logger.info(
-                f"subscriptions on startup: {list(set([si.bus_name for si in new_subscribed_interfaces]))}"
+                f"subscriptions on startup: {list({si.bus_name for si in new_subscribed_interfaces})}"
             )
 
     async def _dbus_interface_call(
@@ -176,12 +176,9 @@ class DbusClient:
                 f"Unable to invoke dbus object, not connected to dbus, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}"
             )
 
-        try:
-            method_fn = interface.__getattribute__(call_method)
-            res = await method_fn(*call_args)
-            return res
-        except Exception as e:
-            raise e
+        method_fn = interface.__getattribute__(call_method)
+        res = await method_fn(*call_args)
+        return res
 
     async def _add_match_rule(self, match_rule: str):
         reply = await self._bus.call(
@@ -362,7 +359,7 @@ class DbusClient:
 
         obj_interface = proxy_object.get_interface(interface.name)
 
-        interface_signals = dict((s.name, s) for s in interface.signals)
+        interface_signals = {s.name: s for s in interface.signals}
 
         logger.debug(
             f"subscribe: bus_name={bus_name}, path={path}, interface={interface.name}, proxy_interface: signals={list(interface_signals.keys())}"
@@ -593,7 +590,7 @@ class DbusClient:
             await self.event_broker.flow_trigger_queue.async_q.join()
 
             # Cleanup dbus_fast message handlers and matchrules
-            for _, proxy_object in bus_name_subscriptions.path_objects.items():
+            for proxy_object in bus_name_subscriptions.path_objects.values():
                 # clean up all dbus matchrules
                 for interface in proxy_object._interfaces.values():
                     proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
@@ -711,6 +708,12 @@ class DbusClient:
           2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
           3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
         """
+        # TODO: This method is currently called once per unique busname and has been adapted to avoid starting
+        # more than one scheduler. This method can be simplified by adding an assertion and then
+        # removing all bus_name specific loops. Afterwards, remove noqa: PLR1704
+        # for si in subscribed_interfaces:
+        #     assert bus_name == si.bus_name
+
         bus_name_object_paths = {}
         bus_name_object_path_interfaces = {}
         for si in subscribed_interfaces:
@@ -721,12 +724,6 @@ class DbusClient:
                 bus_name_object_paths[si.bus_name].append(si.path)
 
             bus_name_object_path_interfaces[si.bus_name][si.path].append(si.interface_name)
-
-        # new_subscribed_bus_names = list(set([si.bus_name for si in subscribed_interfaces]))
-        # new_subscribed_bus_names_paths = {
-        #     bus_name: list(set([si.path for si in subscribed_interfaces if si.bus_name == bus_name]))
-        #     for bus_name in new_subscribed_bus_names
-        # }
 
         logger.debug(
             f"_start_subscription_flows: new_subscriptions: {list(bus_name_object_paths.keys())}"
@@ -748,7 +745,7 @@ class DbusClient:
         # e.g.: StartFlows, StopFlows,
 
         # for each bus_name
-        for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
+        for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():  # noqa: PLR1704
             paths = list(path_interfaces_map.keys())
 
             # for each path in the bus_name
@@ -816,12 +813,12 @@ class DbusClient:
 
         try:
             res = await self._dbus_interface_call(interface, call_method_name, *converted_args)
-        except Exception as e:
+        except Exception:
             logger.debug(
                 f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={method}, converted_args={converted_args}",
                 exc_info=True,
             )
-            raise e
+            raise
 
         if res:
             res = unwrap_dbus_object(res)

@@ -59,4 +59,3 @@ class FlowAction(ABC):
     @abstractmethod
     async def execute(self, context: FlowExecutionContext):
         """Execute the action with the given flow execution context."""
-        pass

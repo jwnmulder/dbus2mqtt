@@ -143,6 +143,11 @@ ignore = [
     "D105",  # undocumented-public-package
     "D106",  # undocumented-public-nested-class
     "D107",  # undocumented-public-init
+
+    # TODO, these got introduced in ruff 0.16.x, should fix them sometime
+    "BLE001", # Do not catch blind exception: `Exception`
+    "DTZ005", # 'datetime.datetime.now()` called without a `tz` argument
+    "ASYNC210", # Async functions should not call blocking HTTP methods
 ]
 
 [tool.ruff.lint.isort]
