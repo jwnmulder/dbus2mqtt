@@ -421,7 +421,7 @@ requires-dist = [
     { name = "janus", specifier = ">=2.0.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "jinja2-ansible-filters", specifier = "==1.3.2" },
-    { name = "jsonargparse", extras = ["ruamel", "signatures"], specifier = "==4.50.0" },
+    { name = "jsonargparse", extras = ["ruamel", "signatures"], specifier = "==4.51.0" },
     { name = "paho-mqtt", specifier = "==2.1.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -573,14 +573,14 @@ wheels = [
 
 [[package]]
 name = "jsonargparse"
-version = "4.50.0"
+version = "4.51.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c9/3b/32823dd7527568da15578be57435ae1171e61337192056873884ebb66295/jsonargparse-4.50.0.tar.gz", hash = "sha256:c559a3991e66cf04d987899b5c1ec6a3de6dc544c44a7cad97cc4a4343066d9a", size = 127289, upload-time = "2026-07-22T04:57:31.188Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/35/ba22b9a2140faf6a38290261a3068d0b92228b063e2caa09463a9999ed0e/jsonargparse-4.51.0.tar.gz", hash = "sha256:17b053dff7e88037cc8481286b1720ef62d8a5af3513b54262f90ea7177582b8", size = 148336, upload-time = "2026-08-20T05:16:59.513Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/5a/a7e1543a6152a6bb5a8f50ef8f2be249956882d564f5f577d74454b1e986/jsonargparse-4.50.0-py3-none-any.whl", hash = "sha256:b066f0d716767c77b9af58d7e9bb433c42135bd3ea2a4f12e04d6152f4cdf91f", size = 136809, upload-time = "2026-07-22T04:57:28.072Z" },
+    { url = "https://files.pythonhosted.org/packages/73/c5/45cc024a30d3d38a24d91efe46b53d480a62def33834041f9d9966ffebbf/jsonargparse-4.51.0-py3-none-any.whl", hash = "sha256:3965e89e2eb3fb1e78421832e610fc2673e6c20f0f1dfd3007bb53caabb528b6", size = 157995, upload-time = "2026-08-20T05:16:56.2Z" },
 ]
 
 [package.optional-dependencies]
