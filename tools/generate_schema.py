@@ -112,15 +112,27 @@ class SchemaGenerator:
             return {"enum": vals}
 
         if is_union(tp):
+            nullable = is_optional(tp)
             union_types = [a for a in get_args(tp) if a is not types.NoneType]
             union_schema_types = [self.python_type_to_schema_optional(a) for a in union_types]
             if None in union_schema_types:
                 union_schema_types.remove(None)
 
             if len(union_schema_types) == 1:
-                return union_schema_types[0]
+                result = union_schema_types[0]
+                if (
+                    nullable
+                    and result is not None
+                    and "type" in result
+                    and isinstance(result["type"], str)
+                ):
+                    return {**result, "type": [result["type"], "null"]}
+                return result
             elif len(union_schema_types) > 1:
-                return {"anyOf": union_schema_types}
+                schema = {"anyOf": union_schema_types}
+                if nullable:
+                    schema["anyOf"].append({"type": "null"})
+                return schema
             else:
                 return {}
 

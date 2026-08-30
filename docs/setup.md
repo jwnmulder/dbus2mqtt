@@ -62,6 +62,11 @@ MQTT connection details can be configured via a mix of environment variables and
 | `mqtt.username`            | `MQTT__USERNAME` | Username                 |
 | `mqtt.password`            | <nobr>`MQTT__PASSWORD`</nobr> | Password    |
 | `mqtt.subscription_topics` |                  | List of topics that dbus2mqtt will subscribe to, defaults to `["dbus2mqtt/#"]` |
+| `mqtt.tls_enabled`         |                  | Enable TLS/SSL (MQTTS), defaults to `false` |
+| `mqtt.tls_ca_certs`        |                  | Path to CA certificate file for server verification. Uses system CAs if not set. |
+| `mqtt.tls_certfile`        |                  | Path to client certificate file for mutual TLS authentication. |
+| `mqtt.tls_keyfile`         |                  | Path to client private key file for mutual TLS authentication. |
+| `mqtt.tls_insecure`        |                  | Disable server certificate hostname verification. Use only for testing with self-signed certs, defaults to `false`. |
 
 ### dbus2mqtt **dbus** config
 

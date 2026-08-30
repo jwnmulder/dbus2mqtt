@@ -337,6 +337,11 @@ class MqttConfig:
         password: Password for broker authentication.
         port: MQTT broker TCP port.
         subscription_topics: List of MQTT topics to subscribe to. Wildcard characters '#' and '+' are supported.
+        tls_enabled: Enable TLS/SSL for the MQTT connection (MQTTS). Defaults to False.
+        tls_ca_certs: Path to CA certificate file for server verification. Uses system CAs if not set.
+        tls_certfile: Path to client certificate file for mutual TLS authentication.
+        tls_keyfile: Path to client private key file for mutual TLS authentication.
+        tls_insecure: Disable server certificate hostname verification. Use only for testing with self-signed certs.
     """
 
     host: str
@@ -344,6 +349,11 @@ class MqttConfig:
     password: SecretStr
     port: int = 1883
     subscription_topics: list[str] = field(default_factory=lambda: ["dbus2mqtt/#"])
+    tls_enabled: bool = False
+    tls_ca_certs: str | None = None
+    tls_certfile: str | None = None
+    tls_keyfile: str | None = None
+    tls_insecure: bool = False
 
 
 @dataclass
