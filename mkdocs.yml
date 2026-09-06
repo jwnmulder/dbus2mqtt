@@ -28,6 +28,7 @@ exclude_docs: |
 theme:
   name: material
   language: en
+  variant: classic
   logo: assets/logo-light-text.svg
   favicon: assets/logo-dark-img.svg
   custom_dir: docs/overrides
