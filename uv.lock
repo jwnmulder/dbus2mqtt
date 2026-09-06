@@ -462,7 +462,7 @@ dependencies = [
     { name = "janus" },
     { name = "jinja2" },
     { name = "jinja2-ansible-filters" },
-    { name = "jsonargparse", extra = ["ruamel", "signatures"] },
+    { name = "jsonargparse", extra = ["jsonschema", "ruamel", "signatures"] },
     { name = "paho-mqtt" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
@@ -497,7 +497,7 @@ requires-dist = [
     { name = "janus", specifier = ">=2.0.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "jinja2-ansible-filters", specifier = "==1.3.2" },
-    { name = "jsonargparse", extras = ["ruamel", "signatures"], specifier = "==4.52.0" },
+    { name = "jsonargparse", extras = ["jsonschema", "ruamel", "signatures"], specifier = "==4.52.0" },
     { name = "paho-mqtt", specifier = "==2.1.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -660,6 +660,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+jsonschema = [
+    { name = "jsonschema" },
+]
 ruamel = [
     { name = "ruamel-yaml" },
 ]
