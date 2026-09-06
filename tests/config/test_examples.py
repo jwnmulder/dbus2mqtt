@@ -8,7 +8,7 @@ import jsonschema
 
 from jsonargparse.typing import SecretStr
 
-from dbus2mqtt.config import Config
+from dbus2mqtt.config import Config, FlowTriggerScheduleConfig
 from dbus2mqtt.config.jsonargparse import filtered_ns, new_argument_parser, ns_to_cls
 
 FILE_DIR = Path(__file__).resolve().parent
@@ -72,6 +72,31 @@ def _parse_and_validate_config(file: str) -> Config:
     # Validate by instantiating Config object
     cfg = parser.instantiate(cfg)
     config = ns_to_cls(Config, cfg)
+
+    # After an update of jsonargparse and the way uuid's where assigned, all flows had the same id
+    # Validate all FlowConfig.id's are unique
+    # Validate all SubscriptionConfig.id's are unique
+    # Validate all FlowTriggerScheduleConfig.id's are unique
+    flow_ids = []
+    subscription_ids = []
+    trigger_ids = []
+
+    for flow in config.flows:
+        assert flow.id not in flow_ids
+        flow_ids.append(flow.id)
+
+    for subscription in config.dbus.subscriptions:
+        assert subscription.id not in subscription_ids
+        subscription_ids.append(subscription.id)
+
+        for flow in subscription.flows:
+            assert flow.id not in flow_ids
+            flow_ids.append(flow.id)
+
+            for trigger in flow.triggers:
+                if trigger.type == FlowTriggerScheduleConfig.type:
+                    assert trigger.id not in trigger_ids
+                    trigger_ids.append(trigger.id)
 
     return config
 

@@ -236,14 +236,14 @@
           "const": "schedule",
           "default": "schedule"
         },
-        "id": {
-          "type": "string"
-        },
         "cron": {
           "type": "object"
         },
         "interval": {
           "type": "object"
+        },
+        "id": {
+          "type": "string"
         }
       },
       "additionalProperties": false

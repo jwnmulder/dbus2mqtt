@@ -69,9 +69,13 @@ class InterfaceConfig:
 @dataclass
 class FlowTriggerScheduleConfig:
     type: Literal["schedule"] = "schedule"
-    id: str = field(default_factory=lambda: uuid.uuid4().hex)
     cron: dict[str, Any] | None = None
     interval: dict[str, Any] | None = None
+    id: str = ""
+
+    def __post_init__(self):
+        if self.id is None or self.id == "":
+            self.id = uuid.uuid4().hex
 
 
 @dataclass
@@ -270,7 +274,11 @@ class FlowConfig:
     actions: list[FlowActionConfig]
     conditions: str | list[str] = field(default_factory=list)
     name: str | None = None
-    id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    id: str = ""
+
+    def __post_init__(self):
+        if self.id is None or self.id == "":
+            self.id = uuid.uuid4().hex
 
 
 @dataclass
@@ -289,7 +297,11 @@ class SubscriptionConfig:
     path: str
     interfaces: list[InterfaceConfig] = field(default_factory=list)
     flows: list[FlowConfig] = field(default_factory=list)
-    id: str = field(default_factory=lambda: uuid.uuid4().hex)
+    id: str = ""
+
+    def __post_init__(self):
+        if self.id is None or self.id == "":
+            self.id = uuid.uuid4().hex
 
     def matches_dbus_object(self, bus_name: str, path: str | None = None) -> bool:
         matches = fnmatch.fnmatchcase(bus_name, self.bus_name)

@@ -175,6 +175,13 @@ class FlowProcessor:
             flow_action_context = FlowActionContext(
                 self.app_context, flow_config, self._global_context, flow_context or {}
             )
+
+            if flow_config.id in self._flows:
+                existing_flow_config = self._flows[flow_config.id]
+                raise ValueError(
+                    f"flow.id must be unique, '{flow_config.name}' and '{existing_flow_config.flow_config.name}' both share the same id {flow_config.id}"
+                )
+
             self._flows[flow_config.id] = flow_action_context
 
     async def flow_processor_task(self):
