@@ -3,6 +3,6 @@
   white-space: nowrap;
 }
 
-a[target="_blank"]::after {
+.md-content a[target="_blank"]::after {
     content: " ↗";
 }
