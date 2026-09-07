@@ -1,2 +1,6 @@
+---
+render_macros: true
+---
+
 <!-- markdownlint-disable-next-line MD041 -->
---8<-- "README.md"
+{{ include_readme() }}

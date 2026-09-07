@@ -49,7 +49,7 @@ sudo docker logs dbus2mqtt -f
 
 ## Configuration reference
 
-dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/) which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
+dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/){:target="_blank"} which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
 
 ### dbus2mqtt **mqtt** config
 

@@ -71,7 +71,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "jsonschema>=4.26.0",
     "packaging>=25.0",
-    "prek>=0.3.3",
+    "prek>=0.3.3"
 ]
 
 [project.urls]

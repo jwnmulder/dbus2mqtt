@@ -126,6 +126,8 @@ markdown_extensions:
   # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
   - admonition
 
+  - attr_list
+
   # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#highlighting-inline-code-blocks
   - pymdownx.inlinehilite
 
@@ -138,12 +140,13 @@ markdown_extensions:
 
   - footnotes
 
-hooks:
-  - tools/mkdocs_hooks.py
+  - zensical.extensions.macros:
+      on_error_fail: true
+      on_undefined: strict
+      render_by_default: false
+      module_name: tools/zensical_macros
 
 plugins:
-  - open-in-new-tab:
-      add_icon: true
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -152,4 +155,3 @@ plugins:
           options:
             docstring_style: google
             show_source: false
-#   - git-revision-date-localized: {}
