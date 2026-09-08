@@ -14,8 +14,8 @@ Trigger configuration:
 
 | Name      | Type  | Description  | Default |
 |-----------|-------|--------------|---------|
-| interval | `dict` | dict of time units and intervals, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html>    | |
-| cron     | `dict` | dict of time units and cron expressions, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html> | |
+| interval | `dict` | dict of time units and intervals, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html>{:target="_blank"}    | |
+| cron     | `dict` | dict of time units and cron expressions, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html>{:target="_blank"} | |
 
 When triggered, the following context parameters are available
 

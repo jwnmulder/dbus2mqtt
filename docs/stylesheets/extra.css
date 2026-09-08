@@ -2,3 +2,7 @@
 .md-typeset table td:first-child {
   white-space: nowrap;
 }
+
+.md-content a[target="_blank"]::after {
+    content: " ↗";
+}

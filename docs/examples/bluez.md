@@ -15,7 +15,7 @@ This setup allows MQTT clients to receive updates about Bluetooth adapter and de
 
 ## Setup activities
 
-* dbus2mqtt setup using the supplied [bluez.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/bluez.yaml)
+* dbus2mqtt setup using the supplied [bluez.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/bluez.yaml){:target="_blank"}
 
 Execute the following command to run dbus2mqtt with the example configuration in this repository.
 
@@ -40,5 +40,5 @@ Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/
 
 ## References
 
-* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Adapter.5.html>
-* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Device.5.html>
+* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Adapter.5.html>{:target="_blank"}
+* <https://manpages.ubuntu.com/manpages/noble/man5/org.bluez.Device.5.html>{:target="_blank"}

@@ -1,6 +1,6 @@
 # Templating
 
-**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/).
+**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/){:target="_blank"}.
 
 Templating is used in these areas of dbus2mqtt:
 
@@ -9,7 +9,7 @@ Templating is used in these areas of dbus2mqtt:
 
 Besides the filters and functions that Jinja provides out of the box, additional extensions are available.
 
-All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/) are included as well as the following global functions, variables and filters:
+All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/){:target="_blank"} are included as well as the following global functions, variables and filters:
 
 | Name                | Type      | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|

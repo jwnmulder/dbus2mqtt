@@ -41,8 +41,8 @@ Example notification with actions and hints, that automatically disappears after
 
 Further references:
 
-* <https://specifications.freedesktop.org/notification-spec/1.3/>
-* <https://specifications.freedesktop.org/icon-naming-spec/latest/>
+* <https://specifications.freedesktop.org/notification-spec/1.3/>{:target="_blank"}
+* <https://specifications.freedesktop.org/icon-naming-spec/latest/>{:target="_blank"}
 
 <!-- ## Gnome SessionManager
 

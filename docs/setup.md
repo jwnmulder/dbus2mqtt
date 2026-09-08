@@ -2,7 +2,7 @@
 
 ## Installation
 
-First, create your own dbus2mqtt configuration file or pick one of the examples. Like the [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml) example from this repository.
+First, create your own dbus2mqtt configuration file or pick one of the examples. Like the [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml){:target="_blank"} example from this repository.
 
 ```bash
 mkdir -p $HOME/.config/dbus2mqtt
@@ -49,7 +49,7 @@ sudo docker logs dbus2mqtt -f
 
 ## Configuration reference
 
-dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/) which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
+dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/){:target="_blank"} which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
 
 ### dbus2mqtt **mqtt** config
 

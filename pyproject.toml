@@ -58,10 +58,8 @@ dev = [
     "ruff==0.16.6",
     "pyright==1.1.411",
     "deptry>=0.24.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.0",
-    "mkdocs-open-in-new-tab>=1.0.8",
     "mkdocstrings-python>=1.19.0",
+    "zensical",
     "pytest>=8.3.5",
     "pytest-asyncio>=1.0.0",
     "types-pyyaml>=6.0.12.20241230",
@@ -70,7 +68,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "jsonschema>=4.26.0",
     "packaging>=25.0",
-    "prek>=0.3.3",
+    "prek>=0.3.3"
 ]
 
 [project.urls]
@@ -94,7 +92,6 @@ exclude = [".venv", ".git", "tests", "tools"]
 
 [tool.deptry.per_rule_ignores]
 DEP003 = ["dbus2mqtt"]
-DEP004 = ["mkdocs"]
 
 [tool.taskipy.tasks]
 lint-ruff = "ruff check"

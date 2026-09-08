@@ -68,14 +68,6 @@ repos:
         always_run: true
         pass_filenames: false
 
-      - id: check-mkdocs
-        name: check-mkdocs
-        entry: uv run --active mkdocs build --strict
-        language: python
-        additional_dependencies: ["uv"]
-        always_run: true
-        pass_filenames: false
-
       - id: deptry
         name: deptry
         entry: uv run --active deptry .
