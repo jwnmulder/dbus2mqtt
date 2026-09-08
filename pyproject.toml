@@ -59,7 +59,7 @@ dev = [
     "pyright==1.1.411",
     "deptry>=0.24.0",
     "mkdocstrings-python>=1.19.0",
-    "zensical",
+    "zensical>=0.0.59",
     "pytest>=8.3.5",
     "pytest-asyncio>=1.0.0",
     "types-pyyaml>=6.0.12.20241230",
