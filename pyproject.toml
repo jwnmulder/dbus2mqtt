@@ -63,7 +63,6 @@ dev = [
     "pytest>=8.3.5",
     "pytest-asyncio>=1.0.0",
     "types-pyyaml>=6.0.12.20241230",
-    "taskipy>=1.14.1",
     "pip>=25.0.1",
     "pytest-cov>=7.0.0",
     "jsonschema>=4.26.0",
@@ -92,10 +91,6 @@ exclude = [".venv", ".git", "tests", "tools"]
 
 [tool.deptry.per_rule_ignores]
 DEP003 = ["dbus2mqtt"]
-
-[tool.taskipy.tasks]
-lint-ruff = "ruff check"
-lint-pyright = "pyright"
 
 [tool.pytest.ini_options]
 addopts = "-s"
