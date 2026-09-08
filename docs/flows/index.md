@@ -1,6 +1,6 @@
 # Flows
 
-**dbus2mqtt** allows you to add additional processing logic (flows) for when events occur. Configuration is done in yaml and a complete example can be found in [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml) which is part of the [MPRIS to Home Assistant Media Player integration](../examples/home_assistant_media_player.md) example
+**dbus2mqtt** allows you to add additional processing logic (flows) for when events occur. Configuration is done in yaml and a complete example can be found in [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml){:target="_blank"} which is part of the [MPRIS to Home Assistant Media Player integration](../examples/home_assistant_media_player.md) example
 
 Flows can be defined on a global or dbus subscription level and can be triggered by any of the following events:
 
