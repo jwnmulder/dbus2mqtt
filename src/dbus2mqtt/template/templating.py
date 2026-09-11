@@ -1,9 +1,8 @@
 import urllib.parse
 
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, tzinfo
 from importlib.metadata import version
 from typing import Any, TypeVar
-from zoneinfo import ZoneInfo
 
 from jinja2 import (
     BaseLoader,
@@ -14,7 +13,8 @@ from jinja2 import (
 )
 from jinja2.nativetypes import NativeEnvironment, NativeTemplate
 from jinja2_ansible_filters import AnsibleCoreFiltersExtension
-from tzlocal import get_localzone
+
+from dbus2mqtt.util import dt as dt_util
 
 R = TypeVar("R")
 
@@ -28,9 +28,7 @@ def now(tz: tzinfo | str | None = None) -> datetime:
     Returns:
         Current datetime object.
     """
-    if isinstance(tz, str):
-        tz = ZoneInfo(key=tz)
-    return datetime.now(tz or get_localzone())
+    return dt_util.now(tz)
 
 
 def utcnow() -> datetime:
@@ -39,7 +37,7 @@ def utcnow() -> datetime:
     Returns:
         Current datetime object.
     """
-    return datetime.now(tz=timezone.utc)
+    return dt_util.utcnow()
 
 
 def as_local(value: datetime) -> datetime:
@@ -51,14 +49,7 @@ def as_local(value: datetime) -> datetime:
     Returns:
         datetime object in local timezone
     """
-    localzone: tzinfo = get_localzone()
-
-    if value.tzinfo == localzone:
-        return value
-    if value.tzinfo is None:
-        value = value.replace(tzinfo=localzone)
-
-    return value.astimezone(localzone)
+    return dt_util.as_local(value)
 
 
 def urldecode(string: str) -> str:

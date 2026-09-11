@@ -26,6 +26,7 @@ from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
+from dbus2mqtt.util import dt as dt_util
 
 logger = logging.getLogger(__name__)
 
@@ -258,7 +259,8 @@ class FlowProcessor:
             flow, flow_execution_context, self.app_context.templating
         )
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        trigger_time = dt_util.as_local(flow_trigger_message.timestamp)
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={trigger_time.isoformat()}"
         if not should_execute_actions:
             log_message = f"{log_message} - conditions not met, skipping actions"
 

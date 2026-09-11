@@ -3,7 +3,6 @@ import fnmatch
 import json
 import logging
 
-from datetime import datetime
 from typing import Any
 
 import dbus_fast.aio as dbus_aio
@@ -38,6 +37,7 @@ from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.util import dt as dt_util
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ class DbusClient:
         self, app_context: AppContext, flow_scheduler: FlowScheduler, bus: MessageBus | None = None
     ):
         self.app_context = app_context
+        self.timezone = app_context.timezone
         self.config = app_context.config.dbus
         self.event_broker = app_context.event_broker
         self.templating = app_context.templating
@@ -1113,7 +1114,7 @@ class DbusClient:
             "bus_name": bus_name,
             "path": path,
             "interface": interface_config.interface,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": dt_util.utcnow().isoformat(),
         }
 
         # Check if 'method' and 'args' are provided
