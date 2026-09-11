@@ -37,6 +37,7 @@ sudo docker run --detach --name dbus2mqtt \
   --volume /run/user:/run/user \
   --env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
   --env-file "$HOME"/.config/dbus2mqtt/.env \
+  -e TZ="Europe/Amsterdam" \
   --user $(id -u):$(id -g) \
   --privileged \
   --restart unless-stopped \

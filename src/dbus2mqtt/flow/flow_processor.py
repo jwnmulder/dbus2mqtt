@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 class FlowScheduler:
     def __init__(self, app_context: AppContext):
+        self.timezone = app_context.timezone
         self.config = app_context.config
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
@@ -45,6 +46,16 @@ class FlowScheduler:
     async def scheduler_task(self):
 
         self.scheduler.start()
+
+        tz_scheduler = str(self.scheduler.timezone)
+        tz_app = str(self.timezone)
+
+        # apscheduler and dbus2mqtt both use tzlocal to determine the local timezone.
+        # If this would ever change, print a warning
+        if tz_scheduler != tz_app:
+            logger.warning(
+                f"Local timezone mismatch between scheduler `{tz_scheduler}) and application ({tz_app})"
+            )
 
         # configure global flow trigger
         self.start_flow_set(self.config.flows)
