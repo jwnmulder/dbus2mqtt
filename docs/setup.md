@@ -48,6 +48,22 @@ sudo docker run --detach --name dbus2mqtt \
 sudo docker logs dbus2mqtt -f
 ```
 
+## Timezone
+
+dbus2mqtt uses the local timezone for operations such as `now()` and scheduled
+flows.
+
+When running in Docker, the `TZ` environment variable is required and must
+specify the desired timezone.
+
+When running without Docker, dbus2mqtt uses the system timezone by default. Set `TZ` to override it.
+
+For example:
+
+```bash
+TZ=Europe/Amsterdam
+```
+
 ## Configuration reference
 
 dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/){:target="_blank"} which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.

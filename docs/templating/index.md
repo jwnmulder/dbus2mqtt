@@ -28,7 +28,7 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
       show_root_toc_entry: false
       show_docstring_raises: false
 
-## uctnow()
+## utcnow()
 
 ::: dbus2mqtt.template.templating.utcnow
     options:

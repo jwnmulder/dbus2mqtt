@@ -20,22 +20,36 @@ R = TypeVar("R")
 
 
 def now(tz: tzinfo | str | None = None) -> datetime:
-    """Returns new datetime object representing current time.
+    """Return the current date and time as a timezone-aware datetime.
 
     Args:
-        tz: If no tz is specified, uses local timezone.
+        tz: Timezone to use. If omitted, the local timezone is used.
+            A timezone name may be specified as an IANA timezone string,
+            for example ``"Europe/Amsterdam"``.
 
     Returns:
-        Current datetime object.
+        The current date and time in the requested timezone.
+
+    Example:
+        ```jinja
+        {{ now() }}
+        {{ now("UTC") }}
+        {{ now("Europe/Amsterdam") }}
+        ```
     """
     return dt_util.now(tz)
 
 
 def utcnow() -> datetime:
-    """Returns new datetime object representing current time using UTC timezone.
+    """Return the current date and time in UTC.
 
     Returns:
-        Current datetime object.
+        The current date and time as a timezone-aware datetime in UTC.
+
+    Example:
+        ```jinja
+        {{ utcnow() }}
+        ```
     """
     return dt_util.utcnow()
 
@@ -48,6 +62,11 @@ def as_local(value: datetime) -> datetime:
 
     Returns:
         datetime object in local timezone
+
+    Example:
+        ```jinja
+        {{ utcnow() | as_local }}
+        ```
     """
     return dt_util.as_local(value)
 
