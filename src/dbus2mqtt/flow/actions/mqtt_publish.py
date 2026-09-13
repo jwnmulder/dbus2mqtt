@@ -49,7 +49,7 @@ class MqttPublishAction(FlowAction):
                 exc_info=True,
             )
             return
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Dont log full exception info to avoid log spamming on dbus errors
             # due to clients disconnecting
             logger.warning(

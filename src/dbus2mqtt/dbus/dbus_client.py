@@ -3,7 +3,6 @@ import fnmatch
 import json
 import logging
 
-from datetime import datetime
 from typing import Any
 
 import dbus_fast.aio as dbus_aio
@@ -38,6 +37,7 @@ from dbus2mqtt.event_broker import MqttMessage, MqttReceiveHints
 from dbus2mqtt.flow.flow_processor import FlowScheduler
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerDbusSignalHandler, FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
+from dbus2mqtt.util import dt as dt_util
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ class DbusClient:
         self, app_context: AppContext, flow_scheduler: FlowScheduler, bus: MessageBus | None = None
     ):
         self.app_context = app_context
+        self.timezone = app_context.timezone
         self.config = app_context.config.dbus
         self.event_broker = app_context.event_broker
         self.templating = app_context.templating
@@ -85,7 +86,7 @@ class DbusClient:
             disconnect_err = "DBus disconnected"
             try:
                 await self._bus.wait_for_disconnect()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 disconnect_err = f"DBus disconnected, connection terminated unexpectedly: {type(e)}"
 
             logger.warning(f"wait_for_disconnect: {disconnect_err}, reconnecting...")
@@ -135,10 +136,10 @@ class DbusClient:
             await self._add_match_rule(
                 "interface='org.freedesktop.DBus.ObjectManager',type='signal',member='InterfacesRemoved'"
             )
-        except Exception as e:
+        except Exception:
             # Disconnect if setup of listeners didn't succeed
             self._bus.disconnect()
-            raise e
+            raise
 
         await self._subscribe_on_connect(reconnect)
 
@@ -164,7 +165,7 @@ class DbusClient:
 
         if not reconnect:
             logger.info(
-                f"subscriptions on startup: {list(set([si.bus_name for si in new_subscribed_interfaces]))}"
+                f"subscriptions on startup: {list({si.bus_name for si in new_subscribed_interfaces})}"
             )
 
     async def _dbus_interface_call(
@@ -176,12 +177,9 @@ class DbusClient:
                 f"Unable to invoke dbus object, not connected to dbus, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={call_method}, converted_args={call_args}"
             )
 
-        try:
-            method_fn = interface.__getattribute__(call_method)
-            res = await method_fn(*call_args)
-            return res
-        except Exception as e:
-            raise e
+        method_fn = interface.__getattribute__(call_method)
+        res = await method_fn(*call_args)
+        return res
 
     async def _add_match_rule(self, match_rule: str):
         reply = await self._bus.call(
@@ -362,7 +360,7 @@ class DbusClient:
 
         obj_interface = proxy_object.get_interface(interface.name)
 
-        interface_signals = dict((s.name, s) for s in interface.signals)
+        interface_signals = {s.name: s for s in interface.signals}
 
         logger.debug(
             f"subscribe: bus_name={bus_name}, path={path}, interface={interface.name}, proxy_interface: signals={list(interface_signals.keys())}"
@@ -593,7 +591,7 @@ class DbusClient:
             await self.event_broker.flow_trigger_queue.async_q.join()
 
             # Cleanup dbus_fast message handlers and matchrules
-            for _, proxy_object in bus_name_subscriptions.path_objects.items():
+            for proxy_object in bus_name_subscriptions.path_objects.values():
                 # clean up all dbus matchrules
                 for interface in proxy_object._interfaces.values():
                     proxy_interface: dbus_aio.proxy_object.ProxyInterface = interface
@@ -711,29 +709,16 @@ class DbusClient:
           2. Trigger flows that have a bus_name_added trigger configured (only once per bus_name)
           3. Trigger flows that have a interfaces_added trigger configured (once for each bus_name-path pair)
         """
-        bus_name_object_paths = {}
-        bus_name_object_path_interfaces = {}
         for si in subscribed_interfaces:
-            bus_name_object_paths.setdefault(si.bus_name, [])
-            bus_name_object_path_interfaces.setdefault(si.bus_name, {}).setdefault(si.path, [])
+            assert bus_name == si.bus_name
 
-            if si.path not in bus_name_object_paths[si.bus_name]:
-                bus_name_object_paths[si.bus_name].append(si.path)
+        # determine which dbus_objects the subscribed interfaces belong to
+        dbus_object_paths = []
+        for si in subscribed_interfaces:
+            if si.path not in dbus_object_paths:
+                dbus_object_paths.append(si.path)
 
-            bus_name_object_path_interfaces[si.bus_name][si.path].append(si.interface_name)
-
-        # new_subscribed_bus_names = list(set([si.bus_name for si in subscribed_interfaces]))
-        # new_subscribed_bus_names_paths = {
-        #     bus_name: list(set([si.path for si in subscribed_interfaces if si.bus_name == bus_name]))
-        #     for bus_name in new_subscribed_bus_names
-        # }
-
-        logger.debug(
-            f"_start_subscription_flows: new_subscriptions: {list(bus_name_object_paths.keys())}"
-        )
-        logger.debug(
-            f"_start_subscription_flows: new_bus_name_object_paths: {bus_name_object_paths}"
-        )
+        logger.debug(f"_start_subscription_flows: bus_name: {bus_name}, paths: {dbus_object_paths}")
 
         # setup and process triggers for each flow in each subscription
         # just once per subscription_config
@@ -747,44 +732,36 @@ class DbusClient:
         # Maybe use queues to communicate from here with the FlowProcessor?
         # e.g.: StartFlows, StopFlows,
 
-        # for each bus_name
-        for bus_name, path_interfaces_map in bus_name_object_path_interfaces.items():
-            paths = list(path_interfaces_map.keys())
+        # Process each unique object path for bus_name
+        for dbus_object_path in dbus_object_paths:
+            # For each subscription_config that matches the bus_name and object_path
+            subscription_configs = self.config.get_subscription_configs(bus_name, dbus_object_path)
+            for subscription_config in subscription_configs:
+                trigger_context = {"bus_name": bus_name, "path": dbus_object_path}
 
-            # for each path in the bus_name
-            for object_path in paths:
-                # For each subscription_config that matches the bus_name and object_path
-                subscription_configs = self.config.get_subscription_configs(bus_name, object_path)
-                for subscription_config in subscription_configs:
-                    trigger_context = {"bus_name": bus_name, "path": object_path}
+                # Only process subscription_config once, no matter how many paths it matches
+                if subscription_config.id not in processed_new_subscriptions:
+                    # Ensure all schedulers are started
+                    # If a scheduler is already active for this subscription flow, it will be reused
+                    self.flow_scheduler.start_flow_set(subscription_config.flows)
 
-                    # Only process subscription_config once, no matter how many paths it matches
-                    if subscription_config.id not in processed_new_subscriptions:
-                        # Ensure all schedulers are started
-                        # If a scheduler is already active for this subscription flow, it will be reused
-                        self.flow_scheduler.start_flow_set(subscription_config.flows)
-
-                        # Trigger flows that have a bus_name_added trigger configured
-                        if trigger_flows:
-                            # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
-                            # leaving it now for backwards compatibility
-                            await self._trigger_processor.trigger_subscription_flows(
-                                subscription_config,
-                                FlowTriggerHandler(
-                                    FlowTriggerBusNameAddedConfig.type, trigger_context
-                                ),
-                            )
-
-                        processed_new_subscriptions.add(subscription_config.id)
-
+                    # Trigger flows that have a bus_name_added trigger configured
                     if trigger_flows:
-                        # Trigger flows that have a object_added trigger configured
+                        # TODO: path arg doesn't make sense here, it did work for mpris however where there is only one path
+                        # leaving it now for backwards compatibility
                         await self._trigger_processor.trigger_subscription_flows(
                             subscription_config,
-                            FlowTriggerHandler(
-                                FlowTriggerDbusObjectAddedConfig.type, trigger_context
-                            ),
+                            FlowTriggerHandler(FlowTriggerBusNameAddedConfig.type, trigger_context),
                         )
+
+                    processed_new_subscriptions.add(subscription_config.id)
+
+                if trigger_flows:
+                    # Trigger flows that have an object_added trigger configured
+                    await self._trigger_processor.trigger_subscription_flows(
+                        subscription_config,
+                        FlowTriggerHandler(FlowTriggerDbusObjectAddedConfig.type, trigger_context),
+                    )
 
     async def call_dbus_interface_method(
         self,
@@ -816,12 +793,12 @@ class DbusClient:
 
         try:
             res = await self._dbus_interface_call(interface, call_method_name, *converted_args)
-        except Exception as e:
+        except Exception:
             logger.debug(
                 f"Error while calling dbus object, bus_name={interface.bus_name}, interface={interface.introspection.name}, method={method}, converted_args={converted_args}",
                 exc_info=True,
             )
-            raise e
+            raise
 
         if res:
             res = unwrap_dbus_object(res)
@@ -1066,7 +1043,7 @@ class DbusClient:
                 result = await self.call_dbus_interface_method(
                     interface, method.method, payload_method_args, payload_method_kwargs
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 error = e
                 logger.warning(
                     f"on_mqtt_msg: Failed calling method={method.method}, {args_msg}, bus_name={interface.bus_name}, exception={e}"
@@ -1094,7 +1071,7 @@ class DbusClient:
 
             try:
                 await self.set_dbus_interface_property(interface, property.property, payload_value)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 error = e
                 logger.warning(
                     f"on_mqtt_msg: property={property.property}, value={payload_value}, bus_name={interface.bus_name} failed, exception={e}"
@@ -1137,7 +1114,7 @@ class DbusClient:
             "bus_name": bus_name,
             "path": path,
             "interface": interface_config.interface,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": dt_util.utcnow().isoformat(),
         }
 
         # Check if 'method' and 'args' are provided
@@ -1185,5 +1162,5 @@ class DbusClient:
                     f"Sent MQTT response: topic={response_topic}, success={response_context['success']}"
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to send MQTT response: {e}")

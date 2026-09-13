@@ -1,28 +1,70 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-exclude-labels:
-  - dependencies
-  - skip-changelog
 categories:
   - title: 🚨 Breaking changes
-    labels:
-      - breaking-change
+    exclusive: true
+    when:
+      label: breaking-change
+
   - title: 🚀 Features
-    labels:
-      - feature
-      - enhancement
+    exclusive: true
+    when:
+      labels:
+        - feature
+        - enhancement
+
   - title: 🐛 Bug Fixes
-    labels:
-      - bugfix
+    exclusive: true
+    when:
+      label: bugfix
+
   - title: 🧰 Misc
-    labels:
-      - chore
-      - documentation
+    exclusive: true
+    when:
+      labels:
+        - chore
+        - documentation
+
   - title: ⬆️ Dependency updates
-    labels:
-      - dependencies
+    exclusive: true
+    collapse-after: 0
+    when:
+      label: dependencies
+
+  # Exclude these from the release notes
+  - type: pre-exclude
+    when:
+      labels:
+        - skip-changelog
+
+  # Version resolution
+  - type: version-resolver
+    semver-increment: major
+    when:
+      label: major
+
+  - type: version-resolver
+    semver-increment: minor
+    when:
+      labels:
+        - minor
+        - breaking-change
+
+  - type: version-resolver
+    semver-increment: patch
+    when:
+      labels:
+        - patch
+        - feature
+        - enhancement
+
+  # Fallback
+  - type: version-resolver
+    semver-increment: patch
+
 exclude-contributors:
   - jwnmulder
+
 autolabeler:
   - label: enhancement
     branch:
@@ -32,20 +74,7 @@ autolabeler:
       - '/fix\/.+/'
     title:
       - '/fix/i'
-version-resolver:
-  major:
-    labels:
-      - major
-  minor:
-    labels:
-      - minor
-      - breaking-change  # minor until we are on 1.x
-  patch:
-    labels:
-      - patch
-      - feature  # patch until we are on 1.x
-      - enhancement  # patch until we are on 1.x
-  default: patch
+
 change-template: '* $TITLE (#$NUMBER) by @$AUTHOR'
 template: |
   $CHANGES

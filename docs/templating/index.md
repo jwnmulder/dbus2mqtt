@@ -1,6 +1,6 @@
 # Templating
 
-**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/).
+**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/){:target="_blank"}.
 
 Templating is used in these areas of dbus2mqtt:
 
@@ -9,19 +9,35 @@ Templating is used in these areas of dbus2mqtt:
 
 Besides the filters and functions that Jinja provides out of the box, additional extensions are available.
 
-All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/) are included as well as the following global functions, variables and filters:
+All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/){:target="_blank"} are included as well as the following global functions, variables and filters:
 
 | Name                | Type      | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|
-| `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package.                             |
-| `now`               | function  | Returns the current date and time as a `datetime` object.                   |
-| `urldecode`         | function  | Decodes a URL-encoded string.                                               |
+| `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package                              |
+| `now`               | function  | Returns the current date and time as a `datetime` object in your local timezone |
+| `utcnow`            | function  | Returns the current date and time as a `datetime` object in UTC (Coordinated Universal Time) |
+| `as_local`          | function  | Converts any `datetime` object to your local timezone                       |
+| `urldecode`         | function  | Decodes a URL-encoded string                                                |
 | `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
 | `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
 
 ## now()
 
 ::: dbus2mqtt.template.templating.now
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## utcnow()
+
+::: dbus2mqtt.template.templating.utcnow
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## as_local()
+
+::: dbus2mqtt.template.templating.as_local
     options:
       show_root_toc_entry: false
       show_docstring_raises: false

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from dbus2mqtt.__main__ import main as main
+from dbus2mqtt.__main__ import main
 from dbus2mqtt.config import Config
 
 

@@ -26,12 +26,14 @@ from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
+from dbus2mqtt.util import dt as dt_util
 
 logger = logging.getLogger(__name__)
 
 
 class FlowScheduler:
     def __init__(self, app_context: AppContext):
+        self.timezone = app_context.timezone
         self.config = app_context.config
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
@@ -45,6 +47,16 @@ class FlowScheduler:
     async def scheduler_task(self):
 
         self.scheduler.start()
+
+        tz_scheduler = str(self.scheduler.timezone)
+        tz_app = str(self.timezone)
+
+        # apscheduler and dbus2mqtt both use tzlocal to determine the local timezone.
+        # If this would ever change, print a warning
+        if tz_scheduler != tz_app:
+            logger.warning(
+                f"Local timezone mismatch between scheduler `{tz_scheduler}) and application ({tz_app})"
+            )
 
         # configure global flow trigger
         self.start_flow_set(self.config.flows)
@@ -97,7 +109,7 @@ class FlowScheduler:
                     logger.info(f"Stopping scheduler[{trigger.id}] for flow {flow.id}")
                     try:
                         self.scheduler.remove_job(trigger.id)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         logger.error(
                             f"Error removing scheduled job {trigger.id}, job likely removed before: {e}"
                         )
@@ -175,6 +187,13 @@ class FlowProcessor:
             flow_action_context = FlowActionContext(
                 self.app_context, flow_config, self._global_context, flow_context or {}
             )
+
+            if flow_config.id in self._flows:
+                existing_flow_config = self._flows[flow_config.id]
+                raise ValueError(
+                    f"flow.id must be unique, '{flow_config.name}' and '{existing_flow_config.flow_config.name}' both share the same id {flow_config.id}"
+                )
+
             self._flows[flow_config.id] = flow_action_context
 
     async def flow_processor_task(self):
@@ -191,7 +210,7 @@ class FlowProcessor:
                 # exc_info is only set when running in verbose mode to avoid lots of stack traces being printed
                 # while flows are still running and the DBus object was just removed. Some examples:
 
-                log_level = logging.WARN
+                log_level = logging.WARNING
 
                 # 1: error during context_set
                 # WARNING:dbus2mqtt.flow.flow_processor:flow_processor_task: Exception The name org.mpris.MediaPlayer2.firefox.instance_1_672 was not provided by any .service files
@@ -240,7 +259,8 @@ class FlowProcessor:
             flow, flow_execution_context, self.app_context.templating
         )
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        trigger_time = dt_util.as_local(flow_trigger_message.timestamp)
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={trigger_time.isoformat()}"
         if not should_execute_actions:
             log_message = f"{log_message} - conditions not met, skipping actions"
 

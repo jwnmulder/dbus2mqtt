@@ -1,14 +1,15 @@
 import json
 
 from pathlib import Path
+from typing import Any
 
 import dotenv
 import jsonschema
 
 from jsonargparse.typing import SecretStr
 
-from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import filtered_ns, new_argument_parser, ns_to_cls
+from dbus2mqtt.config import Config, FlowTriggerScheduleConfig
+from dbus2mqtt.config.jsonargparse import filtered_ns, new_argument_parser, ns_to_cls
 
 FILE_DIR = Path(__file__).resolve().parent
 CONFIG_JSON_SCHEMA = {}
@@ -34,6 +35,20 @@ def _replace_secretstr(obj):
     return obj
 
 
+def _remove_dict_entries_with_none_values(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _remove_dict_entries_with_none_values(item)
+            for key, item in value.items()
+            if item is not None
+        }
+
+    if isinstance(value, list):
+        return [_remove_dict_entries_with_none_values(item) for item in value]
+
+    return value
+
+
 def _parse_and_validate_config(file: str) -> Config:
 
     dotenv.load_dotenv(".env.example")
@@ -46,11 +61,42 @@ def _parse_and_validate_config(file: str) -> Config:
     # Validate with json schema
     config_dict = filtered_ns(Config, cfg.as_dict())
     config_dict = _replace_secretstr(config_dict)
+
+    # jsonargeparse v4.49 did not output entries with null values
+    # jsonargeparse v4.50 does output entries with null values due to a new
+    # way of working with default unset values
+    config_dict = _remove_dict_entries_with_none_values(config_dict)
+
     jsonschema.validate(config_dict, CONFIG_JSON_SCHEMA)
 
     # Validate by instantiating Config object
     cfg = parser.instantiate(cfg)
     config = ns_to_cls(Config, cfg)
+
+    # After an update of jsonargparse and the way uuid's where assigned, all flows had the same id
+    # Validate all FlowConfig.id's are unique
+    # Validate all SubscriptionConfig.id's are unique
+    # Validate all FlowTriggerScheduleConfig.id's are unique
+    flow_ids = []
+    subscription_ids = []
+    trigger_ids = []
+
+    for flow in config.flows:
+        assert flow.id not in flow_ids
+        flow_ids.append(flow.id)
+
+    for subscription in config.dbus.subscriptions:
+        assert subscription.id not in subscription_ids
+        subscription_ids.append(subscription.id)
+
+        for flow in subscription.flows:
+            assert flow.id not in flow_ids
+            flow_ids.append(flow.id)
+
+            for trigger in flow.triggers:
+                if trigger.type == FlowTriggerScheduleConfig.type:
+                    assert trigger.id not in trigger_ids
+                    trigger_ids.append(trigger.id)
 
     return config
 

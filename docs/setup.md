@@ -2,7 +2,7 @@
 
 ## Installation
 
-First, create your own dbus2mqtt configuration file or pick one of the examples. Like the [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml) example from this repository.
+First, create your own dbus2mqtt configuration file or pick one of the examples. Like the [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml){:target="_blank"} example from this repository.
 
 ```bash
 mkdir -p $HOME/.config/dbus2mqtt
@@ -37,6 +37,7 @@ sudo docker run --detach --name dbus2mqtt \
   --volume /run/user:/run/user \
   --env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
   --env-file "$HOME"/.config/dbus2mqtt/.env \
+  -e TZ="Europe/Amsterdam" \
   --user $(id -u):$(id -g) \
   --privileged \
   --restart unless-stopped \
@@ -47,9 +48,25 @@ sudo docker run --detach --name dbus2mqtt \
 sudo docker logs dbus2mqtt -f
 ```
 
+## Timezone
+
+dbus2mqtt uses the local timezone for operations such as `now()` and scheduled
+flows.
+
+When running in Docker, the `TZ` environment variable is required and must
+specify the desired timezone.
+
+When running without Docker, dbus2mqtt uses the system timezone by default. Set `TZ` to override it.
+
+For example:
+
+```bash
+TZ=Europe/Amsterdam
+```
+
 ## Configuration reference
 
-dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/) which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
+dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable/){:target="_blank"} which allows configuration via either yaml configuration, CLI or environment variables. Until this is fully documented have a look at the examples in this repository.
 
 ### dbus2mqtt **mqtt** config
 
