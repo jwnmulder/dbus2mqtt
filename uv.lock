@@ -272,6 +272,7 @@ dependencies = [
     { name = "paho-mqtt" },
     { name = "python-dotenv" },
     { name = "pyyaml" },
+    { name = "tzlocal" },
 ]
 
 [package.dev-dependencies]
@@ -304,6 +305,7 @@ requires-dist = [
     { name = "paho-mqtt", specifier = "==2.1.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "tzlocal", specifier = ">=5.4.4" },
 ]
 
 [package.metadata.requires-dev]

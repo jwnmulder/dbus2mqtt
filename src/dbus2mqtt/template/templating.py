@@ -14,19 +14,61 @@ from jinja2 import (
 from jinja2.nativetypes import NativeEnvironment, NativeTemplate
 from jinja2_ansible_filters import AnsibleCoreFiltersExtension
 
+from dbus2mqtt.util import dt as dt_util
+
 R = TypeVar("R")
 
 
-def now(tz: tzinfo | None = None) -> datetime:
-    """Returns new datetime object representing current time.
+def now(tz: tzinfo | str | None = None) -> datetime:
+    """Return the current date and time as a timezone-aware datetime.
 
     Args:
-        tz: If no tz is specified, uses local timezone.
+        tz: Timezone to use. If omitted, the local timezone is used.
+            A timezone name may be specified as an IANA timezone string,
+            for example ``"Europe/Amsterdam"``.
 
     Returns:
-        Current datetime object.
+        The current date and time in the requested timezone.
+
+    Example:
+        ```jinja
+        {{ now() }}
+        {{ now("UTC") }}
+        {{ now("Europe/Amsterdam") }}
+        ```
     """
-    return datetime.now(tz)
+    return dt_util.now(tz)
+
+
+def utcnow() -> datetime:
+    """Return the current date and time in UTC.
+
+    Returns:
+        The current date and time as a timezone-aware datetime in UTC.
+
+    Example:
+        ```jinja
+        {{ utcnow() }}
+        ```
+    """
+    return dt_util.utcnow()
+
+
+def as_local(value: datetime) -> datetime:
+    """Convert any datetime object to local time zone.
+
+    Args:
+        value: datetime object
+
+    Returns:
+        datetime object in local timezone
+
+    Example:
+        ```jinja
+        {{ utcnow() | as_local }}
+        ```
+    """
+    return dt_util.as_local(value)
 
 
 def urldecode(string: str) -> str:
@@ -62,11 +104,14 @@ class TemplateEngine:
 
         engine_globals = {}
         engine_globals["now"] = now
+        engine_globals["utcnow"] = utcnow
+        engine_globals["as_local"] = as_local
         engine_globals["urldecode"] = urldecode
         engine_globals["dbus2mqtt"] = {"version": version("dbus2mqtt")}
 
         engine_filters = {}
         engine_filters["urldecode"] = urldecode
+        engine_filters["as_local"] = as_local
 
         self.jinja2_env = NativeEnvironment(
             loader=BaseLoader(),

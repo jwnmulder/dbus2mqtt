@@ -13,15 +13,31 @@ All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansibl
 
 | Name                | Type      | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|
-| `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package.                             |
-| `now`               | function  | Returns the current date and time as a `datetime` object.                   |
-| `urldecode`         | function  | Decodes a URL-encoded string.                                               |
+| `dbus2mqtt.version` | `str`     | The current version of the `dbus2mqtt` package                              |
+| `now`               | function  | Returns the current date and time as a `datetime` object in your local timezone |
+| `utcnow`            | function  | Returns the current date and time as a `datetime` object in UTC (Coordinated Universal Time) |
+| `as_local`          | function  | Converts any `datetime` object to your local timezone                       |
+| `urldecode`         | function  | Decodes a URL-encoded string                                                |
 | `dbus_list`         | function  | Returns a list of active subscribed bus_names, documentation below          |
 | `dbus_call`         | function  | D-Bus method invocation, documentation below                                |
 
 ## now()
 
 ::: dbus2mqtt.template.templating.now
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## utcnow()
+
+::: dbus2mqtt.template.templating.utcnow
+    options:
+      show_root_toc_entry: false
+      show_docstring_raises: false
+
+## as_local()
+
+::: dbus2mqtt.template.templating.as_local
     options:
       show_root_toc_entry: false
       show_docstring_raises: false

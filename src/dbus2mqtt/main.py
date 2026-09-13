@@ -73,6 +73,8 @@ async def run(app_config: Config):
 
     app_context = AppContext(app_config, event_broker, template_engine)
 
+    logger.info(f"timezone={app_context.timezone}")
+
     flow_scheduler = FlowScheduler(app_context)
 
     with suppress(asyncio.CancelledError):

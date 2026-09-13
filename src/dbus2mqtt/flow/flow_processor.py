@@ -26,12 +26,14 @@ from dbus2mqtt.flow.actions.mqtt_publish import MqttPublishAction
 from dbus2mqtt.flow.flow_trigger_handlers import FlowTriggerHandler
 from dbus2mqtt.flow.flow_trigger_processor import FlowTriggerProcessor
 from dbus2mqtt.template.templating import TemplateEngine
+from dbus2mqtt.util import dt as dt_util
 
 logger = logging.getLogger(__name__)
 
 
 class FlowScheduler:
     def __init__(self, app_context: AppContext):
+        self.timezone = app_context.timezone
         self.config = app_context.config
         self.event_broker = app_context.event_broker
         self.scheduler = AsyncIOScheduler()
@@ -45,6 +47,16 @@ class FlowScheduler:
     async def scheduler_task(self):
 
         self.scheduler.start()
+
+        tz_scheduler = str(self.scheduler.timezone)
+        tz_app = str(self.timezone)
+
+        # apscheduler and dbus2mqtt both use tzlocal to determine the local timezone.
+        # If this would ever change, print a warning
+        if tz_scheduler != tz_app:
+            logger.warning(
+                f"Local timezone mismatch between scheduler `{tz_scheduler}) and application ({tz_app})"
+            )
 
         # configure global flow trigger
         self.start_flow_set(self.config.flows)
@@ -247,7 +259,8 @@ class FlowProcessor:
             flow, flow_execution_context, self.app_context.templating
         )
 
-        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={flow_trigger_message.timestamp.isoformat()}"
+        trigger_time = dt_util.as_local(flow_trigger_message.timestamp)
+        log_message = f"on_trigger: {trigger_str}, flow={flow_str}, time={trigger_time.isoformat()}"
         if not should_execute_actions:
             log_message = f"{log_message} - conditions not met, skipping actions"
 
