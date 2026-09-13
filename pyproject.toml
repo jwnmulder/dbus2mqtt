@@ -56,7 +56,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff==0.16.6",
-    "pyright==1.1.411",
+    "pyright==1.1.413",
     "deptry>=0.24.0",
     "mkdocstrings-python>=1.19.0",
     "zensical>=0.0.59",
