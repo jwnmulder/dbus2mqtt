@@ -74,7 +74,7 @@ media_player:
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
-              {"property": "Volume", "value": {{volume}} }
+              {"property": "Volume", "value": {{ volume }} }
         volume_up:
           service: mqtt.publish
           data:
@@ -87,3 +87,18 @@ media_player:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
               {"property": "Volume", "value": {{ [0, (state_attr('sensor.mpris_media_player', 'Volume') - 0.1)] | max }} }
+
+  - platform: universal
+    name: MPRIS Media Player Universal
+    children:
+      - media_player.mpris_media_player
+    commands:
+      select_source:
+        action: mqtt.publish
+        data:
+          topic: dbus2mqtt/org.mpris.MediaPlayer2/custom_command
+          payload: >
+              { "action": "set_current_player", "player": "{{ source }}" }
+    attributes:
+      source: sensor.mpris_media_player|current_player
+      source_list: sensor.mpris_media_player|available_players
