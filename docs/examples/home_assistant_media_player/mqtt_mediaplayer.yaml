@@ -9,8 +9,8 @@ media_player:
           {% set s = states('sensor.mpris_media_player_state') %}
           {{ s if s not in ['unavailable', 'unknown'] else None }}
 
-        app_id_template: "{{ states('sensor.mpris_media_player_state.app_id') }}"
-        app_name_template: "{{ states('sensor.mpris_media_player_state.app_name') }}"
+        app_id_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_id') }}"
+        app_name_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_name') }}"
 
         current_volume_template: "{{ state_attr('sensor.mpris_media_player_state', 'volume_level') }}"
         current_is_muted_template: "{{ state_attr('sensor.mpris_media_player_state', 'is_volume_muted') }}"
