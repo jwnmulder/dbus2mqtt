@@ -56,13 +56,17 @@ dbus:
               context:
                 mpris_bus_name: "{{ dbus_list('org.mpris.MediaPlayer2.*') | first }}"
                 mpris_path: /org/mpris/MediaPlayer2
+                available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
                 # By storing the seeked position it can be used to override Position below
                 seeked_position: "{{ kwargs.Position if trigger_type == 'dbus_signal' and signal == 'Seeked' else None }}"
             - type: context_set
               context:
+                current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                properties: |
+                  {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}
                 updated_at: "{{ now().isoformat() }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
@@ -72,8 +76,12 @@ dbus:
                 {% set metadata_xesam_url = metadata.get('xesam:url', '') | urldecode %}
                 {{
                     {
-                      'bus_name': mpris_bus_name,
-                      'updated_at': updated_at
+                      'current_bus_name': mpris_bus_name,
+                      'current_player': current_player,
+                      'available_players': available_players,
+                      'updated_at': updated_at,
+                      'CanQuit' : properties.CanQuit,
+                      'Identity': properties.Identity,
                     }
                     | combine(player_properties)
                     | combine({ 'Position': seeked_position } if seeked_position else {})
@@ -174,6 +182,8 @@ dbus:
 
                       {{
                         {
+                          "app_id": value_json.get('current_player'),
+                          "app_name": value_json.get('Identity'),
                           "media_content_type": "music",
                           "media_duration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
                           "media_position": ((value_json.get('Position') or 0) / 1000000) | int,
@@ -184,8 +194,6 @@ dbus:
                           "media_image_url": media_image_url,
                           "volume_level": value_json.get('Volume'),
                           "is_volume_muted": value_json.get('Volume') == 0,
-                          "source": value_json.get('current_player'),
-                          "source_list": value_json.get('available_players'),
                           "mqtt_data": value_json
                         } | to_json
                       }}
