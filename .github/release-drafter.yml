@@ -34,8 +34,13 @@ categories:
   # Exclude these from the release notes
   - type: pre-exclude
     when:
-      labels:
-        - skip-changelog
+      - labels:
+          - skip-changelog
+      - labels:
+          - dependencies
+        paths:
+          - .github/**
+          - uv.lock
 
   # Version resolution
   - type: version-resolver
