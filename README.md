@@ -24,8 +24,8 @@
 | src/dbus2mqtt/main.py                                        |       78 |       31 |        4 |        2 |     60% |26-34, 45-59, 64-66, 71-81, 106, 121-122, 143-144, 149-150 |
 | src/dbus2mqtt/mqtt/mqtt\_client.py                           |      136 |       73 |       40 |        2 |     43% |64, 84-\>83, 92, 98-153, 157-167, 170-175, 180-220, 237-241 |
 | src/dbus2mqtt/template/\_\_init\_\_.py                       |        0 |        0 |        0 |        0 |    100% |           |
-| src/dbus2mqtt/template/dbus\_template\_functions.py          |       41 |        7 |       14 |        4 |     76% |102, 106, 110, 131, 139-141 |
-| src/dbus2mqtt/template/templating.py                         |      108 |        7 |       22 |        3 |     92% |91, 98-99, 143, 156-157, 176-\>exit, 200-\>exit, 206 |
+| src/dbus2mqtt/template/dbus\_template\_functions.py          |       41 |        7 |       14 |        4 |     76% |92, 96, 100, 121, 129-131 |
+| src/dbus2mqtt/template/templating.py                         |      108 |        7 |       22 |        3 |     92% |92, 99-100, 144, 157-158, 177-\>exit, 201-\>exit, 207 |
 | src/dbus2mqtt/util/dt.py                                     |       23 |        8 |       10 |        2 |     58% |46, 48, 64-71 |
 | **TOTAL**                                                    | **1691** |  **473** |  **584** |   **92** | **69%** |           |
 
