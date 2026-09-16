@@ -30,11 +30,11 @@ def now(tz: tzinfo | str | None = None) -> datetime:
     Returns:
         The current date and time in the requested timezone.
 
-    Example:
-        ```jinja
-        {{ now() }}
-        {{ now("UTC") }}
-        {{ now("Europe/Amsterdam") }}
+    Examples:
+        ```yaml+jinja
+        template: {{ now() }}
+        template: {{ now("UTC") }}
+        template: {{ now("Europe/Amsterdam") }}
         ```
     """
     return dt_util.now(tz)
@@ -46,9 +46,9 @@ def utcnow() -> datetime:
     Returns:
         The current date and time as a timezone-aware datetime in UTC.
 
-    Example:
-        ```jinja
-        {{ utcnow() }}
+    Examples:
+        ```yaml+jinja
+        template: {{ utcnow() }}
         ```
     """
     return dt_util.utcnow()
@@ -63,9 +63,9 @@ def as_local(value: datetime) -> datetime:
     Returns:
         datetime object in local timezone
 
-    Example:
-        ```jinja
-        {{ utcnow() | as_local }}
+    Examples:
+        ```yaml+jinja
+        template: {{ utcnow() | as_local }}
         ```
     """
     return dt_util.as_local(value)
@@ -80,12 +80,13 @@ def urldecode(string: str) -> str:
     Returns:
         A decoded URL string.
 
-    Example:
-        ```python
-        >>> urldecode('abc%20def')
-        'abc def'
-        >>> urldecode('El%20Ni%C3%B1o')
-        'El Niño'
+    Examples:
+        ```yaml+jinja
+        template: {{ urldecode('abc%20def') }}
+        result: 'abc def'
+
+        template: {{ urldecode('El%20Ni%C3%B1o') }}
+        result: 'El Niño'
         ```
     """
     return urllib.parse.unquote(string)

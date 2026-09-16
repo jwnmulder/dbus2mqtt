@@ -24,17 +24,13 @@ class DbusContext:
         Returns:
             List of matching bus names found in current subscriptions
 
-        Example:
-            Template
-            ```yaml
-            all_subscibed_bus_names: "{{ dbus_list('*') }}"
-            subscribed_mpris_bus_names: "{{ dbus_list('org.mpris.MediaPlayer2.*') }}"
-            ```
+        Examples:
+            ```yaml+jinja
+            template: {{ dbus_list('*') }}
+            result: ['org.bluez', 'org.mpris.MediaPlayer2.firefox']
 
-            Result
-            ```yaml
-            all_subscibed_bus_names: ['org.bluez', 'org.mpris.MediaPlayer2.firefox']
-            subscribed_mpris_bus_names: ['org.mpris.MediaPlayer2.firefox']
+            template: {{ dbus_list('org.mpris.MediaPlayer2.*') }}
+            result: ['org.mpris.MediaPlayer2.firefox']
             ```
         """
         res = []
@@ -74,20 +70,14 @@ class DbusContext:
         Raises:
             ValueError: If no subscribed proxy object is found for the given bus_name and path.
 
-        Example:
-            Template
-            ```yaml
-            player_properties: |
-              {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
-            ```
-
-            Result
-            ```yaml
-            player_properties:
-                Metadata: {}
-                Position: 0
-                PlaybackStatus: Stopped
-                Volume: 0.0
+        Examples:
+            ```yaml+jinja
+            template: {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+            result:
+              Metadata: {}
+              Position: 0
+              PlaybackStatus: Stopped
+              Volume: 0.0
             ```
 
         Notes:
