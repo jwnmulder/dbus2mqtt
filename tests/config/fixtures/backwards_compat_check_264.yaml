@@ -1,0 +1,8 @@
+dbus:
+  subscriptions: []
+flows:
+  - name: "object_added and object_removed renamed in #264"
+    triggers:
+      - type: object_added
+      - type: object_removed
+    actions: []

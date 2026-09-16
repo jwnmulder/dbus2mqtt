@@ -1,3 +1,10 @@
+from datetime import datetime
+from os import environ
+
+import pytest
+import tzlocal
+
+from jinja2 import TemplateError
 
 from dbus2mqtt.template.templating import TemplateEngine
 
@@ -13,40 +20,109 @@ def test_preregisted_custom_function():
     assert isinstance(res, str)
     assert "now" in res
 
+
 def test_non_template_str():
     templating = TemplateEngine()
     res = templating.render_template("str_value", object)
     assert res == "str_value"
+
 
 def test_non_template_int_like():
     templating = TemplateEngine()
     res = templating.render_template("3", object)
     assert res == 3
 
+
 def test_non_template_list_like():
     templating = TemplateEngine()
     res = templating.render_template("[1, 2, 3]", object)
     assert res == [1, 2, 3]
+
 
 def test_str_template_str_result():
     templating = TemplateEngine()
     res = templating.render_template("{{ 'str_result' }}", object)
     assert res == "str_result"
 
+
 def test_str_template_int_result():
     templating = TemplateEngine()
     res = templating.render_template("{{ 3 }}", object)
     assert res == 3
+
 
 def test_str_template_list_result():
     templating = TemplateEngine()
     res = templating.render_template("{{ [1, 2, 3] }}", object)
     assert res == [1, 2, 3]
 
+
 def test_str_template_int_result_as_str():
     templating = TemplateEngine()
     res = templating.render_template("{{ 3 }}", str)
     assert res == "3"
+
+
+def test_none_result():
+    templating = TemplateEngine()
+    res = templating.render_template_optional("{{ None }}", str)
+    assert res is None
+
+
+def test_dt_now():
+    templating = TemplateEngine()
+    res = templating.render_template("{{ now() }}", object)
+    assert isinstance(res, datetime)
+    assert res.tzinfo
+
+
+def test_dt_utcnow():
+    templating = TemplateEngine()
+    res = templating.render_template("{{ utcnow() }}", object)
+
+    assert isinstance(res, datetime)
+    assert res.tzinfo
+    assert str(res.tzinfo) == "UTC"
+
+
+def test_dt_now_local_timezone():
+    templating = TemplateEngine()
+
+    # Set an initial local timezone
+    environ["TZ"] = "Europe/Amsterdam"
+    tzlocal.reload_localzone()
+    res = templating.render_template("{{ now() }}", datetime)
+
+    assert res.tzinfo
+    assert str(res.tzinfo) == "Europe/Amsterdam"
+
+    # Change local timezone
+    environ["TZ"] = "Australia/Sydney"
+    tzlocal.reload_localzone()
+    res = templating.render_template("{{ now() }}", datetime)
+
+    assert res.tzinfo
+    assert str(res.tzinfo) == "Australia/Sydney"
+
+
+def test_dt_as_local():
+    templating = TemplateEngine()
+
+    environ["TZ"] = "Europe/Amsterdam"
+    tzlocal.reload_localzone()
+    template = {
+        "dt_now": "{{ now('Australia/Sydney') }}",
+        "dt_now_as_local": "{{ now('Australia/Sydney') | as_local }}",
+        "dt_utcnow": "{{ utcnow() }}",
+        "dt_utcnow_as_local": "{{ utcnow() | as_local }}",
+    }
+
+    res = templating.render_template(template, dict)
+
+    assert str(res["dt_now"].tzinfo) == "Australia/Sydney"
+    assert str(res["dt_now_as_local"].tzinfo) == "Europe/Amsterdam"
+    assert str(res["dt_utcnow"].tzinfo) == "UTC"
+    assert str(res["dt_utcnow_as_local"].tzinfo) == "Europe/Amsterdam"
 
 
 def test_dict_with_integer_expression():
@@ -61,23 +137,19 @@ def test_dict_with_integer_expression():
     assert isinstance(res, dict)
     assert res["value"] == 1
 
+
 def test_nested_dict_templates():
 
-    nested_dict_template = {
-        "a": 1,
-        "b": {
-            "c": "TestValueC"
-        }
-    }
+    nested_dict_template = {"a": 1, "b": {"c": "TestValueC"}}
     context = {
         "mpris_bus_names": ["org.mpris.MediaPlayer2.vlc", "org.mpris.MediaPlayer2.firefox"],
-        "nested_dict_template": nested_dict_template
+        "nested_dict_template": nested_dict_template,
     }
     template = {
         "now": "{{ now().isoformat() }}",
         "dbus_names": "{{ mpris_bus_names }}",
         "nested_raw": nested_dict_template,
-        "nested_template": "{{ nested_dict_template }}"
+        "nested_template": "{{ nested_dict_template }}",
     }
 
     templating = TemplateEngine()
@@ -94,16 +166,27 @@ def test_nested_dict_templates():
     assert isinstance(res["nested_template"]["b"], dict)
     assert res["nested_template"]["b"]["c"] == "TestValueC"
 
+
 def test_dict_template_with_quotes_and_newline():
-    """
-        Test that:
-          1. a dict template with quotes and an ending newline is rendered correctly,
-          2. dbus_call result with a nested dict is rendered correctly and convertible to a dict
+    """Test rendering of a dict template that includes quotes and a trailing newline.
+
+    This test verifies that:
+      1. a dict template with quotes and an ending newline is rendered correctly,
+      2. dbus_call result with a nested dict is rendered correctly and convertible to a dict
     """
     custom_functions = {
-        "dbus_list": lambda bus_name_pattern: ["org.mpris.MediaPlayer2.vlc", "org.mpris.MediaPlayer2.firefox"],
-        "dbus_call": lambda bus_name, path, interface, method, method_args: {'Metadata': {}, 'Position': 0, 'CanControl': True},
-        "dbus_property_get": lambda bus_name, path, interface, property, default_unsupported: {"value": 1}
+        "dbus_list": lambda bus_name_pattern: [
+            "org.mpris.MediaPlayer2.vlc",
+            "org.mpris.MediaPlayer2.firefox",
+        ],
+        "dbus_call": lambda bus_name, path, interface, method, method_args: {
+            "Metadata": {},
+            "Position": 0,
+            "CanControl": True,
+        },
+        "dbus_property_get": lambda bus_name, path, interface, property, default_unsupported: {
+            "value": 1
+        },
     }
 
     templating = TemplateEngine()
@@ -123,19 +206,41 @@ def test_dict_template_with_quotes_and_newline():
     assert isinstance(res["player_properties"], dict)
     assert res["player_properties"]["Position"] == 0
 
+
 def test_nested_list_values():
 
-    context = {
-        "args": ["first-item", "second-item"]
-    }
-    template = {
-        "res": {
-            "plain_args": ["first-item", "second-item"],
-            "args": "{{ args }}"
-        }
-    }
+    context = {"args": ["first-item", "second-item"]}
+    template = {"res": {"plain_args": ["first-item", "second-item"], "args": "{{ args }}"}}
 
     templating = TemplateEngine()
     res = templating.render_template(template, dict, context)
 
     assert res["res"]["plain_args"] == ["first-item", "second-item"]
+
+
+def test_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        templating.render_template(template, dict)
+
+
+@pytest.mark.asyncio
+async def test_async_strict_undefined_error_handling():
+
+    template = {"res": "{{ nonexisting_variable }}"}
+
+    templating = TemplateEngine()
+    with pytest.raises(TemplateError):
+        await templating.async_render_template(template, dict)
+
+
+def test_require_dict_type_for_dict():
+
+    template = {"key": "val"}
+
+    templating = TemplateEngine()
+    with pytest.raises(ValueError):
+        templating.render_template(template, str)

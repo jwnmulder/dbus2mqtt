@@ -1,0 +1,139 @@
+[project]
+site_name = "dbus2mqtt"
+site_description = "General purpose DBus to MQTT bridge"
+site_url = "https://jwnmulder.github.io/dbus2mqtt"
+site_author = "Jan-Willem Mulder"
+repo_name = "jwnmulder/dbus2mqtt"
+repo_url = "https://github.com/jwnmulder/dbus2mqtt"
+strict = true
+
+watch = [
+    "README.md",
+]
+
+# mkdocs configuration not yet supported in zensical
+# not_in_nav: |
+#   examples/dbus2mqtt_internal_state.md
+#   examples/linux_desktop.md
+#   examples/connman-config.md
+
+nav = [
+    { "Home" = "index.md" },
+    { "Setup" = "setup.md" },
+    { "Subscriptions" = "subscriptions.md" },
+    { "Flows" = [
+        "flows/index.md",
+        "flows/flow_triggers.md",
+        "flows/flow_actions.md",
+    ] },
+    { "Templating" = [
+        "templating/index.md",
+    ] },
+    { "Examples" = [
+        "examples/index.md",
+        "examples/home_assistant_media_player.md",
+        "examples/bluez.md",
+        "examples/linux_desktop.md",
+        # "examples/connman-config.md",
+    ] },
+    { "Developer guide" = [
+        "developer/index.md",
+        "developer/debugging_dbus.md",
+    ] },
+]
+
+extra_css = [
+    "stylesheets/extra.css",
+]
+
+[project.theme]
+name = "material"
+variant = "classic"
+language = "en"
+
+logo = "assets/logo-light-text.svg"
+favicon = "assets/logo-dark-img.svg"
+custom_dir = "docs/overrides"
+
+features = [
+
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-annotations
+    "content.code.annotate",
+
+    # Enable copy-to-clipboard button
+    # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-copy-button
+    "content.code.copy",
+
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation
+    "navigation.indexes",
+
+    # Use instant loading for internal links
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#instant-loading
+    "navigation.instant",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.extra.analytics]
+provider = "google"
+property = "G-BRH1JXWE40"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/jwnmulder"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/docker"
+link = "https://hub.docker.com/r/jwnmulder/dbus2mqtt"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/dbus2mqtt"
+
+[project.markdown_extensions]
+
+# https://squidfunk.github.io/mkdocs-material/reference/admonitions/
+admonition = {}
+
+attr_list = {}
+
+# https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#highlighting-inline-code-blocks
+pymdownx.inlinehilite = {}
+
+# https://squidfunk.github.io/mkdocs-material/reference/code-blocks/
+# https://facelessuser.github.io/pymdown-extensions/extensions/superfences/
+pymdownx.superfences = {}
+
+footnotes = {}
+
+[project.markdown_extensions.pymdownx.snippets]
+check_paths = true
+
+[project.markdown_extensions.zensical.extensions.macros]
+on_error_fail = true
+on_undefined = "strict"
+render_by_default = false
+module_name = "tools/zensical_macros"
+
+[project.plugins.mkdocstrings]
+default_handler = "python"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+options.docstring_style = "google"
+options.show_source = false

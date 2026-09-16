@@ -1,10 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>jwnmulder/renovate-config"
+    "local>jwnmulder/renovate-config",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)"
   ],
 
   "labels": ["dependencies"],
+
+  "lockFileMaintenance": {
+    "enabled": true
+  },
 
   "packageRules": [
     {
@@ -14,9 +20,79 @@
       "addLabels": ["automerge"]
     },
     {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies", "dependency-groups"],
+      "rangeStrategy": "update-lockfile"
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["project.dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
+      "matchManagers": ["pep621"],
+      "matchDepTypes": ["dependency-groups"],
+      "matchJsonata": [
+        "managerData.depGroup = 'dev'"
+      ],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "addLabels": ["automerge"]
+    },
+    {
       "description": "Disable Renovate for .python-version",
       "matchFileNames": [".python-version"],
       "enabled": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
+      "pinDigests": true,
+      "separateMinorPatch": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "automerge": true,
+      "addLabels": ["automerge"],
+      "extends": ["schedule:weekly"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["pin", "digest"],
+      "minimumReleaseAge": null
+    },
+    {
+      "matchPackageNames": [
+        "pyright",
+        "RobertCraigie/pyright-python"
+      ],
+      "groupName": "pyright"
+    },
+    {
+      "matchPackageNames": [
+        "ruff",
+        "astral-sh/ruff-pre-commit"
+      ],
+      "groupName": "ruff"
+    },
+    {
+      "matchPackageNames": [
+        "uv",
+        "ghcr.io/astral-sh/uv",
+        "astral-sh/uv-pre-commit"
+      ],
+      "groupName": "uv"
     }
   ]
 }

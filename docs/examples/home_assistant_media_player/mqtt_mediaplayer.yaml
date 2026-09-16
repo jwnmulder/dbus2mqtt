@@ -1,0 +1,87 @@
+media_player:
+  - platform: media_player_template
+    media_players:
+      mpris_media_player:
+        unique_id: dfc83bec-d11a-454b-a3a6-02398c060ee0
+        device_class: receiver
+        friendly_name: MPRIS Media Player
+        value_template: >
+          {% set s = states('sensor.mpris_media_player_state') %}
+          {{ s if s not in ['unavailable', 'unknown'] else None }}
+
+        app_id_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_id') }}"
+        app_name_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_name') }}"
+
+        current_volume_template: "{{ state_attr('sensor.mpris_media_player_state', 'volume_level') }}"
+        current_is_muted_template: "{{ state_attr('sensor.mpris_media_player_state', 'is_volume_muted') }}"
+        current_position_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_position') }}"
+        title_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_title') }}"
+
+        media_content_type_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_content_type') }}"
+        media_duration_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_duration') }}"
+        album_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_album_name') }}"
+        artist_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_artist') }}"
+
+        entity_picture_template: "{{ state_attr('sensor.mpris_media_player_image_url', 'media_image_url') }}"
+        media_image_url_template: "{{ state_attr('sensor.mpris_media_player_image_url', 'media_image_url') }}"
+
+        turn_off:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Quit"}
+        play:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Play"}
+        pause:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Pause"}
+        stop:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Stop"}
+        next:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Next"}
+        previous:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"method": "Previous"}
+        seek:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player_state', 'mqtt_data')['Metadata']['mpris:trackid'] }}", {{ (position * 1000000) | int }}] }
+        set_volume:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{ volume }} }
+        volume_up:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{ [1, (state_attr('sensor.mpris_media_player_state', 'volume_level') + 0.1)] | min }} }
+        volume_down:
+          service: mqtt.publish
+          data:
+            topic: dbus2mqtt/org.mpris.MediaPlayer2/command
+            payload: >
+              {"property": "Volume", "value": {{ [0, (state_attr('sensor.mpris_media_player_state', 'volume_level') - 0.1)] | max }} }

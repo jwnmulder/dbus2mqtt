@@ -1,0 +1,9 @@
+dbus:
+  subscriptions: []
+flows:
+  - name: "on schedule"
+    triggers:
+      - type: schedule
+        cron:
+          minute: "*/5"
+    actions: []

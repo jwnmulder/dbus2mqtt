@@ -1,0 +1,14 @@
+%YAML 1.2
+---
+dbus:
+  subscriptions: []
+flows:
+  - name: "MPRIS player removed"
+    triggers: []
+    actions:
+      - type: mqtt_publish
+        topic: dbus2mqtt/org.mpris.MediaPlayer2/state
+        payload_type: json
+        payload_template:
+          PlaybackStatus: "Off"
+          TestFalseString: "false"  # For another unit test, this one serializes to False

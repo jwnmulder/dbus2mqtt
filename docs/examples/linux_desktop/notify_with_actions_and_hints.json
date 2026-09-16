@@ -1,0 +1,13 @@
+{
+  "method": "Notify",
+  "kwargs": {
+    "app_name": "dbus2mqtt",
+    "replaces_id": 0,
+    "app_icon": "dialog-information",
+    "summary": "dbus2mqtt",
+    "body": "Message from <b><i>dbus2mqtt</i></b>",
+    "actions": ["ok", "OK", "cancel", "Cancel"],
+    "hints": { "urgency": 1, "category": "device" },
+    "expire_timeout": 5000
+  }
+}

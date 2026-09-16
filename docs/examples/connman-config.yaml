@@ -1,0 +1,186 @@
+mqtt:
+  host: localhost
+  port: 1883
+  username: ""
+  password: ""
+  subscription_topics:
+    - internal/hardware/net/#
+
+dbus:
+  bus_type: SYSTEM
+  subscriptions:
+    - bus_name: net.connman
+      path: /
+      interfaces:
+        - interface: net.connman.Manager
+          mqtt_command_topic: internal/hardware/net/manager/command
+          mqtt_response_topic: internal/hardware/net/manager/response/{{ method }}
+          methods:
+            - method: GetProperties
+            - method: GetTechnologies
+            - method: GetServices
+          signals:
+            - signal: ServicesChanged
+            - signal: PropertyChanged
+            - signal: TechnologyAdded
+            - signal: TechnologyRemoved
+      flows:
+        - name: "Manager Service Changed"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Manager
+              path: /
+              signal: ServicesChanged
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/manager/signals/ServicesChanged
+              payload_type: json
+              payload_template: |
+                bus_name: "{{ bus_name }}"
+                path: "{{ path }}"
+                interface: "{{ interface }}"
+                signal: "{{ signal }}"
+                property_name: "{{ args[0] }}"
+                property_value: "{{ args[1] }}"
+                raw_args: "{{ args }}"
+
+        - name: "Manager Property Changed"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Manager
+              path: /
+              signal: PropertyChanged
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/manager/signals/PropertyChanged
+              payload_type: json
+              payload_template: |
+                bus_name: "{{ bus_name }}"
+                path: "{{ path }}"
+                interface: "{{ interface }}"
+                signal: "{{ signal }}"
+                property_name: "{{ args[0] }}"
+                property_value: "{{ args[1] }}"
+                raw_args: "{{ args }}"
+
+        - name: "Manager Technology Added"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Manager
+              path: /
+              signal: TechnologyAdded
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/manager/signals/TechnologyAdded
+              payload_type: json
+              payload_template: |
+                bus_name: "{{ bus_name }}"
+                path: "{{ path }}"
+                interface: "{{ interface }}"
+                signal: "{{ signal }}"
+                property_name: "{{ args[0] }}"
+                property_value: "{{ args[1] }}"
+                raw_args: "{{ args }}"
+
+        - name: "Manager Technology Removed"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Manager
+              path: /
+              signal: TechnologyRemoved
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/manager/signals/TechnologyRemoved
+              payload_type: json
+              payload_template: |
+                bus_name: "{{ bus_name }}"
+                path: "{{ path }}"
+                interface: "{{ interface }}"
+                signal: "{{ signal }}"
+                property_name: "{{ args[0] }}"
+                property_value: "{{ args[1] }}"
+                raw_args: "{{ args }}"
+
+    - bus_name: net.connman
+      path: /net/connman/service/*
+      interfaces:
+        - interface: net.connman.Service
+          mqtt_command_topic: internal/hardware/net/service/command
+          mqtt_response_topic: internal/hardware/net/service/response/{{ method }}
+          methods:
+            - method: GetProperties
+            - method: SetProperty
+            - method: Connect
+            - method: Disconnect
+            - method: Remove
+          properties:
+            - property: State
+            - property: Ethernet
+          signals:
+            - signal: PropertyChanged
+      flows:
+        - name: "Service Property Changed"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Service
+              path: /net/connman/service/*
+              signal: PropertyChanged
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/service/signals/PropertyChanged
+              payload_type: json
+              payload_template: |
+                path: "{{ path.split('/')[-1] }}"
+                raw_args: "{{ args }}"
+
+    - bus_name: net.connman
+      path: /net/connman/technology/*
+      interfaces:
+        - interface: net.connman.Technology
+          mqtt_command_topic: internal/hardware/net/technology/command
+          mqtt_response_topic: internal/hardware/net/technology/response/{{ method }}
+          methods:
+            - method: GetProperties
+            - method: SetProperty
+            - method: Scan
+          signals:
+            - signal: PropertyChanged
+      flows:
+        - name: "Technology Property Changed"
+          triggers:
+            - type: dbus_signal
+              bus_name: net.connman
+              interface: net.connman.Technology
+              path: /net/connman/technology/*
+              signal: PropertyChanged
+          actions:
+            - type: mqtt_publish
+              topic: internal/hardware/net/technology/signals/PropertyChanged
+              payload_type: json
+              payload_template: |
+                bus_name: "{{ bus_name }}"
+                path: "{{ path }}"
+                technology: "{{ path.split('/')[-1] }}"
+                interface: "{{ interface }}"
+                signal: "{{ signal }}"
+                property_name: "{{ args[0] }}"
+                property_value: "{{ args[1] }}"
+                raw_args: "{{ args }}"
+
+    - bus_name: net.connman
+      path: /net/connman/agent/*
+      interfaces:
+        - interface: net.connman.Agent
+          mqtt_command_topic: internal/hardware/net/agent/command
+          mqtt_response_topic: internal/hardware/net/agent/response/{{ method }}
+          methods:
+            - method: Release
+            - method: Cancel
+            - method: RequestBrowser
+            - method: ReportError
+            - method: RequestInput

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -21,32 +21,57 @@ repos:
   #     - id: shellcheck
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
 
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.0
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args:
           - --strict
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.6
+    rev: v0.16.7
     hooks:
-      - id: ruff
+      - id: ruff-check
         args:
           - --fix
           - --fixable
           - I
+      - id: ruff-format
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.6.16
+    rev: 0.12.13
     hooks:
       - id: uv-lock
 
   - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.399
+    rev: v1.1.414
     hooks:
       - id: pyright
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.2
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: local
+    hooks:
+      - id: generate_json_schema
+        name: generate_json_schema
+        # Ensures config.schema.json is always up-to-date
+        entry: bash -c 'uv run --active tools/generate_schema.py > schemas/config.schema.json'
+        language: python
+        additional_dependencies: ["uv"]
+        always_run: true
+        pass_filenames: false
+
+      - id: deptry
+        name: deptry
+        entry: uv run --active deptry .
+        language: python
+        additional_dependencies: ["uv"]
+        always_run: true
+        pass_filenames: false

@@ -1,33 +1,123 @@
+import json
 
-import os
+from pathlib import Path
+from typing import Any
 
 import dotenv
+import jsonschema
 
-from jsonargparse import ArgumentParser
+from jsonargparse.typing import SecretStr
 
-from dbus2mqtt.config import Config
+from dbus2mqtt.config import Config, FlowTriggerScheduleConfig
+from dbus2mqtt.config.jsonargparse import filtered_ns, new_argument_parser, ns_to_cls
 
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = Path(__file__).resolve().parent
+CONFIG_JSON_SCHEMA = {}
+
+
+def setup_module(module):
+    global CONFIG_JSON_SCHEMA
+    schema_file = FILE_DIR.parent.parent / "schemas" / "config.schema.json"
+    CONFIG_JSON_SCHEMA = json.loads(schema_file.read_text(encoding="utf-8"))
+
+
+def _replace_secretstr(obj):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            obj[k] = _replace_secretstr(v)
+        return obj
+    if isinstance(obj, list):
+        return [_replace_secretstr(v) for v in obj]
+    if isinstance(obj, tuple):
+        return tuple(_replace_secretstr(v) for v in obj)
+    if isinstance(obj, SecretStr):
+        return obj.get_secret_value()
+    return obj
+
+
+def _remove_dict_entries_with_none_values(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _remove_dict_entries_with_none_values(item)
+            for key, item in value.items()
+            if item is not None
+        }
+
+    if isinstance(value, list):
+        return [_remove_dict_entries_with_none_values(item) for item in value]
+
+    return value
+
+
+def _parse_and_validate_config(file: str) -> Config:
+
+    dotenv.load_dotenv(".env.example")
+
+    parser = new_argument_parser()
+    parser.add_class_arguments(Config)
+
+    cfg = parser.parse_path(file)
+
+    # Validate with json schema
+    config_dict = filtered_ns(Config, cfg.as_dict())
+    config_dict = _replace_secretstr(config_dict)
+
+    # jsonargeparse v4.49 did not output entries with null values
+    # jsonargeparse v4.50 does output entries with null values due to a new
+    # way of working with default unset values
+    config_dict = _remove_dict_entries_with_none_values(config_dict)
+
+    jsonschema.validate(config_dict, CONFIG_JSON_SCHEMA)
+
+    # Validate by instantiating Config object
+    cfg = parser.instantiate(cfg)
+    config = ns_to_cls(Config, cfg)
+
+    # After an update of jsonargparse and the way uuid's where assigned, all flows had the same id
+    # Validate all FlowConfig.id's are unique
+    # Validate all SubscriptionConfig.id's are unique
+    # Validate all FlowTriggerScheduleConfig.id's are unique
+    flow_ids = []
+    subscription_ids = []
+    trigger_ids = []
+
+    for flow in config.flows:
+        assert flow.id not in flow_ids
+        flow_ids.append(flow.id)
+
+    for subscription in config.dbus.subscriptions:
+        assert subscription.id not in subscription_ids
+        subscription_ids.append(subscription.id)
+
+        for flow in subscription.flows:
+            assert flow.id not in flow_ids
+            flow_ids.append(flow.id)
+
+            for trigger in flow.triggers:
+                if trigger.type == FlowTriggerScheduleConfig.type:
+                    assert trigger.id not in trigger_ids
+                    trigger_ids.append(trigger.id)
+
+    return config
+
 
 def test_home_assistant_media_player_example():
-
-    dotenv.load_dotenv(".env.example")
-
-    parser = ArgumentParser(default_env=True, env_prefix=False)
-    parser.add_class_arguments(Config)
-
-    cfg = parser.parse_path(f"{FILE_DIR}/../../docs/examples/home_assistant_media_player.yaml")
-    config = parser.instantiate_classes(cfg)
-
+    config = _parse_and_validate_config(
+        f"{FILE_DIR}/../../docs/examples/home_assistant_media_player.yaml"
+    )
     assert config is not None
 
+
 def test_linux_desktop_example():
-    dotenv.load_dotenv(".env.example")
+    config = _parse_and_validate_config(f"{FILE_DIR}/../../docs/examples/linux_desktop.yaml")
+    assert config is not None
 
-    parser = ArgumentParser(default_env=True, env_prefix=False)
-    parser.add_class_arguments(Config)
 
-    cfg = parser.parse_path(f"{FILE_DIR}/../../docs/examples/linux_desktop.yaml")
-    config = parser.instantiate_classes(cfg)
+def test_bluez_example():
+    config = _parse_and_validate_config(f"{FILE_DIR}/../../docs/examples/bluez.yaml")
+    assert config is not None
 
+
+def test_connman_example():
+    config = _parse_and_validate_config(f"{FILE_DIR}/../../docs/examples/connman-config.yaml")
     assert config is not None

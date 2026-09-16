@@ -4,13 +4,11 @@ import subprocess
 import sys
 
 from packaging import version
+from packaging.version import InvalidVersion
 
 
 def get_versions_from_git_tags() -> list[version.Version]:
-    result = subprocess.run(
-        ["git", "tag"],
-        capture_output=True, text=True, check=True
-    )
+    result = subprocess.run(["git", "tag"], capture_output=True, text=True, check=True)
     tags = result.stdout.strip().splitlines()
     versions = [t.lstrip("v") for t in tags if t.startswith("v")]
 
@@ -19,24 +17,30 @@ def get_versions_from_git_tags() -> list[version.Version]:
         try:
             parsed = version.parse(v)
             parsed_versions.append(parsed)
-        except Exception as e:
+        except InvalidVersion as e:
             print(f"Error parsing version {v}: {e}")
 
     return parsed_versions
 
-def latest_version_by_cycle(versions: list[version.Version], cycles: list[str]) -> dict[str, version.Version]:
+
+def latest_version_by_cycle(
+    versions: list[version.Version], cycles: list[str]
+) -> dict[str, version.Version]:
     res = {}
-    for cycle in cycles:
-        parsed_cycle = version.parse(cycle)
+    for cycle_str in cycles:
+        cycle = version.parse(cycle_str)
 
         for v in versions:
             # check if version is in cycle range
             # cycle can be major or major.minor or major.minor.patch
-            if len(v.release) > len(parsed_cycle.release):
+            if len(v.release) > len(cycle.release) and v.base_version.startswith(  # noqa: SIM102
+                cycle.base_version
+            ):
                 # update if version is later within cycle
-                if cycle not in cycles or v > parsed_cycle:
-                    res[cycle] = v
+                if cycle not in cycles or v > cycle:
+                    res[cycle_str] = v
     return res
+
 
 def main():
     args = sys.argv[1:]
@@ -57,10 +61,11 @@ def main():
             cycle_details.append({
                 "cycle": cycle,
                 "latestVersion": latest.base_version,
-                "isLatestStable": latest == overall_latest
+                "isLatestStable": latest == overall_latest,
             })
 
     print(json.dumps(cycle_details))
+
 
 if __name__ == "__main__":
     main()
