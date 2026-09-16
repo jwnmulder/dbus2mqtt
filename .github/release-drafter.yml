@@ -36,6 +36,7 @@ categories:
     when:
       - labels:
           - skip-changelog
+          - automerge
       - labels:
           - dependencies
         paths:
