@@ -234,7 +234,6 @@ dbus:
                     name: Image MQTT
                     unique_id: e8eb9686-4af3-47d8-ac01-c23d62e43177
                     image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
-                    availability_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
                   image_url:
                     platform: sensor
                     name: Image Url
