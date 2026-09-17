@@ -68,7 +68,7 @@ See [setup](https://jwnmulder.github.io/dbus2mqtt/setup/) for more installation 
 More dbus2mqtt examples can be found in the [examples](https://jwnmulder.github.io/dbus2mqtt/examples/) section.
 The most complete one being [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
-## Exposing dbus methods, properties and signals
+## Exposing D-Bus methods, properties and signals
 
 See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions/) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
 
