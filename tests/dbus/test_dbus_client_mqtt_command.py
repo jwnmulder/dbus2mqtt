@@ -10,9 +10,9 @@ from tests import mocked_app_context, mocked_dbus_client_with_dbus_objects
 
 @pytest.mark.asyncio
 async def test_method_only():
-    """Mock contains 4 bus objects, test with specific topic and method.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with specific topic and method.
 
-    Expect the method to be called 2 times, once for each bus object with matching subscription
+    Expect the method to be called 4 times, once for each object interface with matching subscription
     """
     mocked_interfaces = await _publish_msg(
         MqttMessage(
@@ -23,12 +23,12 @@ async def test_method_only():
         )
     )
 
-    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 4
 
 
 @pytest.mark.asyncio
 async def test_invalid_method():
-    """Mock contains 4 bus objects, test with valid topic and invalid method.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic and invalid method.
 
     Expect the method to be called zero times
     """
@@ -46,7 +46,7 @@ async def test_invalid_method():
 
 @pytest.mark.asyncio
 async def test_valid_method_on_wrong_topic():
-    """Mock contains 4 bus objects, test with valid method and wrong topic.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid method and wrong topic.
 
     Expect the method to be called zero times
     """
@@ -64,9 +64,9 @@ async def test_valid_method_on_wrong_topic():
 
 @pytest.mark.asyncio
 async def test_method_with_bus_name():
-    """Mock contains 4 bus objects, test with valid topic, method and bus_name.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and bus_name.
 
-    Expect the method to be called 1 time, once for each matching bus name and subscription
+    Expect the method to be called 1 time, once for each object interface matching bus name and subscription
     """
     mocked_interfaces = await _publish_msg(
         MqttMessage(
@@ -75,14 +75,14 @@ async def test_method_with_bus_name():
         )
     )
 
-    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 1
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
 
 
 @pytest.mark.asyncio
 async def test_method_with_bus_name_pattern():
-    """Mock contains 4 bus objects, test with valid topic, method and bus_name.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and bus_name.
 
-    Expect the method to be called 1 time, once for each matching bus name and subscription
+    Expect the method to be called 1 time, once for each object interface matching bus name and subscription
     """
     mocked_interfaces = await _publish_msg(
         MqttMessage(
@@ -90,12 +90,12 @@ async def test_method_with_bus_name_pattern():
         )
     )
 
-    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 1
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
 
 
 @pytest.mark.asyncio
 async def test_method_invalid_bus_name():
-    """Mock contains 4 bus objects, test with valid topic, method and invalid bus_name.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and invalid bus_name.
 
     Expect the method to be called zero times
     """
@@ -111,9 +111,9 @@ async def test_method_invalid_bus_name():
 
 @pytest.mark.asyncio
 async def test_method_with_path():
-    """Mock contains 4 bus objects, test with valid topic, method and path.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and path.
 
-    Expect the method to be called 2 times, once for each bus name with matching path and subscription
+    Expect the method to be called 2 times, once for each object interface matching path and subscription
     """
     mocked_interfaces = await _publish_msg(
         MqttMessage(
@@ -122,14 +122,14 @@ async def test_method_with_path():
         )
     )
 
-    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 4
 
 
 @pytest.mark.asyncio
 async def test_method_with_path_pattern():
-    """Mock contains 4 bus objects, test with valid topic, method and path.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and path.
 
-    Expect the method to be called 2 times, once for each bus name with matching path and subscription
+    Expect the method to be called 2 times, once for each object interface with matching path and subscription
     """
     mocked_interfaces = await _publish_msg(
         MqttMessage(
@@ -138,12 +138,12 @@ async def test_method_with_path_pattern():
         )
     )
 
-    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 4
 
 
 @pytest.mark.asyncio
 async def test_method_invalid_path():
-    """Mock contains 4 bus objects, test with valid method and invalid path.
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid method and invalid path.
 
     Expect the method to be called zero times
     """
@@ -151,6 +151,54 @@ async def test_method_invalid_path():
         MqttMessage(
             topic="dbus2mqtt/test/command",
             payload={"method": "TestMethod2", "path": "/invalid/path/to/object"},
+        )
+    )
+
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 0
+
+
+@pytest.mark.asyncio
+async def test_method_with_interface():
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and interface.
+
+    Expect the method to be called 1 timee, once for each object interface with matching interface and subscription
+    """
+    mocked_interfaces = await _publish_msg(
+        MqttMessage(
+            topic="dbus2mqtt/test/command",
+            payload={"method": "TestMethod2", "interface": "test-interface-name"},
+        )
+    )
+
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
+
+
+@pytest.mark.asyncio
+async def test_method_with_interface_pattern():
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid topic, method and interface.
+
+    Expect the method to be called 1 time, once for each object interface with matching interface and subscription
+    """
+    mocked_interfaces = await _publish_msg(
+        MqttMessage(
+            topic="dbus2mqtt/test/command",
+            payload={"method": "TestMethod2", "interface": "*-interface-name"},
+        )
+    )
+
+    assert sum(i.call_test_method2.call_count for i in mocked_interfaces) == 2
+
+
+@pytest.mark.asyncio
+async def test_method_invalid_interface():
+    """Mock contains 4 bus objects, each having 3 interfaces, test with valid method and invalid interface.
+
+    Expect the method to be called zero times
+    """
+    mocked_interfaces = await _publish_msg(
+        MqttMessage(
+            topic="dbus2mqtt/test/command",
+            payload={"method": "TestMethod2", "interface": "invalid.interface"},
         )
     )
 
@@ -287,6 +335,15 @@ def _mocked_app_context() -> AppContext:
             interfaces=[
                 config.InterfaceConfig(
                     interface="test-interface-name",
+                    mqtt_command_topic="dbus2mqtt/test/command",
+                    methods=[
+                        config.MethodConfig(method="TestMethod1"),
+                        config.MethodConfig(method="TestMethod2"),
+                    ],
+                    properties=[config.PropertyConfig(property="TestProperty1")],
+                ),
+                config.InterfaceConfig(
+                    interface="test-interface-name-same-topic",
                     mqtt_command_topic="dbus2mqtt/test/command",
                     methods=[
                         config.MethodConfig(method="TestMethod1"),

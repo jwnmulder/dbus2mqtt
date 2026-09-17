@@ -3,10 +3,10 @@
 Useful snippets for checking what's going on on dbus
 
 ```bash
-# monitor all dbus traffic
+# monitor all D-Bus traffic
 dbus-monitor
 
-# show introspection data for dbus objects
+# show introspection data for D-Bus objects
 busctl --user introspect org.freedesktop.DBus /org/freedesktop/DBus
 ```
 
