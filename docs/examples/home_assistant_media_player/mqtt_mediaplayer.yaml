@@ -88,6 +88,7 @@ media_player:
 
   - platform: universal
     name: MPRIS Media Player Universal
+    unique_id: 69661e4f-e7c4-4530-b4f9-702f5225bd24
     children:
       - media_player.mpris_media_player
     commands:
@@ -98,5 +99,5 @@ media_player:
           payload: >
               { "action": "set_current_player", "player": "{{ source }}" }
     attributes:
-      source: sensor.mpris_media_player_state|current_player
-      source_list: sensor.mpris_media_player_state|available_players
+      source: sensor.mpris_media_player_state|source
+      source_list: sensor.mpris_media_player_state|source_list

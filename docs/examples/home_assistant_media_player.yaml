@@ -178,7 +178,7 @@ dbus:
                   player_state:
                     platform: sensor
                     name: State
-                    unique_id: 94b97e45-251a-4741-b479-6b48576f2f53
+                    unique_id: e8eb9686-f947-46e1-80d4-fc1e812e39a2
                     state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     value_template: >-
                       {% raw %}
@@ -232,7 +232,7 @@ dbus:
                   image_mqtt:
                     platform: image
                     name: Image MQTT
-                    unique_id: 22c9206e-4af3-47d8-ac01-c23d62e43177
+                    unique_id: e8eb9686-4af3-47d8-ac01-c23d62e43177
                     image_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
                     availability_topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
                   image_url:
