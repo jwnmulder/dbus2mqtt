@@ -36,8 +36,8 @@ When triggered, the following context parameters are available
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'object_added'   |
-| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
-| path         | `str`  | path of the object that was registered on D-Bus |
+| bus_name     | `str`  | bus_name of the object that was registered on dbus |
+| path         | `str`  | path of the object that was registered on dbus |
 
 ## dbus_object_removed
 
@@ -50,12 +50,12 @@ When triggered, the following context parameters are available
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'object_removed' |
-| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
-| path         | `str`  | path of the object that was registered on D-Bus |
+| bus_name     | `str`  | bus_name of the object that was registered on dbus |
+| path         | `str`  | path of the object that was registered on dbus |
 
 ## dbus_signal
 
-D-Bus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
+DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
 
 ```yaml
 - type: dbus_signal
@@ -75,8 +75,8 @@ When triggered, the following context parameters are available
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'dbus_signal'    |
-| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
-| path         | `str`  | path of the object that was registered on D-Bus |
+| bus_name     | `str`  | bus_name of the object that was registered on dbus |
+| path         | `str`  | path of the object that was registered on dbus |
 | interface    | `str`  | name of interface for which the signal was triggered |
 | signal       | `str`  | name of the signal, e.g. 'Seeked' |
 | args         | `list` | positional signal arguments, list of objects |
@@ -135,7 +135,7 @@ flows:
 ```
 
 !!! note
-    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a D-Bus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
+    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
 
 ## context_changed
 
