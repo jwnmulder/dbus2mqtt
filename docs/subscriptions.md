@@ -12,7 +12,7 @@ dbus:
           ...
 ```
 
-`bus_name`, `path` and `interface` should match the dbus object you want to subscribe to. Wildcard patterns are supported for both `bus_name` and `path`
+`bus_name`, `path` and `interface` should match the D-Bus object you want to subscribe to. Wildcard patterns are supported for both `bus_name` and `path`
 
 For each subscription, you can configure the behavior of `dbus2mqtt` using any of the options below.
 
@@ -60,12 +60,13 @@ Methods are invoked after publishing a specific JSON message to the `dbus2mqtt/o
 | method       | `str`  | Method name  |
 | args         | `list` | Optional list of positional arguments that match the methods D-Bus signature |
 | kwargs       | `dict` | Optional list of keyworded arguments that match the methods D-Bus signature. Only available when a D-Bus service provides introspection data with named method arguments |
-| bus_name     | `str`  | Only invoke on dbus objects where bus_name matches, defaults to `*` |
-| path         | `str`  | Only invoke on dbus objects where path matches, defaults to `*`     |
+| bus_name     | `str`  | Only invoke on interfaces of D-Busobjects where bus_name matches, defaults to `*`   |
+| path         | `str`  | Only invoke on interfaces of D-Bus objects where path matches, defaults to `*`      |
+| interface    | `str`  | Only invoke on interfaces of D-Bus objects where interface matches, defaults to `*` |
 
 !!! note
-    If no `bus_name` and `path` is given, commands are executed against all matching
-    dbus objects. To target specific dbus objects make sure to set both keys.
+    If no `bus_name`, `path` and `interface` is given, commands are executed against all matching
+    interfaces of all matching D-Bus objects. To target specific D-Bus objects or interfaces make sure to set the relevant keys.
 
 Example 1, calling `Play` on all registered MPRIS players
 
@@ -105,10 +106,11 @@ Properties can be updated by publishing a specific JSON message to the `dbus2mqt
 
 | key          | type   | description    |
 |--------------|--------|----------------|
-| property     | str    | Property name  |
-| value        | any    | Property value |
-| bus_name     | str    | Only invoke on dbus objects where bus_name matches, defaults to `*`  |
-| path         | str    | Only invoke on dbus objects where path matches, defaults to `*`      |
+| property     | `str`  | Property name  |
+| value        | `any`  | Property value |
+| bus_name     | `str`  | Only invoke on interfaces of D-Busobjects where bus_name matches, defaults to `*`   |
+| path         | `str`  | Only invoke on interfaces of D-Bus objects where path matches, defaults to `*`      |
+| interface    | `str`  | Only invoke on interfaces of D-Bus objects where interface matches, defaults to `*` |
 
 Example, setting `Volume` to 1.0 for Firefox MPRIS player only
 
@@ -126,8 +128,8 @@ Example, setting `Volume` to 1.0 for Firefox MPRIS player only
 If set, D-Bus responses to commands will be published on the configured `mqtt_response_topic` MQTT topic.
 
 !!! note
-    `dbus2mqtt` publishes one response per targeted dbus object.
-    When two dbus objects are targeted, two separate responses will be published.
+    `dbus2mqtt` publishes one response per targeted D-Bus object.
+    When two D-Bus objects are targeted, two separate responses will be published.
 
 Example response for method calls
 
@@ -175,7 +177,7 @@ Example response for property updates
 }
 ```
 
-## Exposing dbus signals
+## Exposing D-Bus signals
 
 Publishing signals to MQTT topics works by subscribing to the relevant signal and using flows for publishing.
 
