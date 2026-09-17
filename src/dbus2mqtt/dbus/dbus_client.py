@@ -925,7 +925,7 @@ class DbusClient:
         return False
 
     def _get_matching_subscribed_interfaces(
-        self, topic: str, bus_name_pattern: str, path_pattern: str
+        self, topic: str, bus_name_pattern: str, path_pattern: str, interface_pattern: str
     ):
         result: list[tuple[InterfaceConfig, dbus_aio.ProxyObject]] = []
 
@@ -944,9 +944,14 @@ class DbusClient:
                 )
                 for subscription_config in subscription_configs:
                     for interface_config in subscription_config.interfaces:
+                        interface_matches = fnmatch.fnmatchcase(
+                            interface_config.interface, interface_pattern
+                        )
+                        if not interface_matches:
+                            continue
+
                         mqtt_topic = interface_config.render_mqtt_command_topic(self.templating, {})
                         topic_matches = mqtt_topic == topic
-
                         if topic_matches:
                             result.append((interface_config, proxy_object))
         return result
@@ -969,6 +974,7 @@ class DbusClient:
 
         payload_bus_name = msg.payload.get("bus_name") or "*"
         payload_path = msg.payload.get("path") or "*"
+        payload_interface = msg.payload.get("interface") or "*"
 
         payload_method = msg.payload.get("method")
         payload_method_args = msg.payload.get("args")
@@ -998,7 +1004,7 @@ class DbusClient:
         ] = []
 
         matching_interfaces = self._get_matching_subscribed_interfaces(
-            msg.topic, payload_bus_name, payload_path
+            msg.topic, payload_bus_name, payload_path, payload_interface
         )
         for interface_config, proxy_object in matching_interfaces:
             for method in interface_config.methods:
@@ -1017,11 +1023,11 @@ class DbusClient:
         if not matched_methods and not matched_properties and hints.log_unmatched_message:
             if payload_method:
                 logger.info(
-                    f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self._subscriptions.keys())}"
+                    f"No configured or active dbus subscriptions for topic={msg.topic}, method={payload_method}, bus_name={payload_bus_name}, path={payload_path}, interface={payload_interface}, active bus_names={list(self._subscriptions.keys())}"
                 )
             if payload_property:
                 logger.info(
-                    f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, active bus_names={list(self._subscriptions.keys())}"
+                    f"No configured or active dbus subscriptions for topic={msg.topic}, property={payload_property}, bus_name={payload_bus_name}, path={payload_path}, interface={payload_interface}, active bus_names={list(self._subscriptions.keys())}"
                 )
             return
 
