@@ -55,7 +55,7 @@ When triggered, the following context parameters are available
 
 ## dbus_signal
 
-DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
+D-Bus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
 
 ```yaml
 - type: dbus_signal
