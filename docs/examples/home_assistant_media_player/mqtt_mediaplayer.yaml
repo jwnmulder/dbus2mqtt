@@ -2,30 +2,28 @@ media_player:
   - platform: media_player_template
     media_players:
       mpris_media_player:
+        unique_id: dfc83bec-d11a-454b-a3a6-02398c060ee0
         device_class: receiver
         friendly_name: MPRIS Media Player
         value_template: >
-          {% set s = states('sensor.mpris_media_player') %}
+          {% set s = states('sensor.mpris_media_player_state') %}
           {{ s if s not in ['unavailable', 'unknown'] else None }}
 
-        current_volume_template: "{{ state_attr('sensor.mpris_media_player', 'Volume') }}"
-        current_is_muted_template: "{{ state_attr('sensor.mpris_media_player', 'VolumeMuted') }}"
-        current_position_template: "{{ state_attr('sensor.mpris_media_player', 'MediaPosition') }}"
-        title_template: "{{ state_attr('sensor.mpris_media_player', 'MediaTitle') }}"
+        app_id_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_id') }}"
+        app_name_template: "{{ state_attr('sensor.mpris_media_player_state', 'app_name') }}"
 
-        media_content_type_template: music  # needed to show 'artist'
-        media_duration_template: "{{ state_attr('sensor.mpris_media_player', 'MediaDuration') }}"
-        album_template: "{{ state_attr('sensor.mpris_media_player', 'MediaAlbum') }}"
-        artist_template: "{{ state_attr('sensor.mpris_media_player', 'MediaArtists') }}"
+        current_volume_template: "{{ state_attr('sensor.mpris_media_player_state', 'volume_level') }}"
+        current_is_muted_template: "{{ state_attr('sensor.mpris_media_player_state', 'is_volume_muted') }}"
+        current_position_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_position') }}"
+        title_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_title') }}"
 
-        # mpris:artUrl might contain a file:// schema. In these cases we rely on images published via MQTT
-        media_image_url_template: >-
-          {% set media_image_url = state_attr('sensor.mpris_media_player', 'MediaImageUrl') %}
-          {% if media_image_url and media_image_url.startswith('file://') %}
-            http://127.0.0.1:8123{{ state_attr('image.mpris_media_player_image', 'entity_picture') }}
-          {% else %}
-            {{ media_image_url }}
-          {% endif %}
+        media_content_type_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_content_type') }}"
+        media_duration_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_duration') }}"
+        album_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_album_name') }}"
+        artist_template: "{{ state_attr('sensor.mpris_media_player_state', 'media_artist') }}"
+
+        entity_picture_template: "{{ state_attr('sensor.mpris_media_player_image_url', 'media_image_url') }}"
+        media_image_url_template: "{{ state_attr('sensor.mpris_media_player_image_url', 'media_image_url') }}"
 
         turn_off:
           service: mqtt.publish
@@ -68,7 +66,7 @@ media_player:
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
-              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player', 'Metadata')['mpris:trackid'] }}", {{ (position * 1000000) | int }}] }
+              { "method": "SetPosition", "args": ["{{ state_attr('sensor.mpris_media_player_state', 'mqtt_data')['Metadata']['mpris:trackid'] }}", {{ (position * 1000000) | int }}] }
         set_volume:
           service: mqtt.publish
           data:
@@ -80,13 +78,13 @@ media_player:
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
-              {"property": "Volume", "value": {{ [1, (state_attr('sensor.mpris_media_player', 'Volume') + 0.1)] | min }} }
+              {"property": "Volume", "value": {{ [1, (state_attr('sensor.mpris_media_player_state', 'volume_level') + 0.1)] | min }} }
         volume_down:
           service: mqtt.publish
           data:
             topic: dbus2mqtt/org.mpris.MediaPlayer2/command
             payload: >
-              {"property": "Volume", "value": {{ [0, (state_attr('sensor.mpris_media_player', 'Volume') - 0.1)] | max }} }
+              {"property": "Volume", "value": {{ [0, (state_attr('sensor.mpris_media_player_state', 'volume_level') - 0.1)] | max }} }
 
   - platform: universal
     name: MPRIS Media Player Universal
@@ -100,5 +98,5 @@ media_player:
           payload: >
               { "action": "set_current_player", "player": "{{ source }}" }
     attributes:
-      source: sensor.mpris_media_player|current_player
-      source_list: sensor.mpris_media_player|available_players
+      source: sensor.mpris_media_player_state|current_player
+      source_list: sensor.mpris_media_player_state|available_players

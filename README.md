@@ -13,12 +13,6 @@ This makes it easy to integrate Linux desktop services or system signals into MQ
 * 📡 Expose **D-Bus methods** for remote control via MQTT messages.
 * 🏠 Includes example configurations for **MPRIS** and **Home Assistant Media Player** integration.
 
-## Project status
-
-**dbus2mqtt** is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.
-
-Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
-
 ## Getting started with dbus2mqtt
 
 Create a `config.yaml` file with the contents shown below. This configuration will expose all bus properties from the `org.mpris.MediaPlayer2.Player` interface to MQTT on the `dbus2mqtt/org.mpris.MediaPlayer2/state` topic.

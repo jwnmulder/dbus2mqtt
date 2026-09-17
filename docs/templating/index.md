@@ -9,7 +9,7 @@ Templating is used in these areas of dbus2mqtt:
 
 Besides the filters and functions that Jinja provides out of the box, additional extensions are available.
 
-All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/){:target="_blank"} are included as well as the following global functions, variables and filters:
+All filters from [jinja2-ansible-filters](https://pypi.org/project/jinja2-ansible-filters/){:target="_blank"} are included, as well as the following global functions, variables and filters:
 
 | Name                | Type      | Description                                                                 |
 |---------------------|-----------|-----------------------------------------------------------------------------|

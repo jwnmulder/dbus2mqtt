@@ -34,8 +34,16 @@ categories:
   # Exclude these from the release notes
   - type: pre-exclude
     when:
-      labels:
-        - skip-changelog
+      - labels:
+          - skip-changelog
+          - automerge
+          - dependencies
+          # waiting for https://github.com/release-drafter/release-drafter/pull/1725
+          # - labels:
+          #     - dependencies
+          #   paths:
+          #     - .github/**
+          #     - uv.lock
 
   # Version resolution
   - type: version-resolver

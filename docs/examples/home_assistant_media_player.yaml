@@ -67,6 +67,8 @@ dbus:
                 current_player: "{{ mpris_bus_name | replace('org.mpris.MediaPlayer2.', '') }}"
                 player_properties: |
                   {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+                properties: |
+                  {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2']) }}
                 updated_at: "{{ now().isoformat() }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/state
@@ -79,7 +81,9 @@ dbus:
                       'current_bus_name': mpris_bus_name,
                       'current_player': current_player,
                       'available_players': available_players,
-                      'updated_at': updated_at
+                      'updated_at': updated_at,
+                      'CanQuit' : properties.CanQuit,
+                      'Identity': properties.Identity,
                     }
                     | combine(player_properties)
                     | combine({ 'Position': seeked_position } if seeked_position else {})
@@ -207,6 +211,8 @@ dbus:
 
                       {{
                         {
+                          "app_id": value_json.get('current_player'),
+                          "app_name": value_json.get('Identity'),
                           "media_content_type": "music",
                           "media_duration": ((metadata.get('mpris:length') or 0) / 1000000) | int,
                           "media_position": ((value_json.get('Position') or 0) / 1000000) | int,
@@ -232,7 +238,7 @@ dbus:
                   image_url:
                     platform: sensor
                     name: Image Url
-                    unique_id: 6e06850b-3209-443c-bec7-2c47021ba607
+                    unique_id: e8eb9686-3209-443c-bec7-2c47021ba607
                     state_topic: dbus2mqtt/org.mpris.MediaPlayer2/state
                     value_template: >-
                       {% raw %}
