@@ -2,10 +2,10 @@
 
 **dbus2mqtt** allows you to add additional processing logic (flows) for when events occur. Configuration is done in yaml and a complete example can be found in [home_assistant_media_player.yaml](https://github.com/jwnmulder/dbus2mqtt/blob/main/docs/examples/home_assistant_media_player.yaml){:target="_blank"} which is part of the [MPRIS to Home Assistant Media Player integration](../examples/home_assistant_media_player.md) example
 
-Flows can be defined on a global or D-Bus subscription level and can be triggered by any of the following events:
+Flows can be defined on a global or dbus subscription level and can be triggered by any of the following events:
 
 * `schedule` for cron based schedules
-* `dbus_signal` for when D-Bus signals occur
+* `dbus_signal` for when dbus signal occur
 * `object_added` when a new bus_name is registered on dbus
 * `object_removed` when a bus_name is removed from dbus
 * `mqtt_message` for reacting to MQTT messages
@@ -16,7 +16,7 @@ Within each flow a set of actions can be configured. These are executed in the o
 * `context_set` to set variables
 * `mqtt_publish` to publish a MQTT message
 
-Global flows are started even when dbus2mqtt is not subscribed to any D-Bus objects. An example for global flows:
+Global flows are started even when dbus2mqtt is not subscribed to any dbus objects. An example for global flows:
 
 ```yaml title="Global flow"
 flows:
@@ -29,7 +29,7 @@ flows:
         msg: hello from example flow
 ```
 
-Subscription based flows are started when dbus2mqtt is subscribed to one or more D-Bus objects. No matter the number of D-Bus objects subscribed, there is at most one flow instance running.
+Subscription based flows are started when dbus2mqtt is subscribed to one or more dbus objects. No matter the number of dbus objects subscribed, there is at most one flow instance running.
 
 ```yaml title="Subscription based flows"
 dbus:

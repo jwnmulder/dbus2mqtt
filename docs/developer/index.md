@@ -2,7 +2,7 @@
 
 ## Specifications
 
-Generic D-Bus specifications:
+Generic DBus specifications:
 
 * [D-Bus Tutorial](https://dbus.freedesktop.org/doc/dbus-tutorial.html){:target="_blank"}
 * [D-Bus Specification](https://dbus.freedesktop.org/doc/dbus-specification.html){:target="_blank"}
