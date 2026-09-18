@@ -83,6 +83,6 @@ autolabeler:
     title:
       - '/fix/i'
 
-change-template: '* $TITLE (#$NUMBER) by @$AUTHOR'
+change-template: '* $TITLE (#$NUMBER) by @$AUTHORS'
 template: |
   $CHANGES
