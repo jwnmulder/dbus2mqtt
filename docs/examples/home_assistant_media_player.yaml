@@ -48,13 +48,15 @@ dbus:
               signal: PropertiesChanged
             - type: dbus_signal
               signal: Seeked
+            - type: context_changed
           conditions:
             # For PropertiesChanged signals, only trigger for org.mpris.MediaPlayer2.Player interfaces
             - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+            - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
               context:
-                mpris_bus_name: "{{ dbus_list('org.mpris.MediaPlayer2.*') | first }}"
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
                 mpris_path: /org/mpris/MediaPlayer2
                 available_players: "{{ dbus_list('org.mpris.MediaPlayer2.*') | map('replace', 'org.mpris.MediaPlayer2.', '') | list }}"
                 # Some players return stale position if GetAll is executed immediately after a seeked signal.
@@ -95,12 +97,17 @@ dbus:
             - type: dbus_object_added
             - type: dbus_signal
               signal: PropertiesChanged
+            - type: context_changed
           conditions:
             - "{{ dbus_list('org.mpris.MediaPlayer2.*') | length > 0 }}"
           actions:
             - type: context_set
               context:
-                artUrl: "{{ (dbus_property_get(bus_name, path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') }}"
+                mpris_bus_name: '{{ current_player_bus_name | default(dbus_list("org.mpris.MediaPlayer2.*") | first, true) }}'
+                mpris_path: /org/mpris/MediaPlayer2
+            - type: context_set
+              context:
+                artUrl: "{{ (dbus_property_get(mpris_bus_name, mpris_path, 'org.mpris.MediaPlayer2.Player', 'Metadata') or {}).get('mpris:artUrl') if mpris_bus_name else None }}"
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
               payload_type: binary
@@ -123,6 +130,28 @@ dbus:
               topic: dbus2mqtt/org.mpris.MediaPlayer2/artUrlImage
               payload_type: binary
               payload_template: "{{ None }}"
+
+        - name: Set current player
+          triggers:
+            - type: mqtt_message
+              topic: dbus2mqtt/org.mpris.MediaPlayer2/custom_command
+              filter: "{{ payload.get('action') == 'set_current_player' }}"
+            - type: dbus_object_removed
+          actions:
+            - type: context_set
+              context:
+                preferred_player: >-
+                  {% set preferred_player = current_player_bus_name | default(None) -%}
+                  {% if trigger_type == 'mqtt_message' -%}
+                  {%   set preferred_player = 'org.mpris.MediaPlayer2.' + payload.get('player') -%}
+                  {% endif -%}
+                  {{ preferred_player }}
+            - type: context_set
+              global_context:
+                current_player_bus_name: >-
+                  {{ preferred_player if preferred_player in dbus_list('org.mpris.MediaPlayer2.*') else None }}
+            - type: log
+              msg: Changed preferred player to '{{ current_player_bus_name }}', requested '{{ preferred_player }}'
 
         - name: Home Assistant Discovery
           triggers:
@@ -194,6 +223,8 @@ dbus:
                           "media_image_url": media_image_url,
                           "volume_level": value_json.get('Volume'),
                           "is_volume_muted": value_json.get('Volume') == 0,
+                          "source_list": value_json.get('available_players'),
+                          "source": value_json.get('current_player'),
                           "mqtt_data": value_json
                         } | to_json
                       }}
