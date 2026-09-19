@@ -25,7 +25,7 @@ When triggered, the following context parameters are available
 
 ## dbus_object_added
 
-This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `dbus2mqtt` subscription.
 
 ```yaml
 - type: dbus_object_added
@@ -55,7 +55,7 @@ When triggered, the following context parameters are available
 
 ## dbus_signal
 
-D-Bus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
+D-Bus signals triggers must be configured with an interface and path. Note that only subscribed signals can be configured as a trigger.
 
 ```yaml
 - type: dbus_signal
@@ -135,7 +135,7 @@ flows:
 ```
 
 !!! note
-    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a D-Bus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
+    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a D-Bus call will be executed as well. Similarly, warnings will be logged if a message does not match any flow or D-Bus method.
 
 ## context_changed
 

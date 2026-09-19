@@ -48,7 +48,7 @@ dbus:
 
 Some action parameters allow the use of templating. When supported, it is documented for each individual trigger and action. See [templating](../templating/index.md) for further templating details.
 
-## Contional flows
+## Conditional flows
 
 Flow actions can be conditionally executed. The `conditions` parameter accepts either a templated string or list of strings.
 When using a list of templated strings, all expressions must evaluate to `True` for actions to be executed.

@@ -10,7 +10,7 @@ dbus-monitor
 busctl --user introspect org.freedesktop.DBus /org/freedesktop/DBus
 ```
 
-Useful snippts for MPRIS debugging
+Useful snippets for MPRIS debugging
 
 ```bash
 playerctl -l

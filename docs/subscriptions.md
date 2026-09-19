@@ -60,7 +60,7 @@ Methods are invoked after publishing a specific JSON message to the `dbus2mqtt/o
 | method       | `str`  | Method name  |
 | args         | `list` | Optional list of positional arguments that match the methods D-Bus signature |
 | kwargs       | `dict` | Optional list of keyworded arguments that match the methods D-Bus signature. Only available when a D-Bus service provides introspection data with named method arguments |
-| bus_name     | `str`  | Only invoke on interfaces of D-Busobjects where bus_name matches, defaults to `*`   |
+| bus_name     | `str`  | Only invoke on interfaces of D-Bus objects where bus_name matches, defaults to `*`   |
 | path         | `str`  | Only invoke on interfaces of D-Bus objects where path matches, defaults to `*`      |
 | interface    | `str`  | Only invoke on interfaces of D-Bus objects where interface matches, defaults to `*` |
 
@@ -108,7 +108,7 @@ Properties can be updated by publishing a specific JSON message to the `dbus2mqt
 |--------------|--------|----------------|
 | property     | `str`  | Property name  |
 | value        | `any`  | Property value |
-| bus_name     | `str`  | Only invoke on interfaces of D-Busobjects where bus_name matches, defaults to `*`   |
+| bus_name     | `str`  | Only invoke on interfaces of D-Bus objects where bus_name matches, defaults to `*`   |
 | path         | `str`  | Only invoke on interfaces of D-Bus objects where path matches, defaults to `*`      |
 | interface    | `str`  | Only invoke on interfaces of D-Bus objects where interface matches, defaults to `*` |
 
@@ -188,7 +188,7 @@ Signals configuration parameters
 | `signal`    | Name of the signal |
 | `filter`    | Templated string that should evaluate to a boolean result. `True` will accept signals, `False` will drop signals |
 
-In contrast to calling methods or setting properties, signals are not automatically published to MQTT topcis.
+In contrast to calling methods or setting properties, signals are not automatically published to MQTT topics.
 To do so, configure a flow as shown below.
 
 ```yaml

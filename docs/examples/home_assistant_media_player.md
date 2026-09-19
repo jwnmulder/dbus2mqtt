@@ -16,7 +16,7 @@ Pre-requisites:
 
 ## Features
 
-* D-Bus subscription using `org.mpris.MediaPlayer2.*` wildcard to support multiple concurrent MRPIS players
+* D-Bus subscription using `org.mpris.MediaPlayer2.*` wildcard to support multiple concurrent MPRIS players
 * Every 5 seconds, the state of the `first` known MPRIS player is published to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/state`
 * Every MPRIS property update immediately publishes the state to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/state`
 * Support for player commands (see below)
@@ -51,7 +51,7 @@ The following MPRIS players are known to work with Home Assistant.
 
 The following table lists player commands, their descriptions, and an example JSON payload for invoking them via MQTT.
 
-Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/command`. Method calls will be done for all matching players. The same applies to property updates.
+Dbus methods can be invoked by sending the JSON payload to MQTT topic `dbus2mqtt/org.mpris.MediaPlayer2/command`. Method calls will be done for all matching players. The same applies to property updates.
 
 | Method<br />Property | Description                       | Example MQTT JSON Payload                           |
 |---------------|------------------------------------------|------------------------------------------------|

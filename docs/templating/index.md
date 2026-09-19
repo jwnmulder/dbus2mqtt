@@ -1,6 +1,6 @@
 # Templating
 
-**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinjas own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/){:target="_blank"}.
+**dbus2mqtt** leverages Jinja to allow formatting of MQTT messages, D-Bus responses and other configuration aspects of `dbus2mqtt`. If you are not familiar with Jinja based expressions, have a look at Jinja's own [Template Designer Documentation](https://jinja.palletsprojects.com/en/stable/templates/){:target="_blank"}.
 
 Templating is used in these areas of dbus2mqtt:
 

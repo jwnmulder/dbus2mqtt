@@ -5,7 +5,7 @@ hide:
 
 # Connman (WIP)
 
-Using dbus2mqtt, you can control you network configuration using connman through mqtt topics.
+Using dbus2mqtt, you can control your network configuration using connman through mqtt topics.
 
 ## Setup activities
 

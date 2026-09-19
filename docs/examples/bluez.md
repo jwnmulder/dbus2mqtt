@@ -27,7 +27,7 @@ uv run dbus2mqtt --config docs/examples/bluez.yaml
 
 The following table lists commands, their descriptions, and an example JSON payload for invoking them via MQTT.
 
-Dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/bluez/hci0/command`. Method calls will be done for all matching D-Bus objects.
+Dbus methods can be invoked by sending the JSON payload to MQTT topic `dbus2mqtt/bluez/hci0/command`. Method calls will be done for all matching D-Bus objects.
 
 | Method<br />Property  | Description                          | Example MQTT JSON Payload                          |
 |-----------------------|--------------------------------------|-------------------------------------------------|
