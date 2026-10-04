@@ -20,18 +20,19 @@ def test_non_template_dict_result():
 
 
 @pytest.mark.asyncio
-async def test_signal_filter_bool_result():
+async def test_filter_bool_result():
 
     config = yaml.safe_load("""
-        signals:
-            - signal: PropertiesChanged
-              filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
+        triggers:
+          - type: dbus_signal
+            signal: PropertiesChanged
+            filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
     """)
 
     templating = TemplateEngine()
     context = {"args": ["org.mpris.MediaPlayer2.Player", {}, []]}
 
-    res = await templating.async_render_template(config["signals"][0]["filter"], bool, context)
+    res = await templating.async_render_template(config["triggers"][0]["filter"], bool, context)
 
     assert res
 
