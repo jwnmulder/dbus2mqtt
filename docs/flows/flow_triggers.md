@@ -89,8 +89,8 @@ When triggered, the following context parameters are available
        - name: PropertiesChanged in player interface
          triggers:
            - type: dbus_signal
-         conditions:
-           - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+             signal: PropertiesChanged
+             filter: "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' }}"
      ```
 
 ## mqtt_message

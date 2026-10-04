@@ -200,12 +200,13 @@ dbus:
         - interface: org.freedesktop.DBus.Properties
           signals:
             - signal: PropertiesChanged
-              filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
 
       flows:
         - name: "Property Changed flow"
           triggers:
             - type: on_signal
+              signal: PropertiesChanged
+              filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
           actions:
             - type: mqtt_publish
               topic: dbus2mqtt/org.mpris.MediaPlayer2/signals/PropertiesChanged

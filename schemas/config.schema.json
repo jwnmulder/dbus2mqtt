@@ -26,13 +26,16 @@
       "type": "object",
       "properties": {
         "signal": {
-          "type": "string"
+          "type": "string",
+          "description": "D-Bus signal name"
         },
         "filter": {
-          "type": "string"
+          "type": "string",
+          "description": "Deprecated, please use dbus_signal.filter on flow triggers"
         }
       },
       "additionalProperties": false,
+      "description": "Interface subscription signal config.",
       "required": [
         "signal"
       ]
@@ -107,6 +110,9 @@
     "FlowTriggerContextChangedConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "const": "context_changed",
           "default": "context_changed"
@@ -122,6 +128,9 @@
     "FlowTriggerBusNameAddedConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "const": "bus_name_added",
           "default": "bus_name_added"
@@ -133,6 +142,9 @@
     "FlowTriggerBusNameRemovedConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "const": "bus_name_removed",
           "default": "bus_name_removed"
@@ -144,6 +156,9 @@
     "FlowTriggerDbusObjectAddedConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "enum": [
             "dbus_object_added",
@@ -158,6 +173,9 @@
     "FlowTriggerDbusObjectRemovedConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "enum": [
             "dbus_object_removed",
@@ -172,6 +190,9 @@
     "FlowTriggerDbusSignalConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "signal": {
           "type": "string",
           "description": "Signal name to filter on, e.g. PropertiesChanged."
@@ -202,6 +223,10 @@
     "FlowTriggerMqttMessageConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string",
+          "description": "Optional template expression, trigger only when it evaluates truthy."
+        },
         "topic": {
           "type": "string",
           "description": "MQTT topic for the trigger."
@@ -217,10 +242,6 @@
           ],
           "description": "Expected payload format, 'json' or 'text'.",
           "default": "json"
-        },
-        "filter": {
-          "type": "string",
-          "description": "Optional template expression, trigger only when it evaluates truthy."
         }
       },
       "additionalProperties": false,
@@ -232,6 +253,9 @@
     "FlowTriggerScheduleConfig": {
       "type": "object",
       "properties": {
+        "filter": {
+          "type": "string"
+        },
         "type": {
           "const": "schedule",
           "default": "schedule"

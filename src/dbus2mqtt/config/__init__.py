@@ -12,13 +12,29 @@ from dbus2mqtt.template.templating import TemplateEngine
 
 @dataclass
 class SignalConfig:
+    """Interface subscription signal config.
+
+    Attributes:
+        signal: D-Bus signal name
+        filter: Deprecated, please use dbus_signal.filter on flow triggers
+    """
+
     signal: str
-    filter: str | None = None  # Deprecate this?, see #283
+    filter: str | None = None
 
     def matches_filter(self, template_engine: TemplateEngine, *args) -> bool:
         if self.filter:
             return template_engine.render_template(self.filter, bool, {"args": args})
         return True
+
+    def __post_init__(self):
+        if self.filter:
+            warnings.warn(
+                "signal.filter is deprecated, please use dbus_signal.filter on flow triggers",
+                FutureWarning,
+                stacklevel=2,
+            )
+            self.type = FlowTriggerDbusObjectAddedConfig.type
 
 
 @dataclass
@@ -67,7 +83,18 @@ class InterfaceConfig:
 
 
 @dataclass
-class FlowTriggerScheduleConfig:
+class FlowTriggerConfigBase:
+    """Base configuration for flow triggers.
+
+    Attributes:
+        filter: Optional template expression, trigger only when it evaluates truthy.
+    """
+
+    filter: str | None = field(default=None, kw_only=True)
+
+
+@dataclass
+class FlowTriggerScheduleConfig(FlowTriggerConfigBase):
     type: Literal["schedule"] = "schedule"
     cron: dict[str, Any] | None = None
     interval: dict[str, Any] | None = None
@@ -79,7 +106,7 @@ class FlowTriggerScheduleConfig:
 
 
 @dataclass
-class FlowTriggerDbusSignalConfig:
+class FlowTriggerDbusSignalConfig(FlowTriggerConfigBase):
     """Configuration for 'dbus_signal' flow trigger.
 
     Attributes:
@@ -109,7 +136,7 @@ class FlowTriggerDbusSignalConfig:
 
 
 @dataclass
-class FlowTriggerBusNameAddedConfig:
+class FlowTriggerBusNameAddedConfig(FlowTriggerConfigBase):
     """Configuration for 'bus_name_adde' flow trigger (DEPRECATED)."""
 
     type: Literal["bus_name_added"] = "bus_name_added"
@@ -123,7 +150,7 @@ class FlowTriggerBusNameAddedConfig:
 
 
 @dataclass
-class FlowTriggerBusNameRemovedConfig:
+class FlowTriggerBusNameRemovedConfig(FlowTriggerConfigBase):
     """Configuration for 'bus_name_removed' flow trigger (DEPRECATED)."""
 
     type: Literal["bus_name_removed"] = "bus_name_removed"
@@ -137,7 +164,7 @@ class FlowTriggerBusNameRemovedConfig:
 
 
 @dataclass
-class FlowTriggerDbusObjectAddedConfig:
+class FlowTriggerDbusObjectAddedConfig(FlowTriggerConfigBase):
     """Configuration for 'dbus_object_added' flow trigger."""
 
     type: Literal["dbus_object_added", "object_added"] = "dbus_object_added"
@@ -153,7 +180,7 @@ class FlowTriggerDbusObjectAddedConfig:
 
 
 @dataclass
-class FlowTriggerDbusObjectRemovedConfig:
+class FlowTriggerDbusObjectRemovedConfig(FlowTriggerConfigBase):
     """Configuration for 'dbus_object_removed' flow trigger."""
 
     type: Literal["dbus_object_removed", "object_removed"] = "dbus_object_removed"
@@ -169,7 +196,7 @@ class FlowTriggerDbusObjectRemovedConfig:
 
 
 @dataclass
-class FlowTriggerMqttMessageConfig:
+class FlowTriggerMqttMessageConfig(FlowTriggerConfigBase):
     """Configuration for 'mqtt_message' flow trigger.
 
     Attributes:
@@ -181,18 +208,10 @@ class FlowTriggerMqttMessageConfig:
     topic: str
     type: Literal["mqtt_message"] = "mqtt_message"
     content_type: Literal["json", "text"] = "json"
-    filter: str | None = None
-
-    def matches_filter(
-        self, template_engine: TemplateEngine, trigger_context: dict[str, Any]
-    ) -> bool:
-        if self.filter:
-            return template_engine.render_template(self.filter, bool, trigger_context)
-        return True
 
 
 @dataclass
-class FlowTriggerContextChangedConfig:
+class FlowTriggerContextChangedConfig(FlowTriggerConfigBase):
     """Configuration for 'context_changed' flow trigger."""
 
     type: Literal["context_changed"] = "context_changed"

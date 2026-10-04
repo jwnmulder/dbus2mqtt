@@ -46,11 +46,9 @@ dbus:
               interval: {seconds: 5}
             - type: dbus_signal
               signal: PropertiesChanged
+              filter: "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' }}"
             - type: dbus_signal
               signal: Seeked
-          conditions:
-            # For PropertiesChanged signals, only trigger for org.mpris.MediaPlayer2.Player interfaces
-            - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
           actions:
             - type: context_set
               context:
