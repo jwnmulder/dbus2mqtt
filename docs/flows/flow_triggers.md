@@ -31,6 +31,12 @@ This trigger is fired during startup or when a new object appears on D-Bus that 
 - type: dbus_object_added
 ```
 
+Trigger configuration:
+
+| Name      | Type  | Description  | Default |
+|-----------|-------|--------------|---------|
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
+
 When triggered, the following context parameters are available
 
 | Name         | Type   | Description      |
@@ -44,6 +50,12 @@ When triggered, the following context parameters are available
 ```yaml
 - type: dbus_object_removed
 ```
+
+Trigger configuration:
+
+| Name      | Type  | Description  | Default |
+|-----------|-------|--------------|---------|
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
 
 When triggered, the following context parameters are available
 
@@ -59,7 +71,6 @@ D-Bus signals triggers must be configured with an interface and path. Note that 
 
 ```yaml
 - type: dbus_signal
-  interface: org.freedesktop.DBus.Properties
   signal: PropertiesChanged
 ```
 
@@ -69,6 +80,7 @@ Trigger configuration:
 |-----------|-------|--------------|---------|
 | signal    | `str` | signal name to filter on, e.g. PropertiesChanged | *required* |
 | interface | `str` \| `None` | interface to filter on, e.g. `org.freedesktop.DBus.Properties` |  |
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
 
 When triggered, the following context parameters are available
 
@@ -89,8 +101,8 @@ When triggered, the following context parameters are available
        - name: PropertiesChanged in player interface
          triggers:
            - type: dbus_signal
-         conditions:
-           - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+             signal: PropertiesChanged
+             filter: "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' }}"
      ```
 
 ## mqtt_message

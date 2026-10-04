@@ -18,10 +18,27 @@ class FlowTriggerHandler:
     def should_trigger_flow(
         self, trigger_config: FlowTriggerConfig, templating: TemplateEngine
     ) -> bool:
+
+        # triggers might have a filter configured
+        if trigger_config.filter is not None:
+            trigger_context = self.final_trigger_context(trigger_config)
+            res = self._matches_filter(trigger_config, templating, trigger_context)
+            return res
+
         return True
 
     def final_trigger_context(self, trigger_config: FlowTriggerConfig) -> dict[str, Any]:
         return self.context
+
+    def _matches_filter(
+        self,
+        trigger_config: FlowTriggerConfig,
+        template_engine: TemplateEngine,
+        trigger_context: dict[str, Any],
+    ) -> bool:
+        if trigger_config.filter:
+            return template_engine.render_template(trigger_config.filter, bool, trigger_context)
+        return True
 
 
 class FlowTriggerDbusSignalHandler(FlowTriggerHandler):
@@ -37,13 +54,14 @@ class FlowTriggerDbusSignalHandler(FlowTriggerHandler):
     ) -> bool:
         assert isinstance(trigger_config, FlowTriggerDbusSignalConfig)
 
-        matches = self.signal == trigger_config.signal
+        if trigger_config.signal != self.signal:
+            return False
 
         # dbus_signal triggers might have an interface configured
-        if matches and trigger_config.interface:
-            matches = self.interface == trigger_config.interface
+        if trigger_config.interface and trigger_config.interface != self.interface:
+            return False
 
-        return matches
+        return super().should_trigger_flow(trigger_config, templating)
 
 
 class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
@@ -66,14 +84,10 @@ class FlowTriggerMqttMessageHandler(FlowTriggerHandler):
     ) -> bool:
         assert isinstance(trigger_config, FlowTriggerMqttMessageConfig)
 
-        matches = trigger_config.topic == self.topic
+        if trigger_config.topic != self.topic:
+            return False
 
-        # mqtt_message triggers might have a filter configured
-        if matches and trigger_config.filter is not None:
-            trigger_context = self.final_trigger_context(trigger_config)
-            matches = trigger_config.matches_filter(templating, trigger_context)
-
-        return matches
+        return super().should_trigger_flow(trigger_config, templating)
 
     def final_trigger_context(self, trigger_config: FlowTriggerMqttMessageConfig) -> dict[str, Any]:
         assert isinstance(trigger_config, FlowTriggerMqttMessageConfig)
