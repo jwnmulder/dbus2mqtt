@@ -204,7 +204,7 @@ dbus:
       flows:
         - name: "Property Changed flow"
           triggers:
-            - type: on_signal
+            - type: dbus_signal
               signal: PropertiesChanged
               filter: "{{ args[0] == 'org.mpris.MediaPlayer2.Player' }}"
           actions:
