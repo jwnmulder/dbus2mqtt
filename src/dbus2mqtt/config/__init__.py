@@ -110,10 +110,10 @@ class FlowTriggerDbusSignalConfig(FlowTriggerConfigBase):
     """Configuration for 'dbus_signal' flow trigger.
 
     Attributes:
-        interface: Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'.
-        signal: Signal name to filter on, e.g. PropertiesChanged.
-        bus_name: undocumented, not used.
-        path: undocumented, not used.
+        interface: Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'
+        signal: Signal name to filter on, e.g. PropertiesChanged
+        bus_name: Not implemented, deprecated, do not use
+        path: Not implemented, deprecated, do not use
     """
 
     signal: str
