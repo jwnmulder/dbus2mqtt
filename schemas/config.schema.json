@@ -195,7 +195,7 @@
         },
         "signal": {
           "type": "string",
-          "description": "Signal name to filter on, e.g. PropertiesChanged."
+          "description": "Signal name to filter on, e.g. PropertiesChanged"
         },
         "type": {
           "const": "dbus_signal",
@@ -203,15 +203,15 @@
         },
         "interface": {
           "type": "string",
-          "description": "Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'."
+          "description": "Interface to filter on, e.g. 'org.freedesktop.DBus.Properties'"
         },
         "bus_name": {
           "type": "string",
-          "description": "undocumented, not used."
+          "description": "Not implemented, deprecated, do not use"
         },
         "path": {
           "type": "string",
-          "description": "undocumented, not used."
+          "description": "Not implemented, deprecated, do not use"
         }
       },
       "additionalProperties": false,
