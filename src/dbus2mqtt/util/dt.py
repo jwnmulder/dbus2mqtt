@@ -66,6 +66,6 @@ def as_utc(value: datetime) -> datetime:
     if value.tzinfo == timezone.utc:
         return value
     if value.tzinfo is None:
-        dattim = value.replace(tzinfo=localzone)
+        value = value.replace(tzinfo=localzone)
 
-    return dattim.astimezone(timezone.utc)
+    return value.astimezone(timezone.utc)
