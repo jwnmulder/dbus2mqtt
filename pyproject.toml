@@ -55,7 +55,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff==0.16.10",
+    "ruff==0.17.0",
     "pyright==1.1.414",
     "deptry>=0.24.0",
     "mkdocstrings-python>=1.19.0",
@@ -123,6 +123,7 @@ extend-select = [
     "UP",    # pyupgrade
     "D",     # pydocstyle rules
     "B",     # flake8-bugbear
+    "DTZ",   # flake8-datetimez
 ]
 ignore = [
     "E501",  # line-too-long
