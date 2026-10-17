@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, tzinfo
+from datetime import UTC, datetime, tzinfo
 from zoneinfo import ZoneInfo
 
 from tzlocal import get_localzone
@@ -26,7 +26,7 @@ def utcnow() -> datetime:
     Returns:
         The current timezone-aware datetime in UTC.
     """
-    return datetime.now(tz=timezone.utc)
+    return datetime.now(tz=UTC)
 
 
 def as_local(value: datetime) -> datetime:
@@ -63,9 +63,9 @@ def as_utc(value: datetime) -> datetime:
     """
     localzone = get_localzone()
 
-    if value.tzinfo == timezone.utc:
+    if value.tzinfo == UTC:
         return value
     if value.tzinfo is None:
         value = value.replace(tzinfo=localzone)
 
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)
