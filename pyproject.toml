@@ -123,6 +123,7 @@ extend-select = [
     "UP",    # pyupgrade
     "D",     # pydocstyle rules
     "B",     # flake8-bugbear
+    "DTZ",   # flake8-datetimez
 ]
 ignore = [
     "E501",  # line-too-long
