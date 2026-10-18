@@ -11,12 +11,6 @@ watch = [
     "README.md",
 ]
 
-# mkdocs configuration not yet supported in zensical
-# not_in_nav: |
-#   examples/dbus2mqtt_internal_state.md
-#   examples/linux_desktop.md
-#   examples/connman-config.md
-
 nav = [
     { "Home" = "index.md" },
     { "Setup" = "setup.md" },
@@ -34,7 +28,6 @@ nav = [
         "examples/home_assistant_media_player.md",
         "examples/bluez.md",
         "examples/linux_desktop.md",
-        # "examples/connman-config.md",
     ] },
     { "Developer guide" = [
         "developer/index.md",
