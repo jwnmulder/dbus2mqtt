@@ -44,6 +44,7 @@ class MqttClient:
             protocol=mqtt.MQTTv5,
             callback_api_version=CallbackAPIVersion.VERSION2,
         )
+        self.client.enable_logger(logger)
 
         self.client.username_pw_set(
             username=self.config.username, password=self.config.password.get_secret_value()
@@ -118,7 +119,7 @@ class MqttClient:
                         # In case failing uri reads, we still publish an empty msg to avoid stale data
                         payload = None
                         logger.warning(
-                            f"mqtt_publish_queue_processor_task: Exception: {e}",
+                            f"mqtt_publish_queue_processor_task: urlopen exception: {e}",
                             exc_info=logger.isEnabledFor(logging.DEBUG),
                         )
 
@@ -145,8 +146,11 @@ class MqttClient:
                     first_message = False
 
             except Exception as e:
+                connected = self.client.is_connected()
                 logger.warning(
-                    f"mqtt_publish_queue_processor_task: Exception: {e}",
+                    "mqtt_publish_queue_processor_task: Failed publishing message due to %s, connected=%s",
+                    f"{e.__class__.__name__}: {e}" if str(e) else f"{e.__class__.__name__}",
+                    connected,
                     exc_info=logger.isEnabledFor(logging.DEBUG),
                 )
             finally:
