@@ -1,9 +1,8 @@
-from datetime import datetime
-
 import pytest
 
 from dbus2mqtt.config import FlowActionLogConfig, FlowTriggerScheduleConfig
 from dbus2mqtt.flow.flow_processor import FlowTriggerMessage
+from dbus2mqtt.util import dt as dt_util
 from tests import mocked_app_context, mocked_flow_processor
 
 
@@ -20,5 +19,5 @@ async def test_context():
     )
 
     await processor._process_flow_trigger(
-        FlowTriggerMessage(flow_config, trigger_config, datetime.now())
+        FlowTriggerMessage(flow_config, trigger_config, dt_util.utcnow())
     )

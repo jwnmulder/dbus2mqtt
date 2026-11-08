@@ -1,6 +1,6 @@
 # dbus2mqtt
 
-**dbus2mqtt** is a Python application that bridges **DBus** with **MQTT**.
+**dbus2mqtt** is a Python application that bridges **D-Bus** with **MQTT**.
 It lets you forward Linux D-Bus signals and properties to MQTT topics, call D-Bus methods via MQTT messages and shape payloads using configurable **templates**.
 
 This makes it easy to integrate Linux desktop services or system signals into MQTT-based workflows - including **Home Assistant**.
@@ -12,12 +12,6 @@ This makes it easy to integrate Linux desktop services or system signals into MQ
 * ⚡ Trigger message publishing via **signals, timers, property changes, or startup events**.
 * 📡 Expose **D-Bus methods** for remote control via MQTT messages.
 * 🏠 Includes example configurations for **MPRIS** and **Home Assistant Media Player** integration.
-
-## Project status
-
-**dbus2mqtt** is considered stable for the use-cases it has been tested against, and is actively being developed. Documentation is continuously being improved.
-
-Initial testing has focused on MPRIS integration. A table of tested MPRIS players and their supported methods can be found on [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
 ## Getting started with dbus2mqtt
 
@@ -74,7 +68,7 @@ See [setup](https://jwnmulder.github.io/dbus2mqtt/setup/) for more installation 
 More dbus2mqtt examples can be found in the [examples](https://jwnmulder.github.io/dbus2mqtt/examples/) section.
 The most complete one being [Mediaplayer integration with Home Assistant](https://jwnmulder.github.io/dbus2mqtt/examples/home_assistant_media_player/)
 
-## Exposing dbus methods, properties and signals
+## Exposing D-Bus methods, properties and signals
 
 See [subscriptions](https://jwnmulder.github.io/dbus2mqtt/subscriptions/) for documentation on calling methods, setting properties and exposing D-Bus signals to MQTT. When configured, D-Bus methods can be invoked by publishing a message like
 

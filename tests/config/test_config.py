@@ -5,7 +5,7 @@ from typing import cast
 import dotenv
 
 from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import new_argument_parser
+from dbus2mqtt.config.jsonargparse import new_argument_parser
 
 FILE_DIR = os.path.dirname(__file__)
 

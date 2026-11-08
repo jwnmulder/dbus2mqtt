@@ -10,7 +10,7 @@ import dotenv
 
 from dbus2mqtt import AppContext
 from dbus2mqtt.config import Config
-from dbus2mqtt.config.jsonarparse import new_argument_parser, ns_to_cls
+from dbus2mqtt.config.jsonargparse import new_argument_parser, ns_to_cls
 from dbus2mqtt.dbus.dbus_client import DbusClient
 from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.flow.flow_processor import FlowProcessor, FlowScheduler
@@ -73,6 +73,8 @@ async def run(app_config: Config):
 
     app_context = AppContext(app_config, event_broker, template_engine)
 
+    logger.info(f"timezone={app_context.timezone}")
+
     flow_scheduler = FlowScheduler(app_context)
 
     with suppress(asyncio.CancelledError):
@@ -131,7 +133,7 @@ def main():
 
     setup_logging(cfg.verbose)
 
-    cfg = parser.instantiate_classes(cfg)
+    cfg = parser.instantiate(cfg)
     app_config = ns_to_cls(Config, cfg)
 
     logger.debug(f"config: {app_config}")

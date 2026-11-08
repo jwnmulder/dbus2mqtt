@@ -1,6 +1,6 @@
 # Examples
 
-Examples work better than large amounts of documentation and puzzling everything together. Feel free to use these examples as-is or adapt them to your own likening.
+Examples work better than large amounts of documentation and puzzling everything together. Feel free to use these examples as-is or adapt them to your own liking.
 
 Each example comes with a dbus2mqtt configuration file and corresponding documentation.
 

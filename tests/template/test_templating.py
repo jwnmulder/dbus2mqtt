@@ -1,4 +1,8 @@
+from datetime import datetime
+from os import environ
+
 import pytest
+import tzlocal
 
 from jinja2 import TemplateError
 
@@ -61,8 +65,64 @@ def test_str_template_int_result_as_str():
 
 def test_none_result():
     templating = TemplateEngine()
-    res = templating.render_template("{{ None }}", str)
+    res = templating.render_template_optional("{{ None }}", str)
     assert res is None
+
+
+def test_dt_now():
+    templating = TemplateEngine()
+    res = templating.render_template("{{ now() }}", object)
+    assert isinstance(res, datetime)
+    assert res.tzinfo
+
+
+def test_dt_utcnow():
+    templating = TemplateEngine()
+    res = templating.render_template("{{ utcnow() }}", object)
+
+    assert isinstance(res, datetime)
+    assert res.tzinfo
+    assert str(res.tzinfo) == "UTC"
+
+
+def test_dt_now_local_timezone():
+    templating = TemplateEngine()
+
+    # Set an initial local timezone
+    environ["TZ"] = "Europe/Amsterdam"
+    tzlocal.reload_localzone()
+    res = templating.render_template("{{ now() }}", datetime)
+
+    assert res.tzinfo
+    assert str(res.tzinfo) == "Europe/Amsterdam"
+
+    # Change local timezone
+    environ["TZ"] = "Australia/Sydney"
+    tzlocal.reload_localzone()
+    res = templating.render_template("{{ now() }}", datetime)
+
+    assert res.tzinfo
+    assert str(res.tzinfo) == "Australia/Sydney"
+
+
+def test_dt_as_local():
+    templating = TemplateEngine()
+
+    environ["TZ"] = "Europe/Amsterdam"
+    tzlocal.reload_localzone()
+    template = {
+        "dt_now": "{{ now('Australia/Sydney') }}",
+        "dt_now_as_local": "{{ now('Australia/Sydney') | as_local }}",
+        "dt_utcnow": "{{ utcnow() }}",
+        "dt_utcnow_as_local": "{{ utcnow() | as_local }}",
+    }
+
+    res = templating.render_template(template, dict)
+
+    assert str(res["dt_now"].tzinfo) == "Australia/Sydney"
+    assert str(res["dt_now_as_local"].tzinfo) == "Europe/Amsterdam"
+    assert str(res["dt_utcnow"].tzinfo) == "UTC"
+    assert str(res["dt_utcnow_as_local"].tzinfo) == "Europe/Amsterdam"
 
 
 def test_dict_with_integer_expression():
@@ -175,3 +235,12 @@ async def test_async_strict_undefined_error_handling():
     templating = TemplateEngine()
     with pytest.raises(TemplateError):
         await templating.async_render_template(template, dict)
+
+
+def test_require_dict_type_for_dict():
+
+    template = {"key": "val"}
+
+    templating = TemplateEngine()
+    with pytest.raises(ValueError):
+        templating.render_template(template, str)

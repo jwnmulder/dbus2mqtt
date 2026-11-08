@@ -24,17 +24,13 @@ class DbusContext:
         Returns:
             List of matching bus names found in current subscriptions
 
-        Example:
-            Template
-            ```yaml
-            all_subscibed_bus_names: "{{ dbus_list('*') }}"
-            subscribed_mpris_bus_names: "{{ dbus_list('org.mpris.MediaPlayer2.*') }}"
-            ```
+        Examples:
+            ```yaml+jinja
+            template: {{ dbus_list('*') }}
+            result: ['org.bluez', 'org.mpris.MediaPlayer2.firefox']
 
-            Result
-            ```yaml
-            all_subscibed_bus_names: ['org.bluez', 'org.mpris.MediaPlayer2.firefox']
-            subscribed_mpris_bus_names: ['org.mpris.MediaPlayer2.firefox']
+            template: {{ dbus_list('org.mpris.MediaPlayer2.*') }}
+            result: ['org.mpris.MediaPlayer2.firefox']
             ```
         """
         res = []
@@ -50,8 +46,8 @@ class DbusContext:
         path: str,
         interface: str,
         method: str,
-        method_args: list[Any] = [],
-        method_kwargs: dict[str, Any] = {},
+        method_args: list[Any] | None = None,
+        method_kwargs: dict[str, Any] | None = None,
     ) -> object:
         """Call a method on a active dbus object that dbus2mqtt is subscribed to.
 
@@ -74,20 +70,14 @@ class DbusContext:
         Raises:
             ValueError: If no subscribed proxy object is found for the given bus_name and path.
 
-        Example:
-            Template
-            ```yaml
-            player_properties: |
-              {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
-            ```
-
-            Result
-            ```yaml
-            player_properties:
-                Metadata: {}
-                Position: 0
-                PlaybackStatus: Stopped
-                Volume: 0.0
+        Examples:
+            ```yaml+jinja
+            template: {{ dbus_call(mpris_bus_name, mpris_path, 'org.freedesktop.DBus.Properties', 'GetAll', ['org.mpris.MediaPlayer2.Player']) }}
+            result:
+              Metadata: {}
+              Position: 0
+              PlaybackStatus: Stopped
+              Volume: 0.0
             ```
 
         Notes:
@@ -97,9 +87,13 @@ class DbusContext:
               Although it can be used call methods that change state,
               it's a bad practice todo so from a template rendering perspective.
         """
-        if not isinstance(method_args, list):
+        if method_args is not None and not isinstance(method_args, list):
             # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
             raise ValueError("method_args must be a list")
+
+        if method_kwargs is not None and not isinstance(method_kwargs, dict):
+            # Pylance will mention this line is unreachable. It is not, jinja2 can pass in any type
+            raise ValueError("method_kwargs must be a dict")
 
         proxy_object = self.dbus_client.get_subscribed_proxy_object(bus_name, path)
         if not proxy_object:

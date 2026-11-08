@@ -1,4 +1,4 @@
-name: trivy
+name: Trivy
 
 "on":
   schedule:
@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ghcr.io/jwnmulder/dbus2mqtt:latest
           format: 'sarif'

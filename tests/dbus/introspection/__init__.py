@@ -18,7 +18,7 @@ class TestInterface(intr.Interface):
             raise AssertionError(
                 f"Method '{name}' not found on interface '{self.name}'. "
                 f"Available methods: {[m.name for m in self.methods]}"
-            )
+            ) from None
 
     def signal(self, name: str) -> intr.Signal:
         try:
@@ -27,7 +27,7 @@ class TestInterface(intr.Interface):
             raise AssertionError(
                 f"Signal '{name}' not found on interface '{self.name}'. "
                 f"Available signals: {[s.name for s in self.signals]}"
-            )
+            ) from None
 
     def property(self, name: str) -> intr.Property:
         try:
@@ -36,7 +36,7 @@ class TestInterface(intr.Interface):
             raise AssertionError(
                 f"Property '{name}' not found on interface '{self.name}'. "
                 f"Available properties: {[p.name for p in self.properties]}"
-            )
+            ) from None
 
 
 class TestNode(intr.Node):
@@ -50,4 +50,4 @@ class TestNode(intr.Node):
             raise AssertionError(
                 f"Interface '{name}' not found. "
                 f"Available interfaces: {[i.name for i in self.interfaces]}"
-            )
+            ) from None

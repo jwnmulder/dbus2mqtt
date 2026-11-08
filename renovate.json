@@ -67,6 +67,12 @@
       "extends": ["schedule:weekly"]
     },
     {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": "python",
+      "matchUpdateTypes": ["pin", "digest"],
+      "minimumReleaseAge": null
+    },
+    {
       "matchPackageNames": [
         "pyright",
         "RobertCraigie/pyright-python"

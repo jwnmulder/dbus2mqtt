@@ -28,9 +28,6 @@ dbus:
         - name: "Manager Service Changed"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Manager
-              path: /
               signal: ServicesChanged
           actions:
             - type: mqtt_publish
@@ -48,9 +45,6 @@ dbus:
         - name: "Manager Property Changed"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Manager
-              path: /
               signal: PropertyChanged
           actions:
             - type: mqtt_publish
@@ -68,9 +62,6 @@ dbus:
         - name: "Manager Technology Added"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Manager
-              path: /
               signal: TechnologyAdded
           actions:
             - type: mqtt_publish
@@ -88,9 +79,6 @@ dbus:
         - name: "Manager Technology Removed"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Manager
-              path: /
               signal: TechnologyRemoved
           actions:
             - type: mqtt_publish
@@ -126,9 +114,6 @@ dbus:
         - name: "Service Property Changed"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Service
-              path: /net/connman/service/*
               signal: PropertyChanged
           actions:
             - type: mqtt_publish
@@ -154,9 +139,6 @@ dbus:
         - name: "Technology Property Changed"
           triggers:
             - type: dbus_signal
-              bus_name: net.connman
-              interface: net.connman.Technology
-              path: /net/connman/technology/*
               signal: PropertyChanged
           actions:
             - type: mqtt_publish

@@ -41,8 +41,8 @@ Example notification with actions and hints, that automatically disappears after
 
 Further references:
 
-* <https://specifications.freedesktop.org/notification-spec/1.3/>
-* <https://specifications.freedesktop.org/icon-naming-spec/latest/>
+* <https://specifications.freedesktop.org/notification-spec/1.3/>{:target="_blank"}
+* <https://specifications.freedesktop.org/icon-naming-spec/latest/>{:target="_blank"}
 
 <!-- ## Gnome SessionManager
 
@@ -51,6 +51,6 @@ Further references:
 
 The following table lists the supported commands, their descriptions, and an example JSON payload for invoking them via MQTT.
 
-dbus methods can be invoked by sendig the JSON payload to MQTT topic `dbus2mqtt/SessionManager/command`.
+dbus methods can be invoked by sending the JSON payload to MQTT topic `dbus2mqtt/SessionManager/command`.
 
 For an overview of commands have a look at <https://docs.flatpak.org/en/latest/portal-api-reference.html> -->

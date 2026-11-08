@@ -14,8 +14,8 @@ Trigger configuration:
 
 | Name      | Type  | Description  | Default |
 |-----------|-------|--------------|---------|
-| interval | `dict` | dict of time units and intervals, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html>    | |
-| cron     | `dict` | dict of time units and cron expressions, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html> | |
+| interval | `dict` | dict of time units and intervals, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/interval.html>{:target="_blank"}    | |
+| cron     | `dict` | dict of time units and cron expressions, see <https://apscheduler.readthedocs.io/en/3.x/modules/triggers/cron.html>{:target="_blank"} | |
 
 When triggered, the following context parameters are available
 
@@ -25,19 +25,25 @@ When triggered, the following context parameters are available
 
 ## dbus_object_added
 
-This trigger is fired during startup or when a new object appears on D-Bus that matches the `bus2mqtt` subscription.
+This trigger is fired during startup or when a new object appears on D-Bus that matches the `dbus2mqtt` subscription.
 
 ```yaml
 - type: dbus_object_added
 ```
+
+Trigger configuration:
+
+| Name      | Type  | Description  | Default |
+|-----------|-------|--------------|---------|
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
 
 When triggered, the following context parameters are available
 
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'object_added'   |
-| bus_name     | `str`  | bus_name of the object that was registered on dbus |
-| path         | `str`  | path of the object that was registered on dbus |
+| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
+| path         | `str`  | path of the object that was registered on D-Bus |
 
 ## dbus_object_removed
 
@@ -45,21 +51,26 @@ When triggered, the following context parameters are available
 - type: dbus_object_removed
 ```
 
+Trigger configuration:
+
+| Name      | Type  | Description  | Default |
+|-----------|-------|--------------|---------|
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
+
 When triggered, the following context parameters are available
 
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'object_removed' |
-| bus_name     | `str`  | bus_name of the object that was registered on dbus |
-| path         | `str`  | path of the object that was registered on dbus |
+| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
+| path         | `str`  | path of the object that was registered on D-Bus |
 
 ## dbus_signal
 
-DBus signals triggers must be configured with an anterface and path. Note that only subscribed signals can be configured as a trigger.
+D-Bus signals triggers must be configured with an interface and path. Note that only subscribed signals can be configured as a trigger.
 
 ```yaml
 - type: dbus_signal
-  interface: org.freedesktop.DBus.Properties
   signal: PropertiesChanged
 ```
 
@@ -69,14 +80,15 @@ Trigger configuration:
 |-----------|-------|--------------|---------|
 | signal    | `str` | signal name to filter on, e.g. PropertiesChanged | *required* |
 | interface | `str` \| `None` | interface to filter on, e.g. `org.freedesktop.DBus.Properties` |  |
+| filter    | `str` \| `None` | Optional templated string that must evaluate to a boolean result. When False, the flow is not triggered | |
 
 When triggered, the following context parameters are available
 
 | Name         | Type   | Description      |
 |--------------|--------|------------------|
 | trigger_type | `str`  | 'dbus_signal'    |
-| bus_name     | `str`  | bus_name of the object that was registered on dbus |
-| path         | `str`  | path of the object that was registered on dbus |
+| bus_name     | `str`  | bus_name of the object that was registered on D-Bus |
+| path         | `str`  | path of the object that was registered on D-Bus |
 | interface    | `str`  | name of interface for which the signal was triggered |
 | signal       | `str`  | name of the signal, e.g. 'Seeked' |
 | args         | `list` | positional signal arguments, list of objects |
@@ -89,8 +101,8 @@ When triggered, the following context parameters are available
        - name: PropertiesChanged in player interface
          triggers:
            - type: dbus_signal
-         conditions:
-           - "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' if trigger_type == 'dbus_signal' and signal == 'PropertiesChanged' else True }}"
+             signal: PropertiesChanged
+             filter: "{{ kwargs.interface_name == 'org.mpris.MediaPlayer2.Player' }}"
      ```
 
 ## mqtt_message
@@ -135,7 +147,7 @@ flows:
 ```
 
 !!! note
-    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a dbus call will be executed as well. Similar, warnings will be logged if a message does not match any flow or D-Bus method.
+    If `topic` overlaps with `subscription[].interfaces[].mqtt_command_topic` and the JSON payload structure follows `mqtt_command_topic` layout, a D-Bus call will be executed as well. Similarly, warnings will be logged if a message does not match any flow or D-Bus method.
 
 ## context_changed
 

@@ -2,10 +2,10 @@
 
 ## Specifications
 
-Generic DBus specifications:
+Generic D-Bus specifications:
 
-* [D-Bus Tutorial](https://dbus.freedesktop.org/doc/dbus-tutorial.html)
-* [D-Bus Specification](https://dbus.freedesktop.org/doc/dbus-specification.html)
+* [D-Bus Tutorial](https://dbus.freedesktop.org/doc/dbus-tutorial.html){:target="_blank"}
+* [D-Bus Specification](https://dbus.freedesktop.org/doc/dbus-specification.html){:target="_blank"}
 
 ## Running from source
 
@@ -32,10 +32,10 @@ uv run prek install
 
 ## Publishing and subscribing to MQTT messages
 
-Multiple MQTT client exist that can be used for testing, e.g.
+Multiple MQTT clients exist that can be used for testing, e.g.
 
-* [MQTT Explorer](https://mqtt-explorer.com/)
-* [github.com/RISE-Maritime/mqtt-cli](https://github.com/RISE-Maritime/mqtt-cli)
+* [MQTT Explorer](https://mqtt-explorer.com/){:target="_blank"}
+* [github.com/RISE-Maritime/mqtt-cli](https://github.com/RISE-Maritime/mqtt-cli){:target="_blank"}
 
 ### Using mqtt-cli
 
