@@ -54,11 +54,26 @@ class MqttClient:
         tls_enabled = self.config.tls_enabled or False
         tls_enabled |= self.config.tls_enabled is None and self.config.port == 8883
         if tls_enabled:
-            self.client.tls_set(
-                ca_certs=self.config.tls_ca_file,
-                certfile=self.config.tls_cert_file,
-                keyfile=self.config.tls_key_file,
-            )
+            try:
+                self.client.tls_set(
+                    ca_certs=self.config.tls_ca_file,
+                    certfile=self.config.tls_cert_file,
+                    keyfile=self.config.tls_key_file,
+                )
+            except FileNotFoundError as e:
+                # FileNotFoundError may not have filename set depending on where it originates
+                files = [
+                    f
+                    for f in (
+                        self.config.tls_ca_file,
+                        self.config.tls_cert_file,
+                        self.config.tls_key_file,
+                    )
+                    if f
+                ]
+                missing = e.filename or ", ".join(files)
+                logger.error(f"TLS file not found: {missing}")
+                raise
             if self.config.tls_insecure:
                 self.client.tls_insecure_set(True)
 
