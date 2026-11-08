@@ -50,7 +50,10 @@ class MqttClient:
             username=self.config.username, password=self.config.password.get_secret_value()
         )
 
-        if self.config.tls_enabled:
+        # Enable TLS when port 8883 is used, unless explicitly disabled
+        tls_enabled = self.config.tls_enabled or False
+        tls_enabled |= self.config.tls_enabled is None and self.config.port == 8883
+        if tls_enabled:
             self.client.tls_set(
                 ca_certs=self.config.tls_ca_file,
                 certfile=self.config.tls_cert_file,

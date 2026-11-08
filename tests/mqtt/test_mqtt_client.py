@@ -73,3 +73,31 @@ def test_tls_disabled_does_not_call_tls_set():
         mock_client_cls.return_value = mock_client
         MqttClient(app_context, None)
         mock_client.tls_set.assert_not_called()
+
+
+def test_tls_auto_enabled_when_port_8883():
+    """Test that TLS is auto-enabled when tls_enabled is None and port is 8883."""
+    # Create config with tls_enabled=None (simulating YAML null) and port=8883
+    mqtt_config = _base_mqtt_config(port=8883)
+    app_context = _make_app_context(mqtt_config)
+    with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client_cls.return_value = mock_client
+        MqttClient(app_context, None)
+        mock_client.tls_set.assert_called_once_with(
+            ca_certs=None,
+            certfile=None,
+            keyfile=None,
+        )
+        mock_client.tls_insecure_set.assert_not_called()
+
+
+def test_tls_not_auto_enabled_when_port_not_8883():
+    """Test that TLS is NOT auto-enabled when tls_enabled is None and port is not 8883."""
+    mqtt_config = _base_mqtt_config(port=1883)
+    app_context = _make_app_context(mqtt_config)
+    with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
+        mock_client = MagicMock()
+        mock_client_cls.return_value = mock_client
+        MqttClient(app_context, None)
+        mock_client.tls_set.assert_not_called()

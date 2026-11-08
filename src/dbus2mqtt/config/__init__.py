@@ -380,7 +380,7 @@ class MqttConfig:
     password: SecretStr
     port: int = 1883
     subscription_topics: list[str] = field(default_factory=lambda: ["dbus2mqtt/#"])
-    tls_enabled: bool = False
+    tls_enabled: bool | None = None
     tls_ca_file: str | None = None
     tls_cert_file: str | None = None
     tls_key_file: str | None = None
