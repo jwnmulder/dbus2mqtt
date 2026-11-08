@@ -52,9 +52,9 @@ class MqttClient:
 
         if self.config.tls_enabled:
             self.client.tls_set(
-                ca_certs=self.config.tls_ca_certs,
-                certfile=self.config.tls_certfile,
-                keyfile=self.config.tls_keyfile,
+                ca_certs=self.config.tls_ca_file,
+                certfile=self.config.tls_cert_file,
+                keyfile=self.config.tls_key_file,
             )
             if self.config.tls_insecure:
                 self.client.tls_insecure_set(True)

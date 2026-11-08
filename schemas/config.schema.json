@@ -521,7 +521,7 @@
         },
         "port": {
           "type": "integer",
-          "description": "MQTT broker TCP port.",
+          "description": "MQTT broker TCP port. Defaults to 1883",
           "default": 1883
         },
         "subscription_topics": {
@@ -533,17 +533,17 @@
         },
         "tls_enabled": {
           "type": "boolean",
-          "description": "Enable TLS/SSL for the MQTT connection (MQTTS). Defaults to False."
+          "description": "Enable TLS/SSL for the MQTT connection (MQTTS). Defaults to True when port is set to 8883."
         },
-        "tls_ca_certs": {
+        "tls_ca_file": {
           "type": "string",
           "description": "Path to CA certificate file for server verification. Uses system CAs if not set."
         },
-        "tls_certfile": {
+        "tls_cert_file": {
           "type": "string",
           "description": "Path to client certificate file for mutual TLS authentication."
         },
-        "tls_keyfile": {
+        "tls_key_file": {
           "type": "string",
           "description": "Path to client private key file for mutual TLS authentication."
         },

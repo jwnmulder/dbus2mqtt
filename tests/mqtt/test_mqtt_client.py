@@ -50,9 +50,9 @@ def test_tls_with_certs():
     app_context = _make_app_context(
         _base_mqtt_config(
             tls_enabled=True,
-            tls_ca_certs="/path/to/ca.crt",
-            tls_certfile="/path/to/client.crt",
-            tls_keyfile="/path/to/client.key",
+            tls_ca_file="/path/to/ca.crt",
+            tls_cert_file="/path/to/client.crt",
+            tls_key_file="/path/to/client.key",
         )
     )
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:

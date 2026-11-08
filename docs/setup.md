@@ -72,18 +72,18 @@ dbus2mqtt leverages [jsonargparse](https://jsonargparse.readthedocs.io/en/stable
 
 MQTT connection details can be configured via a mix of environment variables and yaml configuration.
 
-| YAML config key            | Env vars         | Description              |
-| -------------------------- | ---------------- | ------------------------ |
-| `mqtt.host`                | `MQTT__HOST`     | Hostname or IP           |
-| `mqtt.port`                | `MQTT__PORT`     | Port, defaults to `1883` |
-| `mqtt.username`            | `MQTT__USERNAME` | Username                 |
+| YAML config key            | Env vars                | Description              |
+| -------------------------- | ----------------------- | ------------------------ |
+| `mqtt.host`                | `MQTT__HOST`            | Hostname or IP           |
+| `mqtt.port`                | `MQTT__PORT`            | Port, defaults to `1883` |
+| `mqtt.username`            | `MQTT__USERNAME`        | Username                 |
 | `mqtt.password`            | <nobr>`MQTT__PASSWORD`</nobr> | Password    |
-| `mqtt.subscription_topics` |                  | List of topics that dbus2mqtt will subscribe to, defaults to `["dbus2mqtt/#"]` |
-| `mqtt.tls_enabled`         |                  | Enable TLS/SSL (MQTTS), defaults to `false` |
-| `mqtt.tls_ca_certs`        |                  | Path to CA certificate file for server verification. Uses system CAs if not set. |
-| `mqtt.tls_certfile`        |                  | Path to client certificate file for mutual TLS authentication. |
-| `mqtt.tls_keyfile`         |                  | Path to client private key file for mutual TLS authentication. |
-| `mqtt.tls_insecure`        |                  | Disable server certificate hostname verification. Use only for testing with self-signed certs, defaults to `false`. |
+| `mqtt.subscription_topics` |                         | List of topics that dbus2mqtt will subscribe to, defaults to `["dbus2mqtt/#"]` |
+| `mqtt.tls_enabled`         | `MQTT__TLS_ENABLED`     | Enable TLS/SSL (MQTTS), defaults to `true` if port is set to `8883` |
+| `mqtt.tls_ca_file`         | `MQTT__TLS_CA_FILE`     | Path to CA certificate file for server verification. Uses system CAs if not set. |
+| `mqtt.tls_cert_file`       | `MQTT__TLS_CERT_FILE`   | Path to client certificate file for mutual TLS authentication. |
+| `mqtt.tls_key_file`        | `MQTT__TLS_KEY_FILE`    | Path to client private key file for mutual TLS authentication. |
+| `mqtt.tls_insecure`        | `MQTT__TLS_INCSECURE`   | Disable server certificate hostname verification. Use only for testing with self-signed certs, defaults to `false`. |
 
 ### dbus2mqtt **dbus** config
 
