@@ -16,19 +16,17 @@ from dbus2mqtt.template.templating import TemplateEngine
 
 def mocked_app_context():
 
-    test_config = config.Config(
-        dbus=config.DbusConfig(
-            subscriptions=[
-                config.SubscriptionConfig(
-                    bus_name="test.bus_name.*",
-                    path="/",
-                    interfaces=[InterfaceConfig(interface="test-interface-name")],
-                )
-            ]
-        ),
-        mqtt=config.MqttConfig(host="localhost", username="test", password=SecretStr("test")),
-        flows=[],
+    mqtt_config = config.MqttConfig(host="localhost", username="test", password=SecretStr("test"))
+    dbus_config = config.DbusConfig(
+        subscriptions=[
+            config.SubscriptionConfig(
+                bus_name="test.bus_name.*",
+                path="/",
+                interfaces=[InterfaceConfig(interface="test-interface-name")],
+            )
+        ]
     )
+    test_config = config.Config(dbus_config, mqtt_config, flows=[])
 
     event_broker = EventBroker()
     template_engine = TemplateEngine()

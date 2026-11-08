@@ -1,30 +1,12 @@
 from unittest.mock import MagicMock, patch
 
-from jsonargparse.typing import SecretStr
-
-from dbus2mqtt import AppContext, config
-from dbus2mqtt.event_broker import EventBroker
 from dbus2mqtt.mqtt.mqtt_client import MqttClient
-from dbus2mqtt.template.templating import TemplateEngine
-
-
-def _make_app_context(mqtt_config: config.MqttConfig) -> AppContext:
-    cfg = config.Config(
-        dbus=config.DbusConfig(subscriptions=[]),
-        mqtt=mqtt_config,
-        flows=[],
-    )
-    return AppContext(cfg, EventBroker(), TemplateEngine())
-
-
-def _base_mqtt_config(**kwargs) -> config.MqttConfig:
-    return config.MqttConfig(
-        host="localhost", username="test", password=SecretStr("test"), **kwargs
-    )
+from tests import mocked_app_context
 
 
 def test_tls_enabled_calls_tls_set():
-    app_context = _make_app_context(_base_mqtt_config(tls_enabled=True))
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = True
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
@@ -38,7 +20,9 @@ def test_tls_enabled_calls_tls_set():
 
 
 def test_tls_insecure_calls_tls_insecure_set():
-    app_context = _make_app_context(_base_mqtt_config(tls_enabled=True, tls_insecure=True))
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = True
+    app_context.config.mqtt.tls_insecure = True
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
@@ -47,14 +31,11 @@ def test_tls_insecure_calls_tls_insecure_set():
 
 
 def test_tls_with_certs():
-    app_context = _make_app_context(
-        _base_mqtt_config(
-            tls_enabled=True,
-            tls_ca_file="/path/to/ca.crt",
-            tls_cert_file="/path/to/client.crt",
-            tls_key_file="/path/to/client.key",
-        )
-    )
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = True
+    app_context.config.mqtt.tls_ca_file = "/path/to/ca.crt"
+    app_context.config.mqtt.tls_cert_file = "/path/to/client.crt"
+    app_context.config.mqtt.tls_key_file = "/path/to/client.key"
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
@@ -67,7 +48,8 @@ def test_tls_with_certs():
 
 
 def test_tls_disabled_does_not_call_tls_set():
-    app_context = _make_app_context(_base_mqtt_config(tls_enabled=False))
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = False
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
@@ -78,8 +60,9 @@ def test_tls_disabled_does_not_call_tls_set():
 def test_tls_auto_enabled_when_port_8883():
     """Test that TLS is auto-enabled when tls_enabled is None and port is 8883."""
     # Create config with tls_enabled=None (simulating YAML null) and port=8883
-    mqtt_config = _base_mqtt_config(port=8883)
-    app_context = _make_app_context(mqtt_config)
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = None
+    app_context.config.mqtt.port = 8883
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
@@ -94,8 +77,9 @@ def test_tls_auto_enabled_when_port_8883():
 
 def test_tls_not_auto_enabled_when_port_not_8883():
     """Test that TLS is NOT auto-enabled when tls_enabled is None and port is not 8883."""
-    mqtt_config = _base_mqtt_config(port=1883)
-    app_context = _make_app_context(mqtt_config)
+    app_context = mocked_app_context()
+    app_context.config.mqtt.tls_enabled = None
+    app_context.config.mqtt.port = 1883
     with patch("dbus2mqtt.mqtt.mqtt_client.mqtt.Client") as mock_client_cls:
         mock_client = MagicMock()
         mock_client_cls.return_value = mock_client
