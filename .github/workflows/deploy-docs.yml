@@ -27,8 +27,6 @@ jobs:
           activate-environment: true
           enable-cache: true
       - run: uv run zensical build --clean
-      - name: Copy sitemap.xml to sitemap-index.xml
-        run: cp site/sitemap.xml site/sitemap-index.xml
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
